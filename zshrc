@@ -125,10 +125,12 @@ PROJECT_PATHS=(~/projects/src)
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
 [[ -s $HOME/.gvm/bin/gvm-init.sh ]] && source $HOME/.gvm/bin/gvm-init.sh
 
+# this is for homebrew
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
-# for macports
-export PATH=${PATH}:/opt/local/bin:/opt/local/sbin
+# for coreutils
+export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
+export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:$MANPATH
 
 PATH=$HOME/bin:$PATH
 
