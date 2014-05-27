@@ -15,3 +15,11 @@ if [ -d "$DOTFILES_DIR" ]; then
 fi
 
 git clone --recursive https://github.com/feniix/dotfiles.git $DOTFILES_DIR
+
+if [ $? ]; then
+  ln -s $DOTFILES_DIR/vimdir $HOME/.vim
+  ln -s $DOTFILES_DIR/oh-my-zsh $HOME/.oh-my-zsh
+  ln -sf $DOTFILES_DIR/vimrc $HOME/.vimrc
+  ln -sf $DOTFILES_DIR/zshrc $HOME/.zshrc
+  ln -sf $DOTFILES_DIR/gitconfig $HOME/.gitconfig
+fi
