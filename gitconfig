@@ -1,0 +1,50 @@
+[user]
+    name = Sebastian Otaegui
+    email = feniix@gmail.com
+[credential]
+    helper = osxkeychain
+[push]
+    default = tracking
+[merge]
+    tool = diffmerge
+    stat = true
+[mergetool "diffmerge"]
+    trustExitCode = true
+    cmd = /usr/local/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+[alias]
+    s = status
+    ci = commit
+    br = branch
+    co = checkout
+    df = diff
+    lg = log
+    l = log --graph --pretty=format:'%C(yellow)%h%C(cyan)%d%Creset %s %C(white)- %an, %ar%Creset'
+[core]
+    autocrlf = input
+    excludesfile = ~/.gitignore_global
+    # deals with umlaits
+    quotepath = false
+[rebase]
+    autosquash = true
+[branch]
+    autosetupmerge = always
+[diff]
+    renames = copies
+    mnemonicprefix = true
+[color]
+    ui = true
+[color "branch"]
+    current = yellow black
+    local = yellow
+    remote = magenta
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red reverse
+    new = green reverse
+    whitespace = white reverse
+[color "status"]
+    added = green
+    changed = yellow
+    untracked = cyan reverse
+    branch = magenta
