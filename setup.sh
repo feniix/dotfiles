@@ -22,4 +22,5 @@ if [ $? ]; then
   ln -sf $DOTFILES_DIR/vimrc $HOME/.vimrc
   ln -sf $DOTFILES_DIR/zshrc $HOME/.zshrc
   ln -sf $DOTFILES_DIR/gitconfig $HOME/.gitconfig
+  ln -sf $DOTFILES_DIR/gitignore_global $HOME/.gitignore_global
 fi
