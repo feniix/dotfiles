@@ -9,28 +9,9 @@ has() {
   return $?
 }
 
-if ! has "brew"; then
-  ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-  brew doctor
-fi
-
-if ! has "git"; then
-  brew install git
-fi
-
 if [ -d "$DOTFILES_DIR" ]; then
+    echo "Dotfiles already installed and still haven't made a update mode" 
     exit 1
 fi
 
-if ! has "curl"; then
-  if has "wget"; then
-    # Emulate curl with wget
-    curl() {
-      ARGS="$* "
-      ARGS=${ARGS/-s /-q }
-      ARGS=${ARGS/-o /-O }
-      wget $ARGS
-    }
-  fi
-fi
-
+git clone --recursive https://github.com/feniix/dotfiles.git $DOTFILES_DIR
