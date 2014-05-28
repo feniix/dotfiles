@@ -32,8 +32,8 @@ if filereadable("/etc/vim/vimrc.local")
   source /etc/vim/vimrc.local
 endif
 
-set shiftwidth=4
-set tabstop=4
+set shiftwidth=2
+set tabstop=2
 set expandtab
 set fileformat=unix
 set encoding=utf-8
@@ -63,7 +63,25 @@ set viminfo=!,'1000,<1000,h,n~/.vim/viminfo
 
 " let g:pylint_onwrite = 0
 
-set listchars=tab:▸\ ,eol:¬
+" Display invisible characters
+"
+" For utf-8 use the following characters
+"
+"   ▸ for tabs
+"   . for trailing spaces
+"   ¬ for line breaks
+"
+" otherwise, fall back to
+"
+"   > for tabs
+"   . for trailing spaces
+"   - for line breaks
+"
+if &encoding == "utf-8"
+  set listchars=tab:▸\ ,trail:.,eol:¬
+else
+  set listchars=tab:>\ ,trail:.,eol:-
+endif
 nmap <leader>l :set list!<CR>
 nmap <leader>n :setlocal number!<CR>
 nmap <leader>q :nohlsearch<CR>
@@ -88,29 +106,11 @@ filetype plugin indent on     " required!
 call pathogen#infect()
 let g:syntastic_python_checkers=['flake8']
 
-" set rtp+=~/.vim/bundle/vundle/
-" call vundle#rc()
-
-" Bundle 'gmarik/vundle'
-" Bundle 'Tabular'
-" Bundle 'MarcWeber/vim-addon-mw-utils'
-" Bundle 'tomtom/tlib_vim'
-" Bundle 'honza/vim-snippets'
-" Bundle 'garbas/vim-snipmate'
-" Bundle 'bling/vim-airline'
-
-
-
-" colorscheme darkblue
-
-
 let g:solarized_termcolors=256
 set background=dark
 colorscheme solarized
 
 let g:vim_json_syntax_conceal=0
-
-" let g:syntastic_puppet_puppetlint_args='--no_class_inherits_from_params_class-check'
 
 let g:airline_powerline_fonts = 1
 set laststatus=2
