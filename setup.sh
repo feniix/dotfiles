@@ -10,7 +10,7 @@ has() {
 }
 
 if [ -d "$DOTFILES_DIR" ]; then
-    echo "Dotfiles already installed and still haven't made a update mode" 
+    echo "Dotfiles already installed and still haven't made an update mode" 
     exit 1
 fi
 
