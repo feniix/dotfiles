@@ -15,7 +15,6 @@ if [ -d "$DOTFILES_DIR" ]; then
 fi
 
 git clone --recursive https://github.com/feniix/dotfiles.git $DOTFILES_DIR
-
 if [ $? ]; then
   ln -s $DOTFILES_DIR/vimdir $HOME/.vim
   ln -s $DOTFILES_DIR/oh-my-zsh $HOME/.oh-my-zsh
@@ -23,4 +22,7 @@ if [ $? ]; then
   ln -sf $DOTFILES_DIR/zshrc $HOME/.zshrc
   ln -sf $DOTFILES_DIR/gitconfig $HOME/.gitconfig
   ln -sf $DOTFILES_DIR/gitignore_global $HOME/.gitignore_global
+  cp $DOTFILES_DIR/fonts/*.ttf $HOME/Library/Fonts/
+  cp $DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist $HOME/Library/Preferences/
+  echo "For iterm2 preferences to take effect the OS needs to be restarted" 
 fi
