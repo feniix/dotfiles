@@ -25,4 +25,6 @@ if [ $? ]; then
   cp $DOTFILES_DIR/fonts/*.ttf $HOME/Library/Fonts/
   cp $DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist $HOME/Library/Preferences/
   echo "For iterm2 preferences to take effect the OS needs to be restarted" 
+  echo "Applying saner defaults to OSX, you will be asked for your password" 
+  sh $DOTFILES_DIR/osx-defaults
 fi
