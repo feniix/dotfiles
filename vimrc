@@ -35,9 +35,11 @@ endif
 set shiftwidth=2
 set tabstop=2
 set expandtab
+set smarttab
 set fileformat=unix
 set encoding=utf-8
 set hls
+set autoindent
 
 nnoremap <F2> :set invpaste paste?<CR>
 set pastetoggle=<F2>
