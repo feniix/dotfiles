@@ -101,7 +101,6 @@ filetype plugin on
 inoremap <Nul> <C-x><C-o>
 
 set nocompatible               " be iMproved
-filetype off                   " required!
 
 filetype plugin indent on     " required!
 
@@ -117,3 +116,4 @@ let g:vim_json_syntax_conceal=0
 let g:airline_powerline_fonts = 1
 set laststatus=2
 
+autocmd BufNewFile,BufRead Packerfile set filetype=json
