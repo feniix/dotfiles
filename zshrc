@@ -105,9 +105,6 @@ source ~/.aws/environment
 
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 
-export JAVA_HOME="$(/usr/libexec/java_home)"
-export PATH=${JAVA_HOME}/bin:$PATH
-
 export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
 
 export MAVEN_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
@@ -150,5 +147,24 @@ alias mtr="mtr --curses"
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
+
+# Java setup
+export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+
+function setjdk() { 
+  if [ $# -ne 0 ]; then 
+    removeFromPath '/System/Library/Frameworks/JavaVM.framework/Home/bin' 
+    if [ -n "${JAVA_HOME+x}" ]; then 
+      removeFromPath $JAVA_HOME/bin 
+    fi 
+    export JAVA_HOME=`/usr/libexec/java_home -v $@` 
+    export PATH=$JAVA_HOME/bin:$PATH
+  fi 
+}
+
+function removeFromPath() {
+  export PATH=$(echo $PATH | sed -E -e "s;:$1;;" -e "s;$1:?;;") 
+}
+setjdk 1.7
 
 #-------------------------------#
