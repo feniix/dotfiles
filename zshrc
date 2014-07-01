@@ -131,12 +131,6 @@ export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:$MANPATH
 
 PATH=$HOME/bin:$PATH
 
-if [ -f $HOME/.rvm/scripts/rvm ];
-then
-    export PATH=$HOME/.rvm/bin:$PATH 
-    source $HOME/.rvm/scripts/rvm
-fi
-
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 
@@ -168,3 +162,10 @@ function removeFromPath() {
 setjdk 1.7
 
 #-------------------------------#
+
+if [ -f $HOME/.rvm/scripts/rvm ];
+then
+    export PATH=$HOME/.rvm/bin:$PATH 
+    source $HOME/.rvm/scripts/rvm
+fi
+
