@@ -142,6 +142,8 @@ alias mtr="mtr --curses"
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
 
+alias t="top -ocpu -R -F -s 2 -n30"
+
 # Java setup
 export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
 
