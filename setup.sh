@@ -22,6 +22,7 @@ if [ $? ]; then
   ln -sf $DOTFILES_DIR/zshrc $HOME/.zshrc
   ln -sf $DOTFILES_DIR/gitconfig $HOME/.gitconfig
   ln -sf $DOTFILES_DIR/gitignore_global $HOME/.gitignore_global
+  ln -sf $DOTFILES_DIR/tmux.conf $HOME/.tmux.conf
   cp $DOTFILES_DIR/fonts/*.ttf $HOME/Library/Fonts/
   cp $DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist $HOME/Library/Preferences/
   echo "For iterm2 preferences to take effect the OS needs to be restarted" 
