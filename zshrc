@@ -82,6 +82,7 @@ svn
 systemadmin
 urltools 
 vagrant 
+virtualenv
 vundle 
 zsh-syntax-highlighting 
 )
