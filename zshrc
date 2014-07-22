@@ -139,6 +139,9 @@ alias dos2unix="todos -d"
 alias unix2dos="todos -u"
 alias mtr="mtr --curses"
 
+alias vi=/Applications/MacVim.app/Contents/MacOS/Vim
+alias vim=/Applications/MacVim.app/Contents/MacOS/Vim
+
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
@@ -165,6 +168,8 @@ function removeFromPath() {
 setjdk 1.7
 
 #-------------------------------#
+
+source $(brew --prefix nvm)/nvm.sh
 
 if [ -f $HOME/.rvm/scripts/rvm ];
 then
