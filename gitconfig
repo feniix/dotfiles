@@ -22,7 +22,7 @@
     ld = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -p
 [core]
     autocrlf = input
-    excludesfile = ~/.gitignore_global
+    excludesfile = /Users/otaeguis/.gitignore_global
     # deals with umlaits
     quotepath = false
 [rebase]
@@ -49,3 +49,4 @@
     changed = yellow
     untracked = cyan reverse
     branch = magenta
+

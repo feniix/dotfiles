@@ -132,6 +132,10 @@ export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:$MANPATH
 
 PATH=$HOME/bin:$PATH
 
+bindkey -e
+bindkey '^[[1;9C' forward-word
+bindkey '^[[1;9D' backward-word
+
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 
