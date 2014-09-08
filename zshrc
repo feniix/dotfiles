@@ -31,7 +31,7 @@ alias ohmyzsh="vi ~/.oh-my-zsh"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
 ant 
-aws
+#aws
 battery 
 brew
 brew-cask
@@ -170,6 +170,8 @@ function removeFromPath() {
   export PATH=$(echo $PATH | sed -E -e "s;:$1;;" -e "s;$1:?;;") 
 }
 setjdk 1.7
+
+source $(which aws_zsh_completer.sh)
 
 #-------------------------------#
 
