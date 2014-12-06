@@ -30,6 +30,7 @@ alias ohmyzsh="vi ~/.oh-my-zsh"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
+adb
 ant 
 #aws
 battery 
@@ -37,8 +38,10 @@ brew
 brew-cask
 bundler 
 capistrano 
+catimg
 coffee 
 command-not-found 
+common-aliases
 colored-man
 colorize
 debian 
@@ -57,10 +60,10 @@ gradle
 grails
 history-substring-search 
 iwhois
-jira
 jruby
 knife 
 last-working-dir
+lein
 mercurial
 mvn 
 node
@@ -80,11 +83,12 @@ sublime
 sudo
 svn 
 systemadmin
+thor
 urltools 
 vagrant 
 virtualenv
 vundle 
-zsh-syntax-highlighting 
+zsh_reload
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -139,6 +143,8 @@ bindkey '^[[1;9D' backward-word
 export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
 export DOCKER_TLS_VERIFY=1
 export DOCKER_HOST=tcp://192.168.59.103:2376
+ 
+export PACKER_CACHE_DIR=${HOME}/.packer
 
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
@@ -157,7 +163,7 @@ alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-se
 alias t="top -ocpu -R -F -s 2 -n30"
 
 # Java setup
-export JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
+export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
 function setjdk() { 
   if [ $# -ne 0 ]; then 
