@@ -185,6 +185,7 @@ source $(which aws_zsh_completer.sh)
 
 #-------------------------------#
 
+export NVM_DIR=~/.nvm
 source $(brew --prefix nvm)/nvm.sh
 
 if [ -f $HOME/.rvm/scripts/rvm ];
