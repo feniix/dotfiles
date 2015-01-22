@@ -104,9 +104,8 @@ HISTSIZE=10000
 SAVEHIST=10000
 
 #AMAZON EC2
-export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.2/libexec"
-export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.6.13.0/libexec"
-source ~/.aws/environment
+export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.6/libexec"
+export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.3.0/libexec"
 
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 
@@ -149,8 +148,8 @@ export PACKER_CACHE_DIR=${HOME}/.packer
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 
-alias dos2unix="todos -d"
-alias unix2dos="todos -u"
+#alias dos2unix="todos -d"
+#alias unix2dos="todos -u"
 alias mtr="mtr --curses"
 
 alias vi=/Applications/MacVim.app/Contents/MacOS/Vim
@@ -182,6 +181,8 @@ function removeFromPath() {
 setjdk 1.8
 
 source $(which aws_zsh_completer.sh)
+
+ghpr() {local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
 
 #-------------------------------#
 
