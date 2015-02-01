@@ -132,6 +132,10 @@ export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 # for coreutils
 export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
 export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:$MANPATH
+#
+# for gnu-sed
+export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:$PATH
+export MANPATH=/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH
 
 PATH=$HOME/bin:$PATH
 
@@ -180,7 +184,7 @@ function removeFromPath() {
 }
 setjdk 1.8
 
-source $(which aws_zsh_completer.sh)
+[ -f "/usr/local/share/zsh/site-functions/_aws" ] && source "/usr/local/share/zsh/site-functions/_aws"
 
 ghpr() {local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
 
