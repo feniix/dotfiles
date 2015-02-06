@@ -1,0 +1,3 @@
+Changed deploy-keys to use the standard name for AWS_ACCESS_KEY and AWS_SECRET_KEY
+
+Add flushdns command that flushes the dns in OSX
