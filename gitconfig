@@ -1,5 +1,5 @@
 [user]
-    name = Sebastian Otaegui
+    name = Sebastian Otaegui (black)
     email = feniix@gmail.com
 [credential]
     helper = osxkeychain
@@ -10,7 +10,7 @@
     stat = true
 [mergetool "diffmerge"]
     trustExitCode = true
-    cmd = /usr/local/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+    cmd = /usr/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
 [alias]
     s = status
     ci = commit

@@ -104,8 +104,8 @@ HISTSIZE=10000
 SAVEHIST=10000
 
 #AMAZON EC2
-export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.6/libexec"
-export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.3.0/libexec"
+export EC2_AMITOOL_HOME="/home/otaeguis/.linuxbrew/Cellar/ec2-ami-tools/1.5.6/libexec"
+export EC2_HOME="/home/otaeguis/.linuxbrew/Cellar/ec2-api-tools/1.7.3.0/libexec"
 
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 
@@ -121,21 +121,10 @@ rm -rf ~/.freerdp/known_hosts
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa 
 
-PROJECT_PATHS=(~/projects/src)
+PROJECT_PATHS=(~/src)
 
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
 [[ -s $HOME/.gvm/bin/gvm-init.sh ]] && source $HOME/.gvm/bin/gvm-init.sh
-
-# this is for homebrew
-export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
-
-# for coreutils
-export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
-export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:$MANPATH
-#
-# for gnu-sed
-export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:$PATH
-export MANPATH=/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH
 
 PATH=$HOME/bin:$PATH
 
@@ -143,9 +132,9 @@ bindkey -e
 bindkey '^[[1;9C' forward-word
 bindkey '^[[1;9D' backward-word
 
-export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
-export DOCKER_TLS_VERIFY=1
-export DOCKER_HOST=tcp://192.168.59.103:2376
+#export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
+#export DOCKER_TLS_VERIFY=1
+#export DOCKER_HOST=tcp://192.168.59.103:2376
  
 export PACKER_CACHE_DIR=${HOME}/.packer
 
@@ -156,35 +145,14 @@ alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 #alias unix2dos="todos -u"
 alias mtr="mtr --curses"
 
-alias vi=/Applications/MacVim.app/Contents/MacOS/Vim
-alias vim=/Applications/MacVim.app/Contents/MacOS/Vim
-
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
 
-alias t="top -ocpu -R -F -s 2 -n30"
-
 # Java setup
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
-function setjdk() { 
-  if [ $# -ne 0 ]; then 
-    removeFromPath '/System/Library/Frameworks/JavaVM.framework/Home/bin' 
-    if [ -n "${JAVA_HOME+x}" ]; then 
-      removeFromPath $JAVA_HOME/bin 
-    fi 
-    export JAVA_HOME=`/usr/libexec/java_home -v $@` 
-    export PATH=$JAVA_HOME/bin:$PATH
-  fi 
-}
-
-function removeFromPath() {
-  export PATH=$(echo $PATH | sed -E -e "s;:$1;;" -e "s;$1:?;;") 
-}
-setjdk 1.8
-
-[ -f "/usr/local/share/zsh/site-functions/_aws" ] && source "/usr/local/share/zsh/site-functions/_aws"
+source "${HOME}/.linuxbrew/share/zsh/site-functions/_aws"
 
 ghpr() {local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
 
@@ -193,6 +161,11 @@ function docker-enter () {
   boot2docker ssh -t sudo /var/lib/boot2docker/docker-enter "$@"
 }
 #-------------------------------#
+export PATH="$HOME/.linuxbrew/bin:$PATH"
+export PATH="$PATH:/opt/packer"
+export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
+export INFOPATH="$HOME/.linuxbrew/share/info:$INFOPATH"
+export HOMEBREW_GITHUB_API_TOKEN=0ddc0048aa14539b896523030ef5ead997fbcf08
 
 export NVM_DIR=~/.nvm
 source $(brew --prefix nvm)/nvm.sh
