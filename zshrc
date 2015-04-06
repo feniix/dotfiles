@@ -165,6 +165,8 @@ alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-se
 
 alias t="top -ocpu -R -F -s 2 -n30"
 
+export JMETER_HOME=/usr/local/opt/jmeter
+
 # Java setup
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
