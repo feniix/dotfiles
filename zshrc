@@ -55,7 +55,7 @@ github
 gitignore
 gem 
 gnu-utils 
-gpg-agent
+#gpg-agent
 gradle
 grails
 history-substring-search 
@@ -154,12 +154,10 @@ export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
 
 source "${HOME}/.linuxbrew/share/zsh/site-functions/_aws"
 
+alias gist='gist -p'
+
 ghpr() {local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
 
-function docker-enter () {
-  boot2docker ssh '[ -f /var/lib/boot2docker/nsenter ] || docker run --rm -v /var/lib/boot2docker/:/target jpetazzo/nsenter'
-  boot2docker ssh -t sudo /var/lib/boot2docker/docker-enter "$@"
-}
 #-------------------------------#
 export PATH="$HOME/.linuxbrew/bin:$PATH"
 export PATH="$PATH:/opt/packer"
