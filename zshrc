@@ -50,6 +50,7 @@ encode64
 extract
 fabric
 git 
+git-extras
 git-flow 
 github 
 gitignore
