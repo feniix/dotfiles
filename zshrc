@@ -141,8 +141,8 @@ export MANPATH=/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH
 PATH=$HOME/bin:$PATH
 
 bindkey -e
-bindkey '^[[1;9C' forward-word
-bindkey '^[[1;9D' backward-word
+bindkey "\e\e[D" backward-word # alt + <-
+bindkey "\e\e[C" forward-word # alt + -> 
 
 export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
 export DOCKER_TLS_VERIFY=1
@@ -166,6 +166,8 @@ alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-se
 
 alias t="top -ocpu -R -F -s 2 -n30"
 
+export GOPATH=/usr/local/opt/go/libexec
+export PATH=${PATH}:${GOPATH}/bin
 export JMETER_HOME=/usr/local/opt/jmeter
 
 # Java setup
