@@ -163,6 +163,7 @@ export PATH="$HOME/.linuxbrew/bin:$PATH"
 export PATH="$PATH:/opt/packer"
 export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
 export INFOPATH="$HOME/.linuxbrew/share/info:$INFOPATH"
+export PATH=$HOME/.cabal/bin:$PATH
 export HOMEBREW_GITHUB_API_TOKEN=0ddc0048aa14539b896523030ef5ead997fbcf08
 
 export NVM_DIR=~/.nvm
