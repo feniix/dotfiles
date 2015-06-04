@@ -83,7 +83,7 @@ ssh-agent
 sublime 
 sudo
 svn 
-systemadmin
+#systemadmin
 thor
 urltools 
 vagrant 
@@ -92,21 +92,22 @@ vundle
 zsh_reload
 )
 
-source $ZSH/oh-my-zsh.sh
+source "$ZSH/oh-my-zsh.sh"
 
 export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 
 # history settings
-setopt INC_APPEND_HISTORY AUTO_REMOVE_SLASH
+setopt INC_APPEND_HISTORY
 setopt LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE
+setopt AUTO_REMOVE_SLASH 
 export EDITOR=vim
-HISTSIZE=10000
-SAVEHIST=10000
+export HISTSIZE=100000
+export SAVEHIST=100000
 
 #AMAZON EC2
-export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.6/libexec"
-export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.3.0/libexec"
+export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.7/libexec"
+export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.4.0/libexec"
 
 alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 
@@ -125,20 +126,20 @@ zstyle :omz:plugins:ssh-agent identities id_rsa
 PROJECT_PATHS=(~/projects/src)
 
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
-[[ -s $HOME/.gvm/bin/gvm-init.sh ]] && source $HOME/.gvm/bin/gvm-init.sh
+[[ -s "$HOME/.gvm/bin/gvm-init.sh" ]] && source "$HOME/.gvm/bin/gvm-init.sh"
 
 # this is for homebrew
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
 # for coreutils
-export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
-export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:$MANPATH
+export PATH=/usr/local/opt/coreutils/libexec/gnubin:${PATH}
+export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}
 #
 # for gnu-sed
-export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:$PATH
-export MANPATH=/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH
+export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}
+export MANPATH=/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}
 
-PATH=$HOME/bin:$PATH
+PATH=${HOME}/bin:$PATH
 
 bindkey -e
 bindkey "\e\e[D" backward-word # alt + <-
@@ -179,19 +180,19 @@ function setjdk() {
     if [ -n "${JAVA_HOME+x}" ]; then 
       removeFromPath $JAVA_HOME/bin 
     fi 
-    export JAVA_HOME=`/usr/libexec/java_home -v $@` 
+    export JAVA_HOME=$(/usr/libexec/java_home -v $@)
     export PATH=$JAVA_HOME/bin:$PATH
   fi 
 }
 
 function removeFromPath() {
-  export PATH=$(echo $PATH | sed -E -e "s;:$1;;" -e "s;$1:?;;") 
+  export PATH=$(echo "$PATH" | sed -E -e "s;:$1;;" -e "s;$1:?;;") 
 }
 setjdk 1.8
 
 [ -f "/usr/local/share/zsh/site-functions/_aws" ] && source "/usr/local/share/zsh/site-functions/_aws"
 
-ghpr() {local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
+ghpr() { local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
 
 function docker-enter () {
   boot2docker ssh '[ -f /var/lib/boot2docker/nsenter ] || docker run --rm -v /var/lib/boot2docker/:/target jpetazzo/nsenter'
@@ -200,14 +201,19 @@ function docker-enter () {
 
 alias gist='gist -p'
 
+export VAGRANT_DEFAULT_PROVIDER=virtualbox
+unalias run-help
+autoload run-help
+export HELPDIR=/usr/local/share/zsh/help
+
 #-------------------------------#
 
 export NVM_DIR=~/.nvm
-source $(brew --prefix nvm)/nvm.sh
+source "$(brew --prefix nvm)/nvm.sh"
 
-if [ -f $HOME/.rvm/scripts/rvm ];
+if [ -f "$HOME/.rvm/scripts/rvm" ];
 then
     export PATH=$HOME/.rvm/bin:$PATH 
-    source $HOME/.rvm/scripts/rvm
+    source "$HOME/.rvm/scripts/rvm"
 fi
 
