@@ -132,12 +132,32 @@ PROJECT_PATHS=(~/projects/src)
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
 # for coreutils
-export PATH=/usr/local/opt/coreutils/libexec/gnubin:${PATH}
-export MANPATH=/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}
-#
+export PATH="$(brew --prefix coreutils)/libexec/gnubin:${PATH}"
+export MANPATH="$(brew --prefix coreutils)/libexec/gnuman:${MANPATH}"
+
+# for findutils
+export PATH="$(brew --prefix findutils)/bin:${PATH}"
+export MANPATH="$(brew --prefix findutils)/share/man:${MANPATH}"
+
 # for gnu-sed
-export PATH=/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}
-export MANPATH=/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}
+export PATH="$(brew --prefix gnu-sed)/libexec/gnubin:${PATH}"
+export MANPATH="$(brew --prefix gnu-sed)/libexec/gnuman:${MANPATH}"
+
+# for gnu-tar
+export PATH="$(brew --prefix gnu-tar)/libexec/gnubin:${PATH}"
+export MANPATH="$(brew --prefix gnu-tar)/libexec/gnuman:${MANPATH}"
+
+# for gnu-which
+export PATH="$(brew --prefix gnu-which)/bin:${PATH}"
+export MANPATH="$(brew --prefix gnu-which)/share/man:${MANPATH}"
+
+# for gawk
+export PATH="$(brew --prefix gawk)/bin:${PATH}"
+export MANPATH="$(brew --prefix gawk)/share/man:${MANPATH}"
+
+# for gawk
+export PATH="$(brew --prefix less)/bin:${PATH}"
+export MANPATH="$(brew --prefix less)/share/man:${MANPATH}"
 
 PATH=${HOME}/bin:$PATH
 
