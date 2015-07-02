@@ -30,64 +30,64 @@ alias ohmyzsh="vi ~/.oh-my-zsh"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
-adb
-ant 
+#adb
+#ant 
 #aws
-battery 
+#battery 
+boot2docker
 brew
 brew-cask
 bundler 
-capistrano 
-catimg
-coffee 
+#capistrano 
+#catimg
+#coffee 
 command-not-found 
 common-aliases
 colored-man
-colorize
-debian 
+#colorize
+#debian 
 docker 
-encode64
-extract
-fabric
+#encode64
+#extract
+#fabric
 git 
 git-extras
 git-flow 
 github 
-gitignore
+#gitignore
 gem 
 gnu-utils 
 gpg-agent
 gradle
 grails
 history-substring-search 
-iwhois
-jruby
-knife 
+#iwhois
+#jruby
+#knife 
 last-working-dir
-lein
-mercurial
+#lein
+#mercurial
 mvn 
-node
 npm
 nvm
 pip 
 pj
-pylint
-python 
-rbfu
+#pylint
+#python 
+#rbfu
 rsync
-ruby 
+#ruby 
 rvm 
-screen
+#screen
 ssh-agent 
-sublime 
+#sublime 
 sudo
 svn 
 #systemadmin
-thor
-urltools 
+#thor
+#urltools 
 vagrant 
-virtualenv
+#virtualenv
 vundle 
 zsh_reload
 )
@@ -108,8 +108,6 @@ export SAVEHIST=100000
 #AMAZON EC2
 export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.7/libexec"
 export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.4.0/libexec"
-
-alias dquilt="quilt --quiltrc=${HOME}/.quiltrc-dpkg"
 
 export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
 
@@ -132,32 +130,39 @@ PROJECT_PATHS=(~/projects/src)
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
 # for coreutils
-export PATH="$(brew --prefix coreutils)/libexec/gnubin:${PATH}"
-export MANPATH="$(brew --prefix coreutils)/libexec/gnuman:${MANPATH}"
+p="$(brew --prefix coreutils)"
+export PATH="${p}/libexec/gnubin:${PATH}"
+export MANPATH="${p}/libexec/gnuman:${MANPATH}"
 
 # for findutils
-export PATH="$(brew --prefix findutils)/bin:${PATH}"
-export MANPATH="$(brew --prefix findutils)/share/man:${MANPATH}"
+p="$(brew --prefix findutils)"
+export PATH="${p}/bin:${PATH}"
+export MANPATH="${p}/share/man:${MANPATH}"
 
 # for gnu-sed
-export PATH="$(brew --prefix gnu-sed)/libexec/gnubin:${PATH}"
-export MANPATH="$(brew --prefix gnu-sed)/libexec/gnuman:${MANPATH}"
+p="$(brew --prefix gnu-sed)"
+export PATH="${p}/libexec/gnubin:${PATH}"
+export MANPATH="${p}/libexec/gnuman:${MANPATH}"
 
 # for gnu-tar
-export PATH="$(brew --prefix gnu-tar)/libexec/gnubin:${PATH}"
-export MANPATH="$(brew --prefix gnu-tar)/libexec/gnuman:${MANPATH}"
+p="$(brew --prefix gnu-tar)"
+export PATH="${p}/libexec/gnubin:${PATH}"
+export MANPATH="${p}/libexec/gnuman:${MANPATH}"
 
 # for gnu-which
-export PATH="$(brew --prefix gnu-which)/bin:${PATH}"
-export MANPATH="$(brew --prefix gnu-which)/share/man:${MANPATH}"
+p="$(brew --prefix gnu-which)"
+export PATH="${p}/bin:${PATH}"
+export MANPATH="${p}/share/man:${MANPATH}"
 
 # for gawk
-export PATH="$(brew --prefix gawk)/bin:${PATH}"
-export MANPATH="$(brew --prefix gawk)/share/man:${MANPATH}"
+p="$(brew --prefix gawk)"
+export PATH="${p}/bin:${PATH}"
+export MANPATH="${p}/share/man:${MANPATH}"
 
-# for gawk
-export PATH="$(brew --prefix less)/bin:${PATH}"
-export MANPATH="$(brew --prefix less)/share/man:${MANPATH}"
+# for less
+p="$(brew --prefix less)"
+export PATH="${p}/bin:${PATH}"
+export MANPATH="${p}/share/man:${MANPATH}"
 
 PATH=${HOME}/bin:$PATH
 
