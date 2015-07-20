@@ -166,6 +166,9 @@ export MANPATH="${p}/share/man:${MANPATH}"
 
 PATH=${HOME}/bin:$PATH
 
+# Add appcatalyst
+PATH="${PATH}:/opt/vmware/appcatalyst/bin"
+
 bindkey -e
 bindkey "\e\e[D" backward-word # alt + <-
 bindkey "\e\e[C" forward-word # alt + -> 
