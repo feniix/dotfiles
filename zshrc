@@ -30,64 +30,36 @@ alias ohmyzsh="vi ~/.oh-my-zsh"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
-#adb
-#ant 
-#aws
-#battery 
 boot2docker
 brew
 brew-cask
 bundler 
-#capistrano 
-#catimg
-#coffee 
 command-not-found 
 common-aliases
 colored-man
-#colorize
-#debian 
 docker 
-#encode64
-#extract
-#fabric
 git 
 git-extras
 git-flow 
 github 
-#gitignore
 gem 
 gnu-utils 
 gpg-agent
 gradle
 grails
 history-substring-search 
-#iwhois
-#jruby
-#knife 
 last-working-dir
-#lein
-#mercurial
 mvn 
 npm
 nvm
 pip 
 pj
-#pylint
-#python 
-#rbfu
 rsync
-#ruby 
 rvm 
-#screen
 ssh-agent 
-#sublime 
 sudo
 svn 
-#systemadmin
-#thor
-#urltools 
 vagrant 
-#virtualenv
 vundle 
 zsh_reload
 )
@@ -173,9 +145,9 @@ bindkey -e
 bindkey "\e\e[D" backward-word # alt + <-
 bindkey "\e\e[C" forward-word # alt + -> 
 
-export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
-export DOCKER_TLS_VERIFY=1
-export DOCKER_HOST=tcp://192.168.59.103:2376
+#export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
+#export DOCKER_TLS_VERIFY=1
+#export DOCKER_HOST=tcp://192.168.59.103:2376
  
 export PACKER_CACHE_DIR=${HOME}/.packer
 
