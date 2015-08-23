@@ -55,7 +55,6 @@ nvm
 pip 
 pj
 rsync
-rvm 
 ssh-agent 
 sudo
 svn 
@@ -158,8 +157,8 @@ alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 #alias unix2dos="todos -u"
 alias mtr="mtr --curses"
 
-alias vi=/Applications/MacVim.app/Contents/MacOS/Vim
-alias vim=/Applications/MacVim.app/Contents/MacOS/Vim
+alias vi=nvim
+alias vim=nvim
 
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
@@ -214,9 +213,5 @@ export HELPDIR=/usr/local/share/zsh/help
 export NVM_DIR=~/.nvm
 source "$(brew --prefix nvm)/nvm.sh"
 
-if [ -f "$HOME/.rvm/scripts/rvm" ];
-then
-    export PATH=$HOME/.rvm/bin:$PATH 
-    source "$HOME/.rvm/scripts/rvm"
-fi
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
