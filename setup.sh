@@ -14,18 +14,20 @@ if [ -d "$DOTFILES_DIR" ]; then
     exit 1
 fi
 
-git clone --recursive https://github.com/feniix/dotfiles.git $DOTFILES_DIR
+git clone --recursive https://github.com/feniix/dotfiles.git "$DOTFILES_DIR"
 if [ $? ]; then
-  ln -s $DOTFILES_DIR/vimdir $HOME/.vim
-  ln -s $DOTFILES_DIR/oh-my-zsh $HOME/.oh-my-zsh
-  ln -sf $DOTFILES_DIR/vimrc $HOME/.vimrc
-  ln -sf $DOTFILES_DIR/zshrc $HOME/.zshrc
-  ln -sf $DOTFILES_DIR/gitconfig $HOME/.gitconfig
-  ln -sf $DOTFILES_DIR/gitignore_global $HOME/.gitignore_global
-  ln -sf $DOTFILES_DIR/tmux.conf $HOME/.tmux.conf
-  cp $DOTFILES_DIR/fonts/*.ttf $HOME/Library/Fonts/
-  cp $DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist $HOME/Library/Preferences/
+  ln -s "$DOTFILES_DIR/vimdir" "$HOME/.vim"
+  ln -s "$DOTFILES_DIR/oh-my-zsh" "$HOME/.oh-my-zsh"
+  ln -sf "$DOTFILES_DIR/vimrc" "$HOME/.vimrc"
+  ln -sf "$DOTFILES_DIR/aprc" "$HOME/.aprc"
+  ln -sf "$DOTFILES_DIR/pryrc" "$HOME/.pryrc"
+  ln -sf "$DOTFILES_DIR/zshrc" "$HOME/.zshrc"
+  ln -sf "$DOTFILES_DIR/gitconfig" "$HOME/.gitconfig"
+  ln -sf "$DOTFILES_DIR/gitignore_global" "$HOME/.gitignore_global"
+  ln -sf "$DOTFILES_DIR/tmux.conf $HOME/.tmux.conf"
+  cp "$DOTFILES_DIR/fonts/*.ttf" "$HOME/Library/Fonts/"
+  cp "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/"
   echo "For iterm2 preferences to take effect the OS needs to be restarted" 
   echo "Applying saner defaults to OSX, you will be asked for your password" 
-  sh $DOTFILES_DIR/osx-defaults
+  sh "$DOTFILES_DIR/osx-defaults"
 fi
