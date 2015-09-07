@@ -138,6 +138,9 @@ bindkey '^[[1;9D' backward-word
  
 export PACKER_CACHE_DIR=${HOME}/.packer
 
+export GOPATH=/home/otaeguis/.linuxbrew/opt/go/libexec
+export PATH=$PATH:/home/otaeguis/.linuxbrew/opt/go/libexec/bin
+
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 
