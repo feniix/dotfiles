@@ -34,6 +34,7 @@ boot2docker
 brew
 brew-cask
 bundler 
+cabal
 command-not-found 
 common-aliases
 colored-man
