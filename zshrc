@@ -124,7 +124,7 @@ zstyle :omz:plugins:ssh-agent identities id_rsa
 PROJECT_PATHS=(~/src)
 
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
-[[ -s $HOME/.gvm/bin/gvm-init.sh ]] && source $HOME/.gvm/bin/gvm-init.sh
+export SDKMAN_DIR="$HOME/.sdkman" && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 PATH=$HOME/bin:$PATH
 
@@ -138,8 +138,8 @@ bindkey '^[[1;9D' backward-word
  
 export PACKER_CACHE_DIR=${HOME}/.packer
 
-export GOPATH=/home/otaeguis/.linuxbrew/opt/go/libexec
-export PATH=$PATH:/home/otaeguis/.linuxbrew/opt/go/libexec/bin
+#export GOPATH=/home/otaeguis/.linuxbrew/opt/go/libexec
+#export PATH=$PATH:/home/otaeguis/.linuxbrew/opt/go/libexec/bin
 
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
@@ -167,14 +167,12 @@ export PATH="$PATH:/opt/packer"
 export MANPATH="$HOME/.linuxbrew/share/man:$MANPATH"
 export INFOPATH="$HOME/.linuxbrew/share/info:$INFOPATH"
 export PATH=$HOME/.cabal/bin:$PATH
-export HOMEBREW_GITHUB_API_TOKEN=0ddc0048aa14539b896523030ef5ead997fbcf08
 
 export NVM_DIR=~/.nvm
 source $(brew --prefix nvm)/nvm.sh
 
-if [ -f $HOME/.rvm/scripts/rvm ];
-then
-    export PATH=$HOME/.rvm/bin:$PATH 
-    source $HOME/.rvm/scripts/rvm
-fi
+# The next line updates PATH for the Google Cloud SDK.
+[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
 
+# The next line enables shell command completion for gcloud.
+[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
