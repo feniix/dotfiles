@@ -61,7 +61,8 @@ sudo
 svn 
 vagrant 
 vundle 
-zsh_reload
+zsh-navigation-tools 
+zsh_reload 
 )
 
 source "$ZSH/oh-my-zsh.sh"
