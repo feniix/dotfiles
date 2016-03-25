@@ -33,36 +33,36 @@ plugins=(
 boot2docker
 brew
 brew-cask
-bundler 
+bundler
 cabal
-command-not-found 
+command-not-found
 common-aliases
 colored-man
-docker 
-git 
+docker
+git
 git-extras
-git-flow 
-github 
-gem 
-gnu-utils 
+#git-flow
+#github
+gem
+gnu-utils
 gpg-agent
 gradle
 grails
-history-substring-search 
+history-substring-search
+kitchen
 last-working-dir
-mvn 
+mvn
 npm
 nvm
-pip 
+pip
 pj
 rsync
-ssh-agent 
+ssh-agent
 sudo
-svn 
-vagrant 
-vundle 
-zsh-navigation-tools 
-zsh_reload 
+svn
+vagrant
+vundle
+zsh_reload
 )
 
 source "$ZSH/oh-my-zsh.sh"
@@ -97,7 +97,6 @@ zstyle :omz:plugins:ssh-agent identities id_rsa
 PROJECT_PATHS=(~/projects/src)
 
 #THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
-[[ -s "$HOME/.gvm/bin/gvm-init.sh" ]] && source "$HOME/.gvm/bin/gvm-init.sh"
 
 # this is for homebrew
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
@@ -137,6 +136,8 @@ p="$(brew --prefix less)"
 export PATH="${p}/bin:${PATH}"
 export MANPATH="${p}/share/man:${MANPATH}"
 
+export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
+
 PATH=${HOME}/bin:$PATH
 
 # Add appcatalyst
@@ -152,6 +153,8 @@ bindkey "\e\e[C" forward-word # alt + ->
  
 export PACKER_CACHE_DIR=${HOME}/.packer
 
+[[ -f "$HOME/.aws/github_token" ]] && source "$HOME/.aws/github_token"
+
 #--------- begin alias ---------#
 alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 
@@ -159,8 +162,8 @@ alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 #alias unix2dos="todos -u"
 alias mtr="mtr --curses"
 
-alias vi=nvim
-alias vim=nvim
+alias vi=vim
+#alias vim=nvim
 
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
@@ -194,7 +197,7 @@ function removeFromPath() {
 }
 setjdk 1.8
 
-[ -f "/usr/local/share/zsh/site-functions/_aws" ] && source "/usr/local/share/zsh/site-functions/_aws"
+[[ -f "/usr/local/share/zsh/site-functions/_aws" ]] && source "/usr/local/share/zsh/site-functions/_aws"
 
 ghpr() { local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
 
@@ -215,5 +218,20 @@ export HELPDIR=/usr/local/share/zsh/help
 export NVM_DIR=~/.nvm
 source "$(brew --prefix nvm)/nvm.sh"
 
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+source /usr/local/opt/chruby/share/chruby/chruby.sh
+
+#if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+# The next line updates PATH for the Google Cloud SDK.
+[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
+
+# The next line enables shell command completion for gcloud.
+[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
+
+# OPAM configuration
+[[ -f "$HOME/.opam/opam-init/init.zsh" ]] && source $HOME/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
