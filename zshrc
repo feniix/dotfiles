@@ -33,7 +33,6 @@ plugins=(
 boot2docker
 brew
 brew-cask
-bundler
 cabal
 command-not-found
 common-aliases
@@ -49,7 +48,7 @@ gpg-agent
 gradle
 grails
 history-substring-search
-kitchen
+#kitchen
 last-working-dir
 mvn
 npm
@@ -187,7 +186,8 @@ function setjdk() {
     if [ -n "${JAVA_HOME+x}" ]; then 
       removeFromPath $JAVA_HOME/bin 
     fi 
-    export JAVA_HOME=$(/usr/libexec/java_home -v $@)
+    declare -x JAVA_HOME
+    JAVA_HOME=$(/usr/libexec/java_home -v $@)
     export PATH=$JAVA_HOME/bin:$PATH
   fi 
 }
@@ -199,13 +199,6 @@ setjdk 1.8
 
 [[ -f "/usr/local/share/zsh/site-functions/_aws" ]] && source "/usr/local/share/zsh/site-functions/_aws"
 
-ghpr() { local GIT_BRANCH=$(git symbolic-ref --short HEAD); hub pull-request -b Spantree:develop -h Spantree:${GIT_BRANCH#};}
-
-function docker-enter () {
-  boot2docker ssh '[ -f /var/lib/boot2docker/nsenter ] || docker run --rm -v /var/lib/boot2docker/:/target jpetazzo/nsenter'
-  boot2docker ssh -t sudo /var/lib/boot2docker/docker-enter "$@"
-}
-
 alias gist='gist -p'
 
 export VAGRANT_DEFAULT_PROVIDER=virtualbox
@@ -215,10 +208,14 @@ export HELPDIR=/usr/local/share/zsh/help
 
 #-------------------------------#
 
+export WORKON_HOME="$HOME/VEnvs"
+source /usr/local/bin/virtualenvwrapper.sh
+
 export NVM_DIR=~/.nvm
 source "$(brew --prefix nvm)/nvm.sh"
 
 source /usr/local/opt/chruby/share/chruby/chruby.sh
+source /usr/local/opt/chruby/share/chruby/auto.sh
 
 #if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
@@ -233,5 +230,7 @@ source /usr/local/opt/chruby/share/chruby/chruby.sh
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
