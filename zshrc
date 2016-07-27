@@ -31,63 +31,63 @@ alias ohmyzsh="vi ~/.oh-my-zsh"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
 adb
-ant 
+ant
 #aws
-battery 
+battery
 brew
 brew-cask
-bundler 
-capistrano 
+bundler
+capistrano
 catimg
-coffee 
-command-not-found 
+coffee
+command-not-found
 common-aliases
 colored-man
 colorize
-debian 
-docker 
+debian
+docker
 encode64
 extract
 fabric
-git 
-git-flow 
-github 
+git
+git-flow
+github
 gitignore
-gem 
-gnu-utils 
+gem
+gnu-utils
 #gpg-agent
 gradle
 grails
-history-substring-search 
+history-substring-search
 iwhois
 jruby
-knife 
+knife
 last-working-dir
 lein
 mercurial
-mvn 
+mvn
 node
 npm
 nvm
-pip 
+pip
 pj
 pylint
-python 
+python
 rbfu
 rsync
-ruby 
-rvm 
+ruby
+#rvm
 screen
-ssh-agent 
-sublime 
+ssh-agent
+sublime
 sudo
-svn 
+svn
 systemadmin
 thor
-urltools 
-vagrant 
+urltools
+vagrant
 virtualenv
-vundle 
+vundle
 zsh_reload
 )
 
@@ -119,12 +119,12 @@ rm -rf ~/.freerdp/known_hosts
 
 #config for the ssh-agent plugin
 zstyle :omz:plugins:ssh-agent agent-forwarding on
-zstyle :omz:plugins:ssh-agent identities id_rsa 
+zstyle :omz:plugins:ssh-agent identities id_rsa
 
 PROJECT_PATHS=(~/src)
 
-#THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman" && source "$HOME/.sdkman/bin/sdkman-init.sh"
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+[[ -s $HOME/.sdkman/bin/sdkman-init.sh ]] && source $HOME/.sdkman/bin/sdkman-init.sh
 
 PATH=$HOME/bin:$PATH
 
@@ -135,7 +135,7 @@ bindkey '^[[1;9D' backward-word
 #export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
 #export DOCKER_TLS_VERIFY=1
 #export DOCKER_HOST=tcp://192.168.59.103:2376
- 
+
 export PACKER_CACHE_DIR=${HOME}/.packer
 
 #export GOPATH=/home/otaeguis/.linuxbrew/opt/go/libexec
@@ -171,8 +171,12 @@ export PATH=$HOME/.cabal/bin:$PATH
 export NVM_DIR=~/.nvm
 source $(brew --prefix nvm)/nvm.sh
 
+export PATH=$HOME/.rbenv/bin:$PATH
+eval "$(rbenv init -)"
+
+
 # The next line updates PATH for the Google Cloud SDK.
-[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
+source '/home/otaeguis/google-cloud-sdk/path.zsh.inc'
 
 # The next line enables shell command completion for gcloud.
-[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
+source '/home/otaeguis/google-cloud-sdk/completion.zsh.inc'
