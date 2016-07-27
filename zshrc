@@ -101,9 +101,9 @@ PROJECT_PATHS=(~/projects/src ~/projects/src/spantree)
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
 # for coreutils
-p="$(brew --prefix coreutils)"
-export PATH="${p}/libexec/gnubin:${PATH}"
-export MANPATH="${p}/libexec/gnuman:${MANPATH}"
+#p="$(brew --prefix coreutils)"
+#export PATH="${p}/libexec/gnubin:${PATH}"
+#export MANPATH="${p}/libexec/gnuman:${MANPATH}"
 
 # for findutils
 p="$(brew --prefix findutils)"
@@ -246,3 +246,4 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 
 # kubectl completion
 source ~/dotfiles/completions/kubectl.zsh
+#source <(/usr/local/bin/kubectl completion zsh)
