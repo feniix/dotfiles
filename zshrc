@@ -48,6 +48,7 @@ gpg-agent
 gradle
 grails
 history-substring-search
+#kubectl
 #kitchen
 last-working-dir
 mvn
@@ -110,11 +111,6 @@ p="$(brew --prefix findutils)"
 export PATH="${p}/bin:${PATH}"
 export MANPATH="${p}/share/man:${MANPATH}"
 
-# for gnu-sed
-#p="$(brew --prefix gnu-sed)"
-#export PATH="${p}/libexec/gnubin:${PATH}"
-#export MANPATH="${p}/libexec/gnuman:${MANPATH}"
-
 # for gnu-tar
 p="$(brew --prefix gnu-tar)"
 export PATH="${p}/libexec/gnubin:${PATH}"
@@ -135,27 +131,24 @@ p="$(brew --prefix less)"
 export PATH="${p}/bin:${PATH}"
 export MANPATH="${p}/share/man:${MANPATH}"
 
+# for gnu-sed
+#p="$(brew --prefix gnu-sed)"
+#export PATH="${p}/libexec/gnubin:${PATH}"
+#export MANPATH="${p}/libexec/gnuman:${MANPATH}"
+
 export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
 
 PATH=${HOME}/bin:$PATH
 
-# Add appcatalyst
-PATH="${PATH}:/opt/vmware/appcatalyst/bin"
-
 bindkey -e
 bindkey "\e\e[D" backward-word # alt + <-
 bindkey "\e\e[C" forward-word # alt + ->
-
-#export DOCKER_CERT_PATH=${HOME}/.boot2docker/certs/boot2docker-vm
-#export DOCKER_TLS_VERIFY=1
-#export DOCKER_HOST=tcp://192.168.59.103:2376
 
 export PACKER_CACHE_DIR=${HOME}/.packer
 
 [[ -f "$HOME/.aws/github_token" ]] && source "$HOME/.aws/github_token"
 
 #--------- begin alias ---------#
-alias veewee="BUNDLE_GEMFILE=~/projects/src/veewee/Gemfile bundle exec veewee"
 
 #alias dos2unix="todos -d"
 #alias unix2dos="todos -u"
@@ -212,9 +205,9 @@ export HELPDIR=/usr/local/share/zsh/help
 
 #-------------------------------#
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+#export PYENV_ROOT="$HOME/.pyenv"
+#export PATH="$PYENV_ROOT/bin:$PATH"
+#eval "$(pyenv init -)"
 
 #export WORKON_HOME="$HOME/VEnvs"
 #source /usr/local/bin/virtualenvwrapper.sh
@@ -232,9 +225,6 @@ source /usr/local/opt/chruby/share/chruby/auto.sh
 # The next line enables shell command completion for gcloud.
 [[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
 
-# OPAM configuration
-[[ -f "$HOME/.opam/opam-init/init.zsh" ]] && source $HOME/.opam/opam-init/init.zsh > /dev/null 2> /dev/null || true
-
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
@@ -245,5 +235,5 @@ export LANG=en_US.UTF-8
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 # kubectl completion
-source ~/dotfiles/completions/kubectl.zsh
+#source ~/dotfiles/completions/kubectl.zsh
 #source <(/usr/local/bin/kubectl completion zsh)
