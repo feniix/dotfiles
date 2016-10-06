@@ -48,7 +48,7 @@ gpg-agent
 gradle
 grails
 history-substring-search
-#kubectl
+kubectl
 #kitchen
 last-working-dir
 mvn
@@ -205,9 +205,9 @@ export HELPDIR=/usr/local/share/zsh/help
 
 #-------------------------------#
 
-#export PYENV_ROOT="$HOME/.pyenv"
-#export PATH="$PYENV_ROOT/bin:$PATH"
-#eval "$(pyenv init -)"
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+alias pyenv-start='eval "$(pyenv init -)"'
 
 #export WORKON_HOME="$HOME/VEnvs"
 #source /usr/local/bin/virtualenvwrapper.sh
