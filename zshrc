@@ -215,6 +215,8 @@ alias pyenv-start='eval "$(pyenv init -)"'
 export NVM_DIR=~/.nvm
 source "$(brew --prefix nvm)/nvm.sh"
 
+export HOMEBREW_CASK_OPTS=--caskroom=/usr/local/Caskroom
+
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 source /usr/local/opt/chruby/share/chruby/auto.sh
 
