@@ -56,3 +56,5 @@
     untracked = cyan reverse
     branch = magenta
 
+[http "https://gopkg.in"]
+	followRedirects = true
