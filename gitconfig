@@ -1,58 +1,64 @@
 [user]
-    name = Sebastian Otaegui
-    email = feniix@gmail.com
+  name = Sebastian Otaegui
+  email = feniix@gmail.com
 [credential]
-    helper = osxkeychain
+  helper = osxkeychain
 [push]
-    default = tracking
+  default = tracking
 [merge]
-    tool = diffmerge
-    stat = true
+  tool = diffmerge
+  stat = true
 [mergetool "diffmerge"]
-    trustExitCode = true
-    cmd = /usr/local/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
-[mergetool "sourcetree"]
-	cmd = /opt/homebrew-cask/Caskroom/sourcetree/2.0.5.2/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+  trustExitCode = true
+  cmd = /usr/local/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
 [alias]
-    s = status
-    ci = commit
-    br = branch
-    co = checkout
-    d = diff
-    lg = log 
-    l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-    ld = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -p
+  s = status
+  ci = commit
+  br = branch
+  co = checkout
+  d = diff
+  lg = log
+  l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  ld = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -p
 [core]
-    autocrlf = input
-    excludesfile = ~/.gitignore_global
-    # deals with umlaits
-    quotepath = false
+  autocrlf = input
+  excludesfile = ~/.gitignore_global
+  # deals with umlaits
+  quotepath = false
 [rebase]
-    autosquash = true
+  autosquash = true
 [branch]
-    autosetupmerge = always
+  autosetupmerge = always
 [diff]
-    renames = copies
-    mnemonicprefix = true
+  renames = copies
+  mnemonicprefix = true
 [color]
-    ui = true
+  ui = true
 [color "branch"]
-    current = yellow black
-    local = yellow
-    remote = magenta
+  current = yellow black
+  local = yellow
+  remote = magenta
 [color "diff"]
-    meta = yellow bold
-    frag = magenta bold
-    old = red reverse
-    new = green reverse
-    whitespace = white reverse
+  meta = yellow bold
+  frag = magenta bold
+  old = red reverse
+  new = green reverse
+  whitespace = white reverse
 [color "status"]
-    added = green
-    changed = yellow
-    untracked = cyan reverse
-    branch = magenta
-
+  added = green
+  changed = yellow
+  untracked = cyan reverse
+  branch = magenta
+[github]
+	user = feniix
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22
+[pager]
+	log = diff-highlight | less
+	show = diff-highlight | less
+	diff = diff-highlight | less
+[interactive]
+	diffFilter = diff-highlight
