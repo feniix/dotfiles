@@ -62,3 +62,10 @@
 	diff = diff-highlight | less
 [interactive]
 	diffFilter = diff-highlight
+  added = green
+  changed = yellow
+  untracked = cyan reverse
+  branch = magenta
+
+[http "https://gopkg.in"]
+	followRedirects = true
