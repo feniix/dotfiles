@@ -48,7 +48,7 @@ gpg-agent
 gradle
 grails
 history-substring-search
-kubectl
+#kubectl
 #kitchen
 last-working-dir
 mvn
@@ -95,8 +95,6 @@ zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
 
 PROJECT_PATHS=(~/projects/src ~/projects/src/spantree)
-
-#THIS MUST BE AT THE END OF THE FILE FOR GVM TO WORK!!!
 
 # this is for homebrew
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
@@ -155,7 +153,6 @@ export PACKER_CACHE_DIR=${HOME}/.packer
 alias mtr="mtr --curses"
 
 alias vi=vim
-#alias vim=nvim
 
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
@@ -169,8 +166,6 @@ export GOPATH="$HOME/golang"
 export GOROOT=/usr/local/opt/go/libexec
 export PATH=${GOPATH}/bin:${GOROOT}/bin:${PATH}
 export GO15VENDOREXPERIMENT=1
-
-export HOMEBREW_CASK_OPTS="--caskroom=/opt/homebrew-cask/Caskroom"
 
 export JMETER_HOME=/usr/local/opt/jmeter
 
@@ -237,5 +232,6 @@ export LANG=en_US.UTF-8
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 # kubectl completion
-#source ~/dotfiles/completions/kubectl.zsh
-#source <(/usr/local/bin/kubectl completion zsh)
+if which -s kops    > /dev/null ; then source <(kops completion zsh 2>/dev/null); fi
+if which -s kubectl > /dev/null ; then source <(kubectl completion zsh 2>/dev/null) ; fi
+
