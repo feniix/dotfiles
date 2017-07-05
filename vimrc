@@ -16,6 +16,7 @@ Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'ervandew/supertab'
 Plug 'fatih/vim-go'
+Plug 'feniix/vim-chef'
 Plug 'hashivim/vim-terraform'
 Plug 'luochen1990/rainbow'
 Plug 'marijnh/tern_for_vim'
@@ -24,7 +25,6 @@ Plug 'ntpeters/vim-better-whitespace'
 Plug 'rhysd/vim-crystal'
 Plug 'robbles/logstash.vim'
 Plug 'rodjek/vim-puppet'
-Plug 'scrooloose/Syntastic'
 Plug 'sjl/gundo.vim'
 Plug 'stephpy/vim-yaml'
 Plug 'tfnico/vim-gradle'
@@ -41,6 +41,7 @@ Plug 'vim-ruby/vim-ruby'
 Plug 'vim-scripts/L9'
 Plug 'vim-scripts/Specky'
 Plug 'vim-scripts/Tabular'
+Plug 'vim-syntastic/syntastic'
 
 call plug#end()
 
@@ -157,7 +158,15 @@ filetype plugin on
 " Auto completion via ctrl-space (instead of the nasty ctrl-x ctrl-o)
 inoremap <Nul> <C-x><C-o>
 
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
 let g:syntastic_python_checkers=['flake8']
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+" let g:syntastic_check_on_wq = 0
 
 let g:solarized_termcolors=256
 set background=dark
