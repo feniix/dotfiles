@@ -14,10 +14,7 @@ status
 custom
 context
 dir
-ruby
-elixir
 aws
-go
 git
 hg
 cmd_exec_time
