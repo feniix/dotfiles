@@ -1,57 +1,54 @@
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
 
+ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
+
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="bira"
+ZSH_THEME="bullet-train"
 
-# Example aliases
-alias zshconfig="vi ~/.zshrc"
-alias ohmyzsh="vi ~/.oh-my-zsh"
+BULLETTRAIN_PROMPT_ORDER=(
+status
+custom
+context
+dir
+ruby
+elixir
+aws
+go
+git
+hg
+cmd_exec_time
+)
 
-# Set to this to use case-sensitive completion
-# CASE_SENSITIVE="true"
+BULLETTRAIN_STATUS_EXIT_SHOW=true
+BULLETTRAIN_RUBY_FG=black
+BULLETTRAIN_DIR_FG=black
+BULLETTRAIN_GIT_FG=white
+BULLETTRAIN_GIT_BG=black
 
-# Comment this out to disable weekly auto-update checks
-# DISABLE_AUTO_UPDATE="true"
-
-# Uncomment following line if you want to disable colors in ls
-# DISABLE_LS_COLORS="true"
-
-# Uncomment following line if you want to disable autosetting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment following line if you want red dots to be displayed while waiting for completion
-#COMPLETION_WAITING_DOTS="true"
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
-boot2docker
 brew
 brew-cask
 cabal
+colored-man
 command-not-found
 common-aliases
-colored-man
 docker
+docker-compose
+gem
 git
 git-extras
-#git-flow
-#github
-gem
 gnu-utils
 gpg-agent
 gradle
 grails
 history-substring-search
-#kubectl
-#kitchen
 last-working-dir
 mvn
+nmap
 npm
 nvm
 pip
@@ -61,7 +58,6 @@ ssh-agent
 sudo
 svn
 vagrant
-vundle
 zsh_reload
 )
 
@@ -100,39 +96,24 @@ PROJECT_PATHS=(~/projects/src ~/projects/src/spantree)
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
 # for coreutils
-#p="$(brew --prefix coreutils)"
-#export PATH="${p}/libexec/gnubin:${PATH}"
-#export MANPATH="${p}/libexec/gnuman:${MANPATH}"
+export PATH="/usr/local/opt/coreutils/libexec/gnubin:${PATH}"
+export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}"
 
 # for findutils
-p="$(brew --prefix findutils)"
-export PATH="${p}/bin:${PATH}"
-export MANPATH="${p}/share/man:${MANPATH}"
-
-# for gnu-tar
-p="$(brew --prefix gnu-tar)"
-export PATH="${p}/libexec/gnubin:${PATH}"
-export MANPATH="${p}/libexec/gnuman:${MANPATH}"
-
-# for gnu-which
-p="$(brew --prefix gnu-which)"
-export PATH="${p}/bin:${PATH}"
-export MANPATH="${p}/share/man:${MANPATH}"
+export PATH="/usr/local/opt/findutils/bin:${PATH}"
+export MANPATH="/usr/local/opt/findutils/share/man:${MANPATH}"
 
 # for gawk
-p="$(brew --prefix gawk)"
-export PATH="${p}/bin:${PATH}"
-export MANPATH="${p}/share/man:${MANPATH}"
+export PATH="/usr/local/opt/gawk/bin:${PATH}"
+export MANPATH="/usr/local/opt/gawk/share/man:${MANPATH}"
 
 # for less
-p="$(brew --prefix less)"
-export PATH="${p}/bin:${PATH}"
-export MANPATH="${p}/share/man:${MANPATH}"
+export PATH="/usr/local/opt/less/bin:${PATH}"
+export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
 
 # for gnu-sed
-#p="$(brew --prefix gnu-sed)"
-#export PATH="${p}/libexec/gnubin:${PATH}"
-#export MANPATH="${p}/libexec/gnuman:${MANPATH}"
+export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
+export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
 
 export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
 
@@ -208,7 +189,7 @@ alias pyenv-start='eval "$(pyenv init -)"'
 #source /usr/local/bin/virtualenvwrapper.sh
 
 export NVM_DIR=~/.nvm
-source "$(brew --prefix nvm)/nvm.sh"
+source "/usr/local/opt/nvm/nvm.sh"
 
 export HOMEBREW_CASK_OPTS=--caskroom=/usr/local/Caskroom
 
@@ -235,3 +216,4 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 if which -s kops    > /dev/null ; then source <(kops completion zsh 2>/dev/null); fi
 if which -s kubectl > /dev/null ; then source <(kubectl completion zsh 2>/dev/null) ; fi
 
+eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
