@@ -93,8 +93,8 @@ PROJECT_PATHS=(~/projects/src ~/projects/src/spantree)
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
 
 # for coreutils
-export PATH="/usr/local/opt/coreutils/libexec/gnubin:${PATH}"
-export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}"
+#export PATH="/usr/local/opt/coreutils/libexec/gnubin:${PATH}"
+#export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}"
 
 # for findutils
 export PATH="/usr/local/opt/findutils/bin:${PATH}"
@@ -109,8 +109,8 @@ export PATH="/usr/local/opt/less/bin:${PATH}"
 export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
 
 # for gnu-sed
-export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
-export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
+#export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
+#export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
 
 export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
 
