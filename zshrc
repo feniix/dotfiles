@@ -25,6 +25,7 @@ BULLETTRAIN_RUBY_FG=black
 BULLETTRAIN_DIR_FG=black
 BULLETTRAIN_GIT_FG=white
 BULLETTRAIN_GIT_BG=black
+BULLETTRAIN_DIR_EXTENDED=2
 
 plugins=(
 brew
@@ -187,8 +188,6 @@ alias pyenv-start='eval "$(pyenv init -)"'
 
 export NVM_DIR=~/.nvm
 source "/usr/local/opt/nvm/nvm.sh"
-
-export HOMEBREW_CASK_OPTS=--caskroom=/usr/local/Caskroom
 
 source /usr/local/opt/chruby/share/chruby/chruby.sh
 source /usr/local/opt/chruby/share/chruby/auto.sh
