@@ -14,20 +14,24 @@ status
 custom
 context
 dir
+kctx
 aws
 git
 hg
 cmd_exec_time
 )
 
+BULLETTRAIN_KCTX_KCONFIG="$HOME/.kube/config"
 BULLETTRAIN_STATUS_EXIT_SHOW=true
 BULLETTRAIN_RUBY_FG=black
 BULLETTRAIN_DIR_FG=black
 BULLETTRAIN_GIT_FG=white
 BULLETTRAIN_GIT_BG=black
 BULLETTRAIN_DIR_EXTENDED=2
+BULLETTRAIN_KCTX_FG=black
 
 plugins=(
+ant
 brew
 brew-cask
 cabal
@@ -36,6 +40,7 @@ command-not-found
 common-aliases
 docker
 docker-compose
+dotenv
 gem
 git
 git-extras
@@ -139,6 +144,9 @@ alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
 
 alias t="top -ocpu -R -F -s 2 -n30"
+alias kc=kubectl
+alias ctx=kubectx
+alias ns=kubens
 
 export ANDROID_HOME=/usr/local/opt/android-sdk
 
@@ -150,7 +158,7 @@ export GO15VENDOREXPERIMENT=1
 export JMETER_HOME=/usr/local/opt/jmeter
 
 # Java setup
-export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8"
+export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
 
 function setjdk() {
   if [ $# -ne 0 ]; then
