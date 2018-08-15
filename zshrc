@@ -1,4 +1,6 @@
 # Path to your oh-my-zsh configuration.
+#zmodload zsh/zprof
+
 ZSH=$HOME/.oh-my-zsh
 
 ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
@@ -40,7 +42,6 @@ command-not-found
 common-aliases
 docker
 docker-compose
-dotenv
 gem
 git
 git-extras
@@ -53,7 +54,6 @@ last-working-dir
 mvn
 nmap
 npm
-nvm
 pip
 pj
 rsync
@@ -80,7 +80,7 @@ export SAVEHIST=100000
 
 #AMAZON EC2
 export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.7/libexec"
-export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.4.0/libexec"
+export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.5.1/libexec"
 
 export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
 
@@ -121,7 +121,7 @@ export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
 
 export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
 
-PATH=${HOME}/bin:$PATH
+PATH=${HOME}/sbin:$PATH
 
 bindkey -e
 bindkey "\e\e[D" backward-word # alt + <-
@@ -144,14 +144,13 @@ alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
 
 alias t="top -ocpu -R -F -s 2 -n30"
-alias kc=kubectl
-alias ctx=kubectx
+alias kl=kubectl
+alias kc=kubectx
 alias ns=kubens
 
 export ANDROID_HOME=/usr/local/opt/android-sdk
 
 export GOPATH="$HOME/golang"
-export GOROOT=/usr/local/opt/go/libexec
 export PATH=${GOPATH}/bin:${GOROOT}/bin:${PATH}
 export GO15VENDOREXPERIMENT=1
 
@@ -188,29 +187,18 @@ export HELPDIR=/usr/local/share/zsh/help
 
 #-------------------------------#
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-alias pyenv-start='eval "$(pyenv init -)"'
-
 #export WORKON_HOME="$HOME/VEnvs"
 #source /usr/local/bin/virtualenvwrapper.sh
 
-export NVM_DIR=~/.nvm
-source "/usr/local/opt/nvm/nvm.sh"
-
-source /usr/local/opt/chruby/share/chruby/chruby.sh
-source /usr/local/opt/chruby/share/chruby/auto.sh
-
-
 # The next line updates PATH for the Google Cloud SDK.
-[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
+#[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
 
 # The next line enables shell command completion for gcloud.
-[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
+#[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+#export SDKMAN_DIR="$HOME/.sdkman"
+#[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -221,4 +209,13 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 #if which -s kops    > /dev/null ; then source <(kops completion zsh 2>/dev/null); fi
 #if which -s kubectl > /dev/null ; then source <(kubectl completion zsh 2>/dev/null) ; fi
 
-eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
+source $HOME/.asdf/asdf.sh
+source $HOME/.asdf/completions/asdf.bash
+
+eval "$(direnv hook zsh)"
+
+#eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
+
+export PATH="$PATH:$HOME/istio-0.8.0/bin"
+
+#zprof
