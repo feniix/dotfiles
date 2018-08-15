@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-sudo discoveryutil mdnsflushcache;sudo discoveryutil udnsflushcaches;say flushed
