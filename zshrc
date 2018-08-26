@@ -34,9 +34,6 @@ BULLETTRAIN_KCTX_FG=black
 
 plugins=(
 ant
-brew
-brew-cask
-cabal
 colored-man
 command-not-found
 common-aliases
@@ -55,7 +52,6 @@ mvn
 nmap
 npm
 pip
-pj
 rsync
 rust
 ssh-agent
