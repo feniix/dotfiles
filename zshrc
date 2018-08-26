@@ -28,6 +28,7 @@ BULLETTRAIN_KCTX_FG=black
 
 setopt prompt_subst
 zplug caiogondim/bullet-train.zsh, use:bullet-train.zsh-theme, defer:3
+
 zplug plugins/ant, from:oh-my-zsh
 zplug plugins/colored-man, from:oh-my-zsh
 zplug plugins/command-not-found, from:oh-my-zsh
@@ -47,7 +48,6 @@ zplug plugins/mvn, from:oh-my-zsh
 zplug plugins/nmap, from:oh-my-zsh
 zplug plugins/npm, from:oh-my-zsh
 zplug plugins/pip, from:oh-my-zsh
-zplug plugins/pj, from:oh-my-zsh
 zplug plugins/rsync, from:oh-my-zsh
 zplug plugins/rust, from:oh-my-zsh
 zplug plugins/ssh-agent, from:oh-my-zsh
