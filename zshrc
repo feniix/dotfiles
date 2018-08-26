@@ -77,10 +77,6 @@ export EDITOR=vim
 export HISTSIZE=100000
 export SAVEHIST=100000
 
-bindkey -e
-bindkey "\e\e[D" backward-word # alt + <-
-bindkey "\e\e[C" forward-word # alt + ->
-
 #AMAZON EC2
 export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.7/libexec"
 export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.5.1/libexec"
