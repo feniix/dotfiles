@@ -151,7 +151,7 @@ alias ns=kubens
 export ANDROID_HOME=/usr/local/opt/android-sdk
 
 export GOPATH="$HOME/golang"
-export PATH=${GOPATH}/bin:${GOROOT}/bin:${PATH}
+export PATH=${GOPATH}/bin:${PATH}
 export GO15VENDOREXPERIMENT=1
 
 export JMETER_HOME=/usr/local/opt/jmeter
@@ -216,6 +216,6 @@ eval "$(direnv hook zsh)"
 
 #eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
 
-export PATH="$PATH:$HOME/istio-0.8.0/bin"
+export PATH="$PATH:$HOME/istio-1.0.0/bin"
 
 #zprof
