@@ -1,15 +1,8 @@
 # Path to your oh-my-zsh configuration.
 #zmodload zsh/zprof
 
-ZSH=$HOME/.oh-my-zsh
-
-ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
-
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-ZSH_THEME="bullet-train"
+export ZPLUG_HOME=/usr/local/opt/zplug
+source $ZPLUG_HOME/init.zsh
 
 BULLETTRAIN_PROMPT_ORDER=(
 status
@@ -32,51 +25,61 @@ BULLETTRAIN_GIT_BG=black
 BULLETTRAIN_DIR_EXTENDED=2
 BULLETTRAIN_KCTX_FG=black
 
-plugins=(
-ant
-brew
-brew-cask
-cabal
-colored-man
-command-not-found
-common-aliases
-docker
-docker-compose
-gem
-git
-git-extras
-gnu-utils
-gpg-agent
-gradle
-grails
-history-substring-search
-last-working-dir
-mvn
-nmap
-npm
-pip
-pj
-rsync
-rust
-ssh-agent
-sudo
-svn
-vagrant
-zsh_reload
-)
 
-source "$ZSH/oh-my-zsh.sh"
+setopt prompt_subst
+zplug caiogondim/bullet-train.zsh, use:bullet-train.zsh-theme, defer:3
+zplug plugins/ant, from:oh-my-zsh
+zplug plugins/colored-man, from:oh-my-zsh
+zplug plugins/command-not-found, from:oh-my-zsh
+zplug plugins/common-aliases, from:oh-my-zsh
+zplug plugins/docker, from:oh-my-zsh
+zplug plugins/docker-compose, from:oh-my-zsh
+zplug plugins/gem, from:oh-my-zsh
+zplug plugins/git, from:oh-my-zsh
+zplug plugins/git-extras, from:oh-my-zsh
+zplug plugins/gnu-utils, from:oh-my-zsh
+zplug plugins/gpg-agent, from:oh-my-zsh
+zplug plugins/gradle, from:oh-my-zsh
+zplug plugins/grails, from:oh-my-zsh
+zplug plugins/history-substring-search, from:oh-my-zsh
+zplug plugins/last-working-dir, from:oh-my-zsh
+zplug plugins/mvn, from:oh-my-zsh
+zplug plugins/nmap, from:oh-my-zsh
+zplug plugins/npm, from:oh-my-zsh
+zplug plugins/pip, from:oh-my-zsh
+zplug plugins/pj, from:oh-my-zsh
+zplug plugins/rsync, from:oh-my-zsh
+zplug plugins/rust, from:oh-my-zsh
+zplug plugins/ssh-agent, from:oh-my-zsh
+zplug plugins/sudo, from:oh-my-zsh
+zplug plugins/svn, from:oh-my-zsh
+zplug plugins/vagrant, from:oh-my-zsh
+zplug plugins/zsh_reload, from:oh-my-zsh
+
+zplug load
+
+zstyle :compinstall filename "$HOME/.zshrc"
+zstyle :omz:plugins:ssh-agent agent-forwarding on
+zstyle :omz:plugins:ssh-agent identities id_rsa
+
+autoload -Uz compinit
+compinit
+
+set -o monitor
 
 export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 
 # history settings
-setopt INC_APPEND_HISTORY
-setopt LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE
-setopt AUTO_REMOVE_SLASH
+HISTFILE=~/.zsh_history
+setopt INC_APPEND_HISTORY LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE AUTO_REMOVE_SLASH
 export EDITOR=vim
 export HISTSIZE=100000
 export SAVEHIST=100000
+
+bindkey -e
+bindkey "\e\e[D" backward-word # alt + <-
+bindkey "\e\e[C" forward-word # alt + ->
 
 #AMAZON EC2
 export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.7/libexec"
@@ -93,8 +96,6 @@ rm -rf ~/.freerdp/known_hosts
 #config for the ssh-agent plugin
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
-
-PROJECT_PATHS=(~/projects/src ~/projects/src/spantree)
 
 # this is for homebrew
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
