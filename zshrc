@@ -67,8 +67,8 @@ export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 
 # history settings
-setopt INC_APPEND_HISTORY
-setopt LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE
+HISTFILE=~/.zsh_history
+setopt INC_APPEND_HISTORY LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE
 setopt AUTO_REMOVE_SLASH
 export EDITOR=vim
 export HISTSIZE=100000
@@ -89,8 +89,6 @@ rm -rf ~/.freerdp/known_hosts
 #config for the ssh-agent plugin
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
-
-PROJECT_PATHS=(~/projects/src ~/projects/src/spantree)
 
 # this is for homebrew
 export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
