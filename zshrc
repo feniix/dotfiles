@@ -202,8 +202,8 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 #if which -s kops    > /dev/null ; then source <(kops completion zsh 2>/dev/null); fi
 #if which -s kubectl > /dev/null ; then source <(kubectl completion zsh 2>/dev/null) ; fi
 
-source $HOME/.asdf/asdf.sh
-source $HOME/.asdf/completions/asdf.bash
+source /usr/local/opt/asdf/asdf.sh
+source /usr/local/etc/bash_completion.d/asdf.bash
 
 eval "$(direnv hook zsh)"
 
