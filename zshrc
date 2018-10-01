@@ -48,6 +48,7 @@ gradle
 grails
 history-substring-search
 last-working-dir
+mix
 mvn
 nmap
 npm
@@ -178,36 +179,105 @@ unalias run-help
 autoload run-help
 export HELPDIR=/usr/local/share/zsh/help
 
+function home_bin() {
+  local home_bin=~/bin
+  if ! test "${PATH#*$home_bin:}" != "$PATH"; then
+    export PATH=~/bin:$PATH
+  fi
+}
+
+function get_hg_password() {
+  security find-generic-password -a otaegui -s healthgrades -w | pbcopy
+}
+
+function did_it_run() {
+  local env
+  local curr
+  local last_run
+
+  env=$1
+  curr=$(date '+%s')
+  last_run=0
+
+  if [ -f "/tmp/.$env.lastrun" ]; then
+    last_run=$(cat "/tmp/.$env.lastrun")
+  fi
+
+  local diff=$((curr - last_run))
+
+  if [ $diff -gt 43200 ]; then
+    echo -n "$curr" > "/tmp/.$env.lastrun"
+    return 1
+  fi
+  return 0
+}
+
+function hg() {
+  home_bin
+  case $1 in
+    dev|sandbox|infrastructure)
+      get_hg_password
+      export ENVIRONMENT=$1
+      if [[ "${AWS_PROFILE}" != "hrm-$1"  ]]; then
+        if ! did_it_run "hrm-$1"; then
+          adfs-aws --user sotaegui --profile "hrm-$1" -r ADFS-HRMTest-Administrator
+        fi
+        export AWS_PROFILE="hrm-$1"
+      fi
+      kubectl config use-context exp-$1
+      pbcopy <<<" "
+      ;;
+    uat)
+      get_hg_password
+      export ENVIRONMENT=$1
+      if [[ "${AWS_PROFILE}" != "hrm-$1"  ]]; then
+        if ! did_it_run "hrm-$1"; then
+          adfs-aws --user sotaegui --profile "hrm-$1" -r ADFS-ExPPreProd-Administrator
+        fi
+        export AWS_PROFILE="hrm-$1"
+      fi
+      kubectl config use-context exp-$1
+      pbcopy <<<" "
+      ;;
+    prod)
+      get_hg_password
+      export ENVIRONMENT=$1
+      if [[ "${AWS_PROFILE}" != "hrm-$1"  ]]; then
+        if ! did_it_run "hrm-$1"; then
+          adfs-aws --user sotaegui --profile "hrm-$1" -r ADFS-ExPProd-Administrator
+        fi
+        export AWS_PROFILE="hrm-$1"
+      fi
+      kubectl config use-context exp-$1
+      pbcopy <<<" "
+      ;;
+    unload)
+      unset ENVIRONMENT
+      unset AWS_PROFILE
+      ;;
+    *)
+      #if (( ${+AWS_PROFILE} )); then
+      #  echo "Current ENVIRONMENT=$ENVIRONMENT and AWS_PROFILE=$AWS_PROFILE"
+      #fi
+      #printf 'Use dev, sandbox, infrastructure, uat or prod. Use unload to logout\n'
+      ;;
+  esac
+}
+
 #-------------------------------#
-
-#export WORKON_HOME="$HOME/VEnvs"
-#source /usr/local/bin/virtualenvwrapper.sh
-
-# The next line updates PATH for the Google Cloud SDK.
-#[[ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]] && source "$HOME/google-cloud-sdk/path.zsh.inc"
-
-# The next line enables shell command completion for gcloud.
-#[[ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]] && source "$HOME/google-cloud-sdk/completion.zsh.inc"
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-#export SDKMAN_DIR="$HOME/.sdkman"
-#[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-# kubectl completion
-#if which -s kops    > /dev/null ; then source <(kops completion zsh 2>/dev/null); fi
-#if which -s kubectl > /dev/null ; then source <(kubectl completion zsh 2>/dev/null) ; fi
-
 source /usr/local/opt/asdf/asdf.sh
 source /usr/local/etc/bash_completion.d/asdf.bash
 
-eval "$(direnv hook zsh)"
+source ~/sbin/kubectl-completion
+source ~/sbin/kops-completion
 
-#eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib)"
+eval "$(direnv hook zsh)"
 
 export PATH="$PATH:$HOME/istio-1.0.0/bin"
 
