@@ -194,8 +194,10 @@ function did_it_run() {
   local env
   local curr
   local last_run
+  local session_timeout
 
   env=$1
+  session_timeout=${2:-43200}
   curr=$(date '+%s')
   last_run=0
 
@@ -205,7 +207,7 @@ function did_it_run() {
 
   local diff=$((curr - last_run))
 
-  if [ $diff -gt 43200 ]; then
+  if [ $diff -gt $session_timeout ]; then
     echo -n "$curr" > "/tmp/.$env.lastrun"
     return 1
   fi
@@ -251,15 +253,24 @@ function hg() {
       kubectl config use-context exp-$1
       pbcopy <<<" "
       ;;
-    unload)
+    md)
+      get_hg_password
+      export ENVIRONMENT=$1
+      if [[ "${AWS_PROFILE}" != "hrm-$1"  ]]; then
+        if ! did_it_run "hrm-$1"; then
+          adfs-aws --user sotaegui --profile "hrm-$1" -r ADFS-MD-Administrator
+        fi
+        export AWS_PROFILE="hrm-$1"
+      fi
+      pbcopy <<<" "
+      ;;
+    logout)
+      rm -f /tmp/.hrm-$ENVIRONMENT.lastrun
       unset ENVIRONMENT
       unset AWS_PROFILE
       ;;
     *)
-      #if (( ${+AWS_PROFILE} )); then
-      #  echo "Current ENVIRONMENT=$ENVIRONMENT and AWS_PROFILE=$AWS_PROFILE"
-      #fi
-      #printf 'Use dev, sandbox, infrastructure, uat or prod. Use unload to logout\n'
+      # TODO print error messages etc
       ;;
   esac
 }
@@ -278,6 +289,9 @@ source ~/sbin/kubectl-completion
 source ~/sbin/kops-completion
 
 eval "$(direnv hook zsh)"
+
+export MONO_GAC_PREFIX=/usr/local
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 
 export PATH="$PATH:$HOME/istio-1.0.0/bin"
 
