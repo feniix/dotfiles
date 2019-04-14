@@ -78,3 +78,5 @@
   trustExitCode = true
 [commit]
   template = ~/.stCommitMsg
+[diff "sopsdiffer"]
+	textconv = sops -d
