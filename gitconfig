@@ -80,3 +80,5 @@
   template = ~/.stCommitMsg
 [diff "sopsdiffer"]
 	textconv = sops -d
+[url "git@github.com:"]
+	insteadOf = https://github.com/

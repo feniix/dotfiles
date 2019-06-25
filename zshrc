@@ -168,7 +168,7 @@ function setjdk() {
 function removeFromPath() {
   export PATH=$(echo "$PATH" | sed -E -e "s;:$1;;" -e "s;$1:?;;")
 }
-setjdk 1.8
+setjdk 11
 
 [[ -f "/usr/local/share/zsh/site-functions/_aws" ]] && source "/usr/local/share/zsh/site-functions/_aws"
 
@@ -181,8 +181,13 @@ export HELPDIR=/usr/local/share/zsh/help
 
 #-------------------------------#
 
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
+#export LC_ALL=en_US.UTF-8
+#export LC_NUMERIC=en_US.UTF-8
+#export LC_TIME=en_US.UTF-8
+#export LC_COLLATE=en_US.UTF-8
+#export LC_MONETARY=en_US.UTF-8
+#export LC_MESSAGES=en_US.UTF-8
+#export LANG=en_US.UTF-8
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
