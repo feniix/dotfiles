@@ -215,6 +215,7 @@ export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
 export PATH="/usr/local/opt/php@7.2/bin:$PATH"
 export PATH="/usr/local/opt/php@7.2/sbin:$PATH"
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
 
 # this is needed to load the AWS credentials in some go apps that use the aws
 # sdk
