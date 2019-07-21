@@ -181,13 +181,20 @@ export HELPDIR=/usr/local/share/zsh/help
 
 #-------------------------------#
 
-#export LC_ALL=en_US.UTF-8
-#export LC_NUMERIC=en_US.UTF-8
-#export LC_TIME=en_US.UTF-8
-#export LC_COLLATE=en_US.UTF-8
-#export LC_MONETARY=en_US.UTF-8
-#export LC_MESSAGES=en_US.UTF-8
-#export LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_CTYPE=UTF-8
+export LC_NUMERIC="en_US.UTF-8"
+export LC_TIME="en_US.UTF-8"
+export LC_COLLATE="en_US.UTF-8"
+export LC_MONETARY="en_US.UTF-8"
+export LC_MESSAGES="en_US.UTF-8"
+export LC_PAPER="en_US.UTF-8"
+export LC_NAME="en_US.UTF-8"
+export LC_ADDRESS="en_US.UTF-8"
+export LC_TELEPHONE="en_US.UTF-8"
+export LC_MEASUREMENT="en_US.UTF-8"
+export LC_IDENTIFICATION="en_US.UTF-8"
+export LC_ALL=
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
@@ -225,6 +232,8 @@ export KUBECONFIG=$HOME/.kube/config:$HOME/.kube/spantree.cfg
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+export PATH=$HOME/.linkerd2/bin:$PATH
 
 # The next line updates PATH for the Google Cloud SDK.
 if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
