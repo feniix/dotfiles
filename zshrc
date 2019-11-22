@@ -219,8 +219,8 @@ export MONO_GAC_PREFIX=/usr/local
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 
 export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
-export PATH="/usr/local/opt/php@7.2/bin:$PATH"
-export PATH="/usr/local/opt/php@7.2/sbin:$PATH"
+#export PATH="/usr/local/opt/php@7.2/bin:$PATH"
+#export PATH="/usr/local/opt/php@7.2/sbin:$PATH"
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
 export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
 
@@ -234,6 +234,7 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH=$HOME/.linkerd2/bin:$PATH
+export PATH="/usr/local/opt/node@12/bin:$PATH"
 
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
