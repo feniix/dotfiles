@@ -207,7 +207,6 @@ asdf_load() {
   source /usr/local/opt/asdf/asdf.sh
   source /usr/local/etc/bash_completion.d/asdf.bash
 }
-
 asdf_load
 
 source ~/sbin/kubectl-completion
@@ -219,10 +218,15 @@ export MONO_GAC_PREFIX=/usr/local
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 
 export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
-#export PATH="/usr/local/opt/php@7.2/bin:$PATH"
-#export PATH="/usr/local/opt/php@7.2/sbin:$PATH"
+export PATH="/usr/local/opt/php@7.3/bin:$PATH"
+export PATH="/usr/local/opt/php@7.3/sbin:$PATH"
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
 export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
+
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
+export PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig"
 
 # this is needed to load the AWS credentials in some go apps that use the aws
 # sdk
@@ -239,9 +243,13 @@ export PATH="/usr/local/opt/node@12/bin:$PATH"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f "$HOME/google-cloud-sdk/path.zsh.inc" ]; then . "$HOME/google-cloud-sdk/path.zsh.inc"; fi
+if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc ]; then
+  source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
+fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f "$HOME/google-cloud-sdk/completion.zsh.inc" ]; then . "$HOME/google-cloud-sdk/completion.zsh.inc"; fi
+if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
+  source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+fi
 
 #zprof
