@@ -64,6 +64,25 @@ zsh_reload
 
 source "$ZSH/oh-my-zsh.sh"
 
+complete () {
+	emulate -L zsh
+	local args void cmd print remove
+	args=("$@")
+	zparseopts -D -a void o: A: G: W: C: F: P: S: X: a b c d e f g j k u v p=print r=remove
+	if [[ -n $print ]]
+	then
+		printf 'complete %2$s %1$s\n' "${(@kv)_comps[(R)_bash*]#* }"
+	elif [[ -n $remove ]]
+	then
+		for cmd
+		do
+			unset "_comps[$cmd]"
+		done
+	else
+		compdef _bash_complete\ ${(j. .)${(q)args[1,-1-$#]}} "$@"
+	fi
+}
+
 export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 
@@ -82,7 +101,7 @@ export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
 
 export MAVEN_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
 
-export GRADLE_OPTS="-Xmx2024m -Xms2024m -XX:MaxPermSize=256m"
+export GRADLE_OPTS="-Xmx2024m -Xms2024m "
 
 rm -rf ~/.freerdp/known_hosts
 
@@ -170,7 +189,8 @@ function removeFromPath() {
 }
 setjdk 11
 
-[[ -f "/usr/local/share/zsh/site-functions/_aws" ]] && source "/usr/local/share/zsh/site-functions/_aws"
+[[ -f "/usr/local/bin/aws_completer" ]] && complete -C '/usr/local/bin/aws_completer' aws
+export AWS_PAGER=""
 
 alias gist='gist -p'
 
@@ -209,8 +229,10 @@ asdf_load() {
 }
 asdf_load
 
-source ~/sbin/kubectl-completion
-source ~/sbin/kops-completion
+source <(kubectl completion zsh)
+source <(kops completion zsh)
+#source ~/sbin/kubectl-completion
+#source ~/sbin/kops-completion
 
 eval "$(direnv hook zsh)"
 
@@ -218,8 +240,8 @@ export MONO_GAC_PREFIX=/usr/local
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 
 export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
-export PATH="/usr/local/opt/php@7.3/bin:$PATH"
-export PATH="/usr/local/opt/php@7.3/sbin:$PATH"
+#export PATH="/usr/local/opt/php@7.3/bin:$PATH"
+#export PATH="/usr/local/opt/php@7.3/sbin:$PATH"
 export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
 export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
 
@@ -251,5 +273,7 @@ fi
 if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
   source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
 fi
+
+export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
 
 #zprof
