@@ -62,7 +62,6 @@
   show = diff-so-fancy | less
   diff = diff-so-fancy | less
 [interactive]
-  diffFilter = diff-highlight
   added = green
   changed = yellow
   untracked = cyan reverse
@@ -71,19 +70,22 @@
 [http "https://gopkg.in"]
   followRedirects = true
 [difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+  cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+  path = 
 [mergetool "sourcetree"]
-	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-	trustExitCode = true
+  cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+  trustExitCode = true
 [commit]
   template = ~/.stCommitMsg
+  gpgsign = true
 [diff "sopsdiffer"]
-	textconv = sops -d
+  textconv = sops -d
 [url "git@github.com:"]
-	insteadOf = https://github.com/
+  insteadOf = https://github.com/
 [filter "lfs"]
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
+  required = true
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+[pull]
+  rebase = false
