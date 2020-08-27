@@ -254,13 +254,14 @@ export PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig"
 # sdk
 export AWS_SDK_LOAD_CONFIG=1
 
-export KUBECONFIG=$HOME/.kube/config:$HOME/.kube/spantree.cfg
+export KUBECONFIG=$HOME/.kube/config
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH=$HOME/.linkerd2/bin:$PATH
 export PATH="/usr/local/opt/node@12/bin:$PATH"
+export PATH="/usr/local/opt/python/libexec/bin:$PATH"
 
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
@@ -277,3 +278,25 @@ fi
 export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
 
 #zprof
+
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+#__conda_setup="$('/usr/local/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+#if [ $? -eq 0 ]; then
+#    eval "$__conda_setup"
+#else
+#    if [ -f "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
+#        . "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh"
+#    else
+#        export PATH="/usr/local/Caskroom/miniconda/base/bin:$PATH"
+#    fi
+#fi
+#unset __conda_setup
+# <<< conda initialize <<<
+
+
+###_begin_ttt_install_block_###
+export PATH=/Users/otaegui/.ttt_home:$PATH
+###_end_ttt_install_block_###
+
