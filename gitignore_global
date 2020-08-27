@@ -89,7 +89,6 @@ com_crashlytics_export_strings.xml
 #### Jetbrains ####
 
 #### Xcode ####
-build/
 *.pbxuser
 !default.pbxuser
 *.mode1v3
