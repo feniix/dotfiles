@@ -163,9 +163,7 @@ alias ns=kubens
 
 export ANDROID_HOME=/usr/local/opt/android-sdk
 
-export GOPATH="$HOME/golang"
-export PATH=${GOPATH}/bin:${PATH}
-export GO15VENDOREXPERIMENT=1
+export PATH=~/go/bin:${PATH}
 
 export JMETER_HOME=/usr/local/opt/jmeter
 

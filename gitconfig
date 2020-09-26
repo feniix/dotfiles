@@ -80,8 +80,6 @@
   gpgsign = true
 [diff "sopsdiffer"]
   textconv = sops -d
-[url "git@github.com:"]
-  insteadOf = https://github.com/
 [filter "lfs"]
   required = true
   clean = git-lfs clean -- %f
@@ -89,3 +87,10 @@
   process = git-lfs filter-process
 [pull]
   rebase = false
+[url "ssh://git@github.com/tempuslabs/"]
+  insteadOf = https://github.com/tempuslabs/
+[url "git@github.com:feniix/"]
+  insteadOf = https://github.com/feniix/
+[url "git@github.com:spantree/"]
+  insteadOf = https://github.com/spantree/
+
