@@ -293,6 +293,15 @@ export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
 #unset __conda_setup
 # <<< conda initialize <<<
 
+function list() {
+  case $1 in
+    projects)
+      gcloud projects list --format 'table(name:sort=1,projectId,parent.id:label=Parent)'
+      ;;
+    *)
+      ;;
+  esac
+}
 
 ###_begin_ttt_install_block_###
 export PATH=/Users/otaegui/.ttt_home:$PATH
