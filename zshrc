@@ -259,8 +259,7 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH=$HOME/.linkerd2/bin:$PATH
 export PATH="/usr/local/opt/node@12/bin:$PATH"
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-
+export PATH="/usr/local/opt/python@3.8/bin:$PATH"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # The next line updates PATH for the Google Cloud SDK.
