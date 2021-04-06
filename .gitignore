@@ -1,0 +1,6 @@
+sbin/autoform
+sbin/gke-bastion-proxy
+sbin/hg-stuff
+sbin/lokoctl
+sbin/okta-personal-token
+sbin/ttt
