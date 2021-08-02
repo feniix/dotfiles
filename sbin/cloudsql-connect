@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+which cloud_sql_proxy &>/dev/null || {
+  cat <<EOF >&2
+Requires cloud_sql_proxy:
+https://cloud.google.com/sql/docs/mysql/quickstart-proxy-test
+EOF
+  exit 1
+}
+which jq &>/dev/null || {
+  echo "Requires jq: brew install jq" >&2
+  exit 1
+}
+shutdown_proxy() {
+  if [[ -n "${CLOUD_SQL_PID:-}" ]]; then
+    kill "$CLOUD_SQL_PID"
+  fi
+}
+trap shutdown_proxy EXIT
+binding_type() {
+  local ns="$1"
+  local sb="$2"
+  kubectl get secretbinding -n "$ns" "$sb" -o json | jq -r .spec.type
+}
+secret_data() {
+  local ns="$1"
+  local sb="$2"
+  kubectl get secret -n "$ns" "$sb" -o json | jq '.data | map_values(@base64d)'
+}
+kv() {
+  local data="$1"
+  local key="$2"
+  echo "$data" | jq -r ".${key}"
+}
+random_port() {
+  shuf -i 30000-40000 -n 1
+}
+wait_for_port() {
+  local port="$1"
+  while ! nc -z 127.0.0.1 "$port"; do
+    sleep 0.5
+  done
+}
+csqlproxy() {
+  local secret="$1"
+  local port="$2"
+  local project="$(kv "$secret" CLOUDSQL_PROJECT_ID)"
+  local region="$(kv "$secret" CLOUDSQL_REGION)"
+  local instance="$(kv "$secret" CLOUDSQL_INSTANCE_NAME)"
+  cloud_sql_proxy -ip_address_types=PRIVATE \
+    -instances="${project}:${region}:${instance}=tcp:127.0.0.1:${port}" &
+}
+mysql_connect() {
+  local secret="$1"
+  local port="$2"
+  mysql --protocol=TCP \
+    --host=127.0.0.1 \
+    --port="$port" \
+    --user="$(kv "$secret" MYSQL_USER)" \
+    --password="$(kv "$secret" MYSQL_PWD)" \
+    "$(kv "$secret" MYSQL_DATABASE)"
+}
+postgresql_connect() {
+  local secret="$1"
+  local port="$2"
+  env PGPASSWORD="$(kv "$secret" PGPASSWORD)" \
+    psql --host=127.0.0.1 \
+      --port="$port" \
+      --user="$(kv "$secret" PGUSER)" \
+      "$(kv "$secret" PGDATABASE)"
+}
+usage() {
+  cat <<EOF >&2
+Usage: $0 [NAMESPACE] [SECRET]
+  NAMESPACE: Kubernetes Namespace with the CloudSQL SecretBinding
+  SECRET:    Kubernetes Secret with the CloudSQL connection details
+Example: $0 gke-example-system db
+  Connect to the CloudSQL database specified in the gke-example-system/db SecretBinding.
+EOF
+}
+main() {
+  local ns="$1"
+  local sb="$2"
+  local type secret
+  binding_type="$(binding_type "$1" "$2")"
+  secret="$(secret_data "$1" "$2")"
+  local port="$(random_port)"
+  csqlproxy "$secret" "$port"
+  CLOUD_SQL_PID="$!"
+  wait_for_port "$port"
+  case "$binding_type" in
+  cloudsqlMysql) mysql_connect "$secret" "$port";;
+  cloudsqlPostgresql) postgresql_connect "$secret" "$port";;
+  *) echo "Unsupported binding type: $binding_type" >&2;
+     exit 1;;
+  esac
+}
+if [[ $# -ne 2 ]]; then
+  usage
+  exit 1
+fi
+main "$@"

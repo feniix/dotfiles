@@ -60,7 +60,10 @@ sudo
 svn
 vagrant
 zsh_reload
+zsh-completions
 )
+
+autoload -U compinit && compinit
 
 source "$ZSH/oh-my-zsh.sh"
 
@@ -128,6 +131,10 @@ export MANPATH="/usr/local/opt/gawk/share/man:${MANPATH}"
 export PATH="/usr/local/opt/less/bin:${PATH}"
 export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
 
+# for grep
+export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+export MANPATH="/usr/local/opt/grep/libexec/gnuman:${MANPATH}"
+
 # for gnu-sed
 #export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
 #export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
@@ -157,9 +164,7 @@ alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
 alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
 
 alias t="top -ocpu -R -F -s 2 -n30"
-alias kl=kubectl
-alias kc=kubectx
-alias ns=kubens
+alias k=kubectl
 
 export ANDROID_HOME=/usr/local/opt/android-sdk
 
@@ -227,8 +232,8 @@ asdf_load() {
 }
 asdf_load
 
-source <(kubectl completion zsh)
-source <(kops completion zsh)
+#source <(kubectl completion zsh)
+#source <(kops completion zsh)
 #source ~/sbin/kubectl-completion
 #source ~/sbin/kops-completion
 
@@ -259,7 +264,7 @@ zstyle ':completion:*' cache-path ~/.zsh/cache
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH=$HOME/.linkerd2/bin:$PATH
 export PATH="/usr/local/opt/node@12/bin:$PATH"
-export PATH="/usr/local/opt/python@3.8/bin:$PATH"
+export PATH="/usr/local/opt/python@3.9/bin:$PATH"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # The next line updates PATH for the Google Cloud SDK.
@@ -306,3 +311,7 @@ function list() {
 export PATH=/Users/otaegui/.ttt_home:$PATH
 ###_end_ttt_install_block_###
 
+# Created by `pipx` on 2021-04-29 02:19:17
+export PATH="$PATH:/Users/otaegui/.local/bin"
+
+export PATH="$PATH:/Users/otaegui/bin"

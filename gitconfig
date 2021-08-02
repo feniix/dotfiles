@@ -94,3 +94,5 @@
 [url "git@github.com:spantree/"]
   insteadOf = https://github.com/spantree/
 
+[init]
+	defaultBranch = main

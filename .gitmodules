@@ -4,3 +4,6 @@
 [submodule "vimdir"]
 	path = vimdir
 	url = https://github.com/feniix/vimdir.git
+[submodule "zsh_custom/plugins/zsh-completions"]
+	path = zsh_custom/plugins/zsh-completions
+	url = https://github.com/zsh-users/zsh-completions
