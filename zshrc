@@ -32,6 +32,44 @@ BULLETTRAIN_GIT_BG=black
 BULLETTRAIN_DIR_EXTENDED=2
 BULLETTRAIN_KCTX_FG=black
 
+# this is for homebrew
+export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
+
+export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
+export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
+export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
+export PATH="/usr/local/opt/node@12/bin:$PATH"
+export PATH="/usr/local/opt/python@3.9/bin:$PATH"
+export PATH="/usr/local/opt/gnupg@2.2/bin:$PATH"
+
+# for coreutils
+#export PATH="/usr/local/opt/coreutils/libexec/gnubin:${PATH}"
+#export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}"
+
+# for findutils
+export PATH="/usr/local/opt/findutils/bin:${PATH}"
+export MANPATH="/usr/local/opt/findutils/share/man:${MANPATH}"
+
+# for gawk
+export PATH="/usr/local/opt/gawk/bin:${PATH}"
+export MANPATH="/usr/local/opt/gawk/share/man:${MANPATH}"
+
+# for less
+export PATH="/usr/local/opt/less/bin:${PATH}"
+export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
+
+# for grep
+export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
+export MANPATH="/usr/local/opt/grep/libexec/gnuman:${MANPATH}"
+
+# for gnu-sed
+#export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
+#export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
+
+export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
+
+export PATH=${HOME}/sbin:$PATH
+
 plugins=(
 ant
 colored-man-pages
@@ -59,7 +97,6 @@ ssh-agent
 sudo
 svn
 vagrant
-zsh_reload
 zsh-completions
 )
 
@@ -92,7 +129,7 @@ export DEBEMAIL="feniix@gmail.com"
 # history settings
 HISTFILE=~/.zsh_history
 setopt INC_APPEND_HISTORY LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE AUTO_REMOVE_SLASH
-export EDITOR=vim
+export EDITOR=nvim
 export HISTSIZE=100000
 export SAVEHIST=100000
 
@@ -112,36 +149,6 @@ rm -rf ~/.freerdp/known_hosts
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
 
-# this is for homebrew
-export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
-
-# for coreutils
-#export PATH="/usr/local/opt/coreutils/libexec/gnubin:${PATH}"
-#export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}"
-
-# for findutils
-export PATH="/usr/local/opt/findutils/bin:${PATH}"
-export MANPATH="/usr/local/opt/findutils/share/man:${MANPATH}"
-
-# for gawk
-export PATH="/usr/local/opt/gawk/bin:${PATH}"
-export MANPATH="/usr/local/opt/gawk/share/man:${MANPATH}"
-
-# for less
-export PATH="/usr/local/opt/less/bin:${PATH}"
-export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
-
-# for grep
-export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
-export MANPATH="/usr/local/opt/grep/libexec/gnuman:${MANPATH}"
-
-# for gnu-sed
-#export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
-#export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
-
-export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
-
-PATH=${HOME}/sbin:$PATH
 
 bindkey -e
 bindkey "\e\e[D" backward-word # alt + <-
@@ -157,7 +164,8 @@ export PACKER_CACHE_DIR=${HOME}/.packer
 #alias unix2dos="todos -u"
 alias mtr="mtr --curses"
 
-alias vi=vim
+alias vim=nvim
+alias vi=nvim
 
 # copy / move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
@@ -242,11 +250,6 @@ eval "$(direnv hook zsh)"
 export MONO_GAC_PREFIX=/usr/local
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 
-export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
-#export PATH="/usr/local/opt/php@7.3/bin:$PATH"
-#export PATH="/usr/local/opt/php@7.3/sbin:$PATH"
-export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
-export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
 
 export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
@@ -261,10 +264,9 @@ export KUBECONFIG=$HOME/.kube/config
 zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path ~/.zsh/cache
 
+
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export PATH=$HOME/.linkerd2/bin:$PATH
-export PATH="/usr/local/opt/node@12/bin:$PATH"
-export PATH="/usr/local/opt/python@3.9/bin:$PATH"
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # The next line updates PATH for the Google Cloud SDK.
@@ -307,6 +309,15 @@ function list() {
   esac
 }
 
+function rm_local_branches() {
+  if [ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ]; then
+    echo "deleting local branches that do not have a remote"
+    git fetch --all -p; git branch -vv | grep ": gone]" | awk '{ print $1 }' | xargs -r -n 1 git branch -D
+  else
+    echo "not a git repo"
+  fi
+}
+
 ###_begin_ttt_install_block_###
 export PATH=/Users/otaegui/.ttt_home:$PATH
 ###_end_ttt_install_block_###
@@ -315,3 +326,5 @@ export PATH=/Users/otaegui/.ttt_home:$PATH
 export PATH="$PATH:/Users/otaegui/.local/bin"
 
 export PATH="$PATH:/Users/otaegui/bin"
+export PATH="/usr/local/opt/ssh-copy-id/bin:$PATH"
+export KICS_QUERIES_PATH=/usr/local/opt/kics/share/kics/assets/queries

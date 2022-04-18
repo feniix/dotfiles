@@ -79,7 +79,7 @@
   template = ~/.stCommitMsg
   gpgsign = true
 [diff "sopsdiffer"]
-  textconv = sops -d
+	textconv = sops -d
 [filter "lfs"]
   required = true
   clean = git-lfs clean -- %f
