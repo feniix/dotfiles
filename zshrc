@@ -33,40 +33,40 @@ BULLETTRAIN_DIR_EXTENDED=2
 BULLETTRAIN_KCTX_FG=black
 
 # this is for homebrew
-export PATH=/usr/local/bin:/usr/local/sbin:${PATH}
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
 
-export PATH="/usr/local/opt/curl-openssl/bin:$PATH"
-export PATH="/usr/local/opt/make/libexec/gnubin:$PATH"
-export PATH="/usr/local/opt/gnu-getopt/bin:$PATH"
-export PATH="/usr/local/opt/node@12/bin:$PATH"
-export PATH="/usr/local/opt/python@3.9/bin:$PATH"
-export PATH="/usr/local/opt/gnupg@2.2/bin:$PATH"
+export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+export PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
+export PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH"
+export PATH="/opt/homebrew/opt/python@3.9/bin:$PATH"
+export PATH="/opt/homebrew/opt/gnupg@2.2/bin:$PATH"
+export PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
 
-# for coreutils
-#export PATH="/usr/local/opt/coreutils/libexec/gnubin:${PATH}"
-#export MANPATH="/usr/local/opt/coreutils/libexec/gnuman:${MANPATH}"
+#for coreutils
+#export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:${PATH}"
+#export MANPATH="/opt/homebrew/opt/coreutils/libexec/gnuman:${MANPATH}"
 
 # for findutils
-export PATH="/usr/local/opt/findutils/bin:${PATH}"
-export MANPATH="/usr/local/opt/findutils/share/man:${MANPATH}"
+export PATH="/opt/homebrew/opt/findutils/bin:${PATH}"
+export MANPATH="/opt/homebrew/opt/findutils/share/man:${MANPATH}"
 
 # for gawk
-export PATH="/usr/local/opt/gawk/bin:${PATH}"
-export MANPATH="/usr/local/opt/gawk/share/man:${MANPATH}"
+export PATH="/opt/homebrew/opt/gawk/bin:${PATH}"
+export MANPATH="/opt/homebrew/opt/gawk/share/man:${MANPATH}"
 
 # for less
-export PATH="/usr/local/opt/less/bin:${PATH}"
-export MANPATH="/usr/local/opt/less/share/man:${MANPATH}"
+export PATH="/opt/homebrew/opt/less/bin:${PATH}"
+export MANPATH="/opt/homebrew/opt/less/share/man:${MANPATH}"
 
 # for grep
-export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
-export MANPATH="/usr/local/opt/grep/libexec/gnuman:${MANPATH}"
+export PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
+export MANPATH="/opt/homebrew/opt/grep/libexec/gnuman:${MANPATH}"
 
 # for gnu-sed
-#export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:${PATH}"
-#export MANPATH="/usr/local/opt/gnu-sed/libexec/gnuman:${MANPATH}"
+#export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:${PATH}"
+#export MANPATH="/opt/homebrew/opt/gnu-sed/libexec/gnuman:${MANPATH}"
 
-export MANPATH="/usr/local/opt/erlang/lib/erlang/man:${MANPATH}"
+export MANPATH="/opt/homebrew/opt/erlang/lib/erlang/man:${MANPATH}"
 
 export PATH=${HOME}/sbin:$PATH
 
@@ -100,9 +100,14 @@ vagrant
 zsh-completions
 )
 
-autoload -U compinit && compinit
-
 source "$ZSH/oh-my-zsh.sh"
+
+if type brew &>/dev/null; then
+  FPATH=/opt/homebrew/completions/zsh:/opt/homebrew/share/zsh-completions:$FPATH
+
+  autoload -Uz compinit && compinit
+fi
+
 
 complete () {
 	emulate -L zsh
@@ -132,10 +137,6 @@ setopt INC_APPEND_HISTORY LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_RE
 export EDITOR=nvim
 export HISTSIZE=100000
 export SAVEHIST=100000
-
-#AMAZON EC2
-export EC2_AMITOOL_HOME="/usr/local/Cellar/ec2-ami-tools/1.5.7/libexec"
-export EC2_HOME="/usr/local/Cellar/ec2-api-tools/1.7.5.1/libexec"
 
 export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
 
@@ -174,8 +175,6 @@ alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-se
 alias t="top -ocpu -R -F -s 2 -n30"
 alias k=kubectl
 
-export ANDROID_HOME=/usr/local/opt/android-sdk
-
 export PATH=~/go/bin:${PATH}
 
 export JMETER_HOME=/usr/local/opt/jmeter
@@ -200,7 +199,6 @@ function removeFromPath() {
 }
 setjdk 11
 
-[[ -f "/usr/local/bin/aws_completer" ]] && complete -C '/usr/local/bin/aws_completer' aws
 export AWS_PAGER=""
 
 alias gist='gist -p'
@@ -208,7 +206,7 @@ alias gist='gist -p'
 export VAGRANT_DEFAULT_PROVIDER=virtualbox
 unalias run-help
 autoload run-help
-export HELPDIR=/usr/local/share/zsh/help
+export HELPDIR=/opt/homebrew/share/zsh/help
 
 #-------------------------------#
 
@@ -231,12 +229,12 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 
 asdf_unload() {
   removeFromPath /Users/otaegui/.asdf/shims
-  removeFromPath /usr/local/opt/asdf/bin
+  removeFromPath /opt/homebrew/opt/asdf/libexec
 }
 
 asdf_load() {
-  source /usr/local/opt/asdf/asdf.sh
-  source /usr/local/etc/bash_completion.d/asdf.bash
+  source /opt/homebrew/opt/asdf/libexec/asdf.sh
+  source /opt/homebrew/opt/asdf/etc/bash_completion.d/asdf.bash
 }
 asdf_load
 
@@ -245,16 +243,16 @@ asdf_load
 #source ~/sbin/kubectl-completion
 #source ~/sbin/kops-completion
 
+
 eval "$(direnv hook zsh)"
 
-export MONO_GAC_PREFIX=/usr/local
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 
 
-export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/usr/local/opt/openssl@1.1/include"
-export PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig"
+export PATH="/opt/homebrew/opt/openssl@1.1/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@1.1/lib/pkgconfig"
 
 # this is needed to load the AWS credentials in some go apps that use the aws
 # sdk
@@ -270,34 +268,18 @@ export PATH=$HOME/.linkerd2/bin:$PATH
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc ]; then
-  source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
+if [ -f /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc ]; then
+  source /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
 fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
-  source /usr/local/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+if [ -f /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
+  source /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
 fi
 
-export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr/local/opt/openssl@1.1"
+export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
 
 #zprof
-
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-#__conda_setup="$('/usr/local/Caskroom/miniconda/base/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-#if [ $? -eq 0 ]; then
-#    eval "$__conda_setup"
-#else
-#    if [ -f "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh" ]; then
-#        . "/usr/local/Caskroom/miniconda/base/etc/profile.d/conda.sh"
-#    else
-#        export PATH="/usr/local/Caskroom/miniconda/base/bin:$PATH"
-#    fi
-#fi
-#unset __conda_setup
-# <<< conda initialize <<<
 
 function list() {
   case $1 in
@@ -323,8 +305,11 @@ export PATH=/Users/otaegui/.ttt_home:$PATH
 ###_end_ttt_install_block_###
 
 # Created by `pipx` on 2021-04-29 02:19:17
-export PATH="$PATH:/Users/otaegui/.local/bin"
+export PATH="$PATH:/Users/feniix/.local/bin"
 
-export PATH="$PATH:/Users/otaegui/bin"
-export PATH="/usr/local/opt/ssh-copy-id/bin:$PATH"
-export KICS_QUERIES_PATH=/usr/local/opt/kics/share/kics/assets/queries
+export PATH="$PATH:/Users/feniix/bin"
+export PATH="/opt/homebrew/opt/ssh-copy-id/bin:$PATH"
+export KICS_QUERIES_PATH=/opt/homebrew/opt/kics/share/kics/assets/queries
+export PATH="$PATH:~/Library/Application Support/JetBrains/Toolbox/scripts"
+
+
