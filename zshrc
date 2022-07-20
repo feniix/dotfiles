@@ -1,9 +1,9 @@
 # Path to your oh-my-zsh configuration.
 #zmodload zsh/zprof
 
-ZSH=$HOME/.oh-my-zsh
+export ZSH=$HOME/.oh-my-zsh
 
-ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
+export ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
