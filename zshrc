@@ -309,7 +309,8 @@ export PATH="$PATH:/Users/feniix/.local/bin"
 
 export PATH="$PATH:/Users/feniix/bin"
 export PATH="/opt/homebrew/opt/ssh-copy-id/bin:$PATH"
-export KICS_QUERIES_PATH=/opt/homebrew/opt/kics/share/kics/assets/queries
+export PATH="/usr/local/bin:$PATH"
+export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
 export PATH="$PATH:~/Library/Application Support/JetBrains/Toolbox/scripts"
-
+export TFENV_ARCH=amd64
 
