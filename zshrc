@@ -19,7 +19,6 @@ dir
 kctx
 aws
 git
-hg
 cmd_exec_time
 )
 
@@ -31,6 +30,15 @@ BULLETTRAIN_GIT_FG=white
 BULLETTRAIN_GIT_BG=black
 BULLETTRAIN_DIR_EXTENDED=2
 BULLETTRAIN_KCTX_FG=black
+
+
+if [ -f /opt/homebrew/etc/brew-wrap ]; then
+  source /opt/homebrew/etc/brew-wrap
+fi
+
+export HOMEBREW_BREWFILE=~/dotfiles/Brewfile
+export HOMEBREW_BREWFILE_BACKUP=~/dotfiles/Brewfile.bak
+export HOMEBREW_BREWFILE_APPSTORE=1
 
 # this is for homebrew
 export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
@@ -312,5 +320,6 @@ export PATH="/opt/homebrew/opt/ssh-copy-id/bin:$PATH"
 export PATH="/usr/local/bin:$PATH"
 export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
 export PATH="$PATH:~/Library/Application Support/JetBrains/Toolbox/scripts"
+export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
 export TFENV_ARCH=amd64
 
