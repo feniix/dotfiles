@@ -14,6 +14,7 @@ brew ca-certificates
 brew cmake
 brew coreutils
 brew curl
+brew dep
 brew diff-so-fancy
 brew direnv
 brew findutils
