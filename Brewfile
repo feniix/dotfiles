@@ -82,6 +82,8 @@ brew pcre
 brew pcre2
 brew pinentry
 brew pkg-config
+brew python-tk@3.10
+brew python-tk@3.9
 brew python@3.10
 brew python@3.9
 brew readline
@@ -92,6 +94,7 @@ brew six
 brew sqlite
 brew ssh-copy-id
 brew stern
+brew tcl-tk
 brew tfenv
 brew tree
 brew tree-sitter
