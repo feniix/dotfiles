@@ -11,6 +11,7 @@ brew bonnie++
 brew brotli
 brew c-ares
 brew ca-certificates
+brew checkov
 brew cmake
 brew coreutils
 brew curl
@@ -31,10 +32,12 @@ brew gnu-tar
 brew gnupg@2.2
 brew gnutls
 brew go
+brew go-jsonnet
 brew grep
 brew guile
 brew hadolint
 brew icu4c
+brew infracost
 brew jmeter
 brew jq
 brew kyverno
@@ -48,6 +51,7 @@ brew libidn2
 brew libksba
 brew libnghttp2
 brew libpng
+brew libpython-tabulate
 brew libssh2
 brew libtasn1
 brew libtermkey
@@ -60,6 +64,7 @@ brew lua
 brew luajit-openresty
 brew luarocks
 brew luv
+brew lz4
 brew m4
 brew make
 brew mas
@@ -82,26 +87,36 @@ brew pcre
 brew pcre2
 brew pinentry
 brew pkg-config
+brew popt
+brew pre-commit
 brew python-tk@3.10
 brew python-tk@3.9
 brew python@3.10
 brew python@3.9
 brew readline
 brew ripgrep
+brew rsync
 brew rtmpdump
 brew ruby-build
+brew shellcheck
 brew six
 brew sqlite
 brew ssh-copy-id
 brew stern
 brew tcl-tk
+brew terraform-docs
+brew terrascan
 brew tfenv
+brew tflint
+brew tfsec
+brew tfupdate
 brew tree
 brew tree-sitter
 brew unbound
 brew unibilium
 brew unixodbc
 brew wget
+brew xxhash
 brew xz
 brew zsh
 brew zsh-completions
@@ -110,6 +125,7 @@ brew zstd
 tap homebrew/cask
 cask 1password
 cask appcleaner
+cask diffmerge
 cask docker
 cask expressvpn
 cask firefox
@@ -127,6 +143,9 @@ tap adoptopenjdk/openjdk
 
 tap danvergara/tools
 brew dblab
+
+tap minamijoyo/hcledit
+brew hcledit
 
 tap rcmdnk/file
 brew brew-file

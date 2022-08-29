@@ -10,7 +10,7 @@
   stat = true
 [mergetool "diffmerge"]
   trustExitCode = true
-  cmd = /usr/local/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+  cmd = /opt/homebrew/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
 [alias]
   s = status
   ci = commit
@@ -26,6 +26,7 @@
   # deals with umlaits
   quotepath = false
   pager = diff-so-fancy | less --tabs=4 -RFX
+  ignorecase = false
 [rebase]
   autosquash = true
 [branch]
