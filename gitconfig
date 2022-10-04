@@ -80,7 +80,7 @@
   template = ~/.stCommitMsg
   gpgsign = true
 [diff "sopsdiffer"]
-	textconv = sops -d
+  textconv = sops -d
 [filter "lfs"]
   required = true
   clean = git-lfs clean -- %f
@@ -96,4 +96,5 @@
   insteadOf = https://github.com/spantree/
 
 [init]
-	defaultBranch = main
+  defaultBranch = main
+

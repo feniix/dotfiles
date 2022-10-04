@@ -67,8 +67,8 @@ export PATH="/opt/homebrew/opt/less/bin:${PATH}"
 export MANPATH="/opt/homebrew/opt/less/share/man:${MANPATH}"
 
 # for grep
-export PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
-export MANPATH="/opt/homebrew/opt/grep/libexec/gnuman:${MANPATH}"
+#export PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
+#export MANPATH="/opt/homebrew/opt/grep/libexec/gnuman:${MANPATH}"
 
 # for gnu-sed
 #export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:${PATH}"
@@ -321,5 +321,6 @@ export PATH="/usr/local/bin:$PATH"
 export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
 export PATH="$PATH:~/Library/Application Support/JetBrains/Toolbox/scripts"
 export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
-export TFENV_ARCH=amd64
+export TFENV_ARCH=arm64
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
