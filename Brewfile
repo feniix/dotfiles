@@ -95,6 +95,7 @@ brew libvidstab
 brew libvmaf
 brew libvorbis
 brew libvpx
+brew libvterm
 brew libx11
 brew libxau
 brew libxcb
@@ -104,6 +105,7 @@ brew libxrender
 brew libyaml
 brew little-cms2
 brew lua
+brew luajit
 brew luajit-openresty
 brew luarocks
 brew luv
@@ -141,8 +143,10 @@ brew popt
 brew pre-commit
 brew python-tk@3.10
 brew python-tk@3.9
+brew python-typing-extensions
 brew python@3.10
 brew python@3.9
+brew pyyaml
 brew rav1e
 brew readline
 brew ripgrep
