@@ -222,11 +222,11 @@ tap rcmdnk/file
 brew brew-file
 
 # App Store applications
-appstore 1569813296  1Password for Safari  (2.3.7)
+appstore 1569813296  1Password for Safari  (2.3.8)
 appstore 937984704   Amphetamine           (5.2.2)
-appstore 975937182   Fantastical           (3.6.6)
-appstore 1460836908  GoPro Player          (2.0.9)
+appstore 975937182   Fantastical           (3.7.1)
+appstore 1460836908  GoPro Player          (2.1.1)
 appstore 409183694   Keynote               (12.1)
 appstore 409203825   Numbers               (12.1)
 appstore 429449079   Patterns              (1.2)
-appstore 803453959   Slack                 (4.27.154)
+appstore 803453959   Slack                 (4.28.184)

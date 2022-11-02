@@ -20,6 +20,7 @@
   lg = log
   l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   ld = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -p
+  append = commit --amend -C HEAD
 [core]
   autocrlf = input
   excludesfile = ~/.gitignore_global
@@ -97,4 +98,5 @@
 
 [init]
   defaultBranch = main
+  templateDir = /Users/feniix/.git-template
 
