@@ -59,6 +59,7 @@ brew jmeter
 brew jpeg-turbo
 brew jpeg-xl
 brew jq
+brew krb5
 brew lame
 brew leptonica
 brew less
@@ -76,6 +77,7 @@ brew libksba
 brew libnghttp2
 brew libogg
 brew libpng
+brew libpq
 brew libpthread-stubs
 brew libpython-tabulate
 brew librist
@@ -199,7 +201,6 @@ cask diffmerge
 cask docker
 cask expressvpn
 cask firefox
-cask gifox
 cask google-chrome
 cask google-cloud-sdk
 cask iterm2
@@ -222,11 +223,11 @@ tap rcmdnk/file
 brew brew-file
 
 # App Store applications
-appstore 1569813296  1Password for Safari  (2.3.8)
+appstore 1569813296  1Password for Safari  (2.4.1)
 appstore 937984704   Amphetamine           (5.2.2)
-appstore 975937182   Fantastical           (3.7.1)
-appstore 1460836908  GoPro Player          (2.1.1)
-appstore 409183694   Keynote               (12.1)
-appstore 409203825   Numbers               (12.1)
+appstore 975937182   Fantastical           (3.7.2)
+appstore 1460836908  GoPro Player          (2.1.2)
+appstore 409183694   Keynote               (12.2)
+appstore 409203825   Numbers               (12.2)
 appstore 429449079   Patterns              (1.2)
 appstore 803453959   Slack                 (4.28.184)

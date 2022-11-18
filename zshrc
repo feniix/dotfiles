@@ -324,3 +324,9 @@ export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin:/opt/homebrew/Cellar/
 export TFENV_ARCH=arm64
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+
+# Fiberplane CLI (fp)
+export PATH="/Users/feniix/.fiberplane:$PATH"
+source /Users/feniix/.fiberplane/zsh_completions
+
