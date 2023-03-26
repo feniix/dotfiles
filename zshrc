@@ -46,7 +46,7 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
 export PATH="/opt/homebrew/opt/curl/bin:$PATH"
 export PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
 export PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH"
-export PATH="/opt/homebrew/opt/python@3.10/bin:$PATH"
+export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"
 export PATH="/opt/homebrew/opt/gnupg@2.2/bin:$PATH"
 export PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
 

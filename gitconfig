@@ -23,7 +23,7 @@
   append = commit --amend -C HEAD
 [core]
   autocrlf = input
-  excludesfile = ~/.gitignore_global
+#  excludesfile = ~/.gitignore_global
   # deals with umlaits
   quotepath = false
   pager = diff-so-fancy | less --tabs=4 -RFX
