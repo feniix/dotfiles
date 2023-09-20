@@ -276,13 +276,13 @@ export PATH=$HOME/.linkerd2/bin:$PATH
 source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # The next line updates PATH for the Google Cloud SDK.
-if [ -f /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc ]; then
-  source /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/path.zsh.inc
+if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
+  source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
 fi
 
 # The next line enables shell command completion for gcloud.
-if [ -f /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc ]; then
-  source /opt/homebrew/Caskroom/google-cloud-sdk/latest/google-cloud-sdk/completion.zsh.inc
+if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
+  source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
 fi
 
 export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
@@ -329,4 +329,6 @@ export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
 # Fiberplane CLI (fp)
 export PATH="/Users/feniix/.fiberplane:$PATH"
 source /Users/feniix/.fiberplane/zsh_completions
+
+export PATH=$HOME/.docker/bin:$PATH
 
