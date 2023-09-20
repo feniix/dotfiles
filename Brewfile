@@ -1,24 +1,35 @@
 
 # tap repositories and their packages
 
-tap homebrew/core
+tap homebrew/cask-versions
+cask temurin11
+cask temurin17
+cask temurin8
+
+tap kubescape/tap
+
+tap minamijoyo/hcledit
+brew hcledit
+
+tap rcmdnk/file
+brew brew-file
+
+# Other Homebrew packages
 brew abseil
 brew aom
 brew aribb24
 brew asdf
 brew autoconf
 brew automake
-brew aws-sdk-cpp
-brew awscli
 brew bdw-gc
 brew bonnie++
-brew bottom
 brew brotli
 brew bzip2
 brew c-ares
 brew ca-certificates
 brew cairo
 brew capstone
+brew cffi
 brew cfitsio
 brew checkov
 brew cjson
@@ -32,10 +43,9 @@ brew diff-so-fancy
 brew diffutils
 brew direnv
 brew dive
-brew docker
-brew docker-credential-helper
 brew docker-slim
 brew docutils
+brew dtc
 brew epsilon
 brew expat
 brew ffmpeg
@@ -81,11 +91,11 @@ brew icu4c
 brew imath
 brew infracost
 brew isl
-brew jmeter
 brew jpeg-turbo
 brew jpeg-xl
 brew jq
 brew json-c
+brew jsoncpp
 brew krb5
 brew lame
 brew leptonica
@@ -144,6 +154,7 @@ brew libxml2
 brew libxrender
 brew libyaml
 brew little-cms2
+brew lpeg
 brew lua
 brew luajit
 brew luajit-openresty
@@ -160,8 +171,8 @@ brew mpdecimal
 brew mpfr
 brew mpg123
 brew msgpack
+brew ncdu
 brew ncurses
-brew neovim --HEAD
 brew netcdf
 brew nettle
 brew node
@@ -173,8 +184,6 @@ brew oniguruma
 brew openblas
 brew opencore-amr
 brew openexr
-brew openjdk
-brew openjdk@11
 brew openjpeg
 brew openldap
 brew openssl@1.1
@@ -185,14 +194,21 @@ brew pango
 brew pcre
 brew pcre2
 brew pinentry
+brew pipx
 brew pixman
 brew pkg-config
 brew poppler
 brew popt
 brew pre-commit
+brew prettier
 brew proj
 brew protobuf
+brew pycparser
 brew python-build
+brew python-certifi
+brew python-markdown
+brew python-packaging
+brew python-pyproject-hooks
 brew python-tabulate
 brew python-tk@3.10
 brew python-tk@3.9
@@ -258,18 +274,22 @@ brew zsh
 brew zsh-completions
 brew zstd
 
-tap homebrew/cask
+# Other Cask applications
 cask 1password
+cask ableton-live-suite
 cask appcleaner
 cask c0re100-qbittorrent
 cask diffmerge
 cask discord
-cask docker
+cask disk-inventory-x
 cask expressvpn
 cask firefox
 cask google-chrome
 cask google-cloud-sdk
+cask iina
 cask iterm2
+cask orbstack
+cask ripx
 cask skim
 cask spotify
 cask steam
@@ -278,25 +298,18 @@ cask visual-studio-code
 cask vlc
 cask zoom
 
-tap adoptopenjdk/openjdk
-
-tap danvergara/tools
-brew dblab
-
-tap minamijoyo/hcledit
-brew hcledit
-
-tap rcmdnk/file
-brew brew-file
-
 # App Store applications
-appstore 1569813296  1Password for Safari  (2.7.0)
-appstore 1432731683  Adblock Plus          (2.2.3)
-appstore 937984704   Amphetamine           (5.2.2)
-appstore 975937182   Fantastical           (3.7.7)
-appstore 1460836908  GoPro Player          (2.1.7)
-appstore 409183694   Keynote               (12.2.1)
-appstore 409203825   Numbers               (12.2.1)
+appstore 1569813296  1Password for Safari  (2.15.1)
+appstore 1432731683  Adblock Plus          (2.2.9)
+appstore 937984704   Amphetamine           (5.3)
+appstore 975937182   Fantastical           (3.7.21)
+appstore 1460836908  GoPro Player          (2.1.9)
+appstore 409183694   Keynote               (13.1)
+appstore 409203825   Numbers               (13.1)
 appstore 429449079   Patterns              (1.3)
-appstore 803453959   Slack                 (4.29.149)
-appstore 497799835   Xcode                 (14.2)
+appstore 1472777122  PayPal Honey          (16.1.6)
+appstore 545519333   Prime Video           (10.4.1)
+appstore 803453959   Slack                 (4.34.119)
+appstore 747648890   Telegram              (10.0.5)
+appstore 1147396723  WhatsApp              (2.2336.9)
+appstore 497799835   Xcode                 (15.0)
