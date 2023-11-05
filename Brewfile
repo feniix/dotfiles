@@ -38,7 +38,6 @@ brew cmocka
 brew coreutils
 brew curl
 brew dav1d
-brew dep
 brew diff-so-fancy
 brew diffutils
 brew direnv
@@ -76,7 +75,6 @@ brew gnu-time
 brew gnupg
 brew gnupg@2.2
 brew gnutls
-brew go
 brew go-jsonnet
 brew graphite2
 brew grep
@@ -197,6 +195,7 @@ brew pinentry
 brew pipx
 brew pixman
 brew pkg-config
+brew poetry
 brew poppler
 brew popt
 brew pre-commit
@@ -208,10 +207,12 @@ brew python-build
 brew python-certifi
 brew python-markdown
 brew python-packaging
+brew python-pyparsing
 brew python-pyproject-hooks
 brew python-tabulate
 brew python-tk@3.10
 brew python-tk@3.9
+brew python-toml
 brew python-typing-extensions
 brew python@3.10
 brew python@3.11
@@ -300,16 +301,16 @@ cask zoom
 
 # App Store applications
 appstore 1569813296  1Password for Safari  (2.15.1)
-appstore 1432731683  Adblock Plus          (2.2.9)
+appstore 1432731683  Adblock Plus          (2.2.10)
 appstore 937984704   Amphetamine           (5.3)
-appstore 975937182   Fantastical           (3.7.21)
-appstore 1460836908  GoPro Player          (2.1.9)
-appstore 409183694   Keynote               (13.1)
-appstore 409203825   Numbers               (13.1)
+appstore 975937182   Fantastical           (3.8.4)
+appstore 1460836908  GoPro Player          (2.1.10)
+appstore 409183694   Keynote               (13.2)
+appstore 409203825   Numbers               (13.2)
 appstore 429449079   Patterns              (1.3)
 appstore 1472777122  PayPal Honey          (16.1.6)
-appstore 545519333   Prime Video           (10.4.1)
+appstore 545519333   Prime Video           (10.6.1)
 appstore 803453959   Slack                 (4.34.119)
-appstore 747648890   Telegram              (10.0.5)
-appstore 1147396723  WhatsApp              (2.2336.9)
+appstore 747648890   Telegram              (10.1.1)
+appstore 1147396723  WhatsApp              (2.2341.18)
 appstore 497799835   Xcode                 (15.0)
