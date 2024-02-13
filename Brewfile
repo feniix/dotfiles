@@ -21,6 +21,7 @@ brew aribb24
 brew asdf
 brew autoconf
 brew automake
+brew aws-iam-authenticator
 brew bdw-gc
 brew bonnie++
 brew brotli
@@ -75,16 +76,18 @@ brew gnu-time
 brew gnupg
 brew gnupg@2.2
 brew gnutls
-brew go-jsonnet
+brew gpgme
 brew graphite2
 brew grep
 brew grpc
 brew guile
 brew hadolint
+brew handbrake
 brew harfbuzz
 brew hdf5
 brew highway
 brew hub
+brew hwloc
 brew icu4c
 brew imath
 brew infracost
@@ -92,8 +95,10 @@ brew isl
 brew jpeg-turbo
 brew jpeg-xl
 brew jq
+brew jrsonnet
 brew json-c
 brew jsoncpp
+brew keyring
 brew krb5
 brew lame
 brew leptonica
@@ -114,6 +119,7 @@ brew libgpg-error
 brew libheif
 brew libidn2
 brew libksba
+brew libmicrohttpd
 brew libmpc
 brew libnghttp2
 brew libogg
@@ -165,6 +171,7 @@ brew make
 brew mas
 brew mbedtls
 brew minizip
+brew mkcert
 brew mpdecimal
 brew mpfr
 brew mpg123
@@ -178,6 +185,7 @@ brew npth
 brew nspr
 brew nss
 brew numpy
+brew nvm
 brew oniguruma
 brew openblas
 brew opencore-amr
@@ -186,6 +194,7 @@ brew openjpeg
 brew openldap
 brew openssl@1.1
 brew openssl@3
+brew openvino
 brew opus
 brew p11-kit
 brew pango
@@ -202,13 +211,23 @@ brew pre-commit
 brew prettier
 brew proj
 brew protobuf
+brew pugixml
 brew pycparser
+brew python-argcomplete
 brew python-build
 brew python-certifi
+brew python-click
+brew python-distlib
+brew python-filelock
+brew python-jinja
 brew python-markdown
+brew python-markupsafe
+brew python-networkx
 brew python-packaging
+brew python-platformdirs
 brew python-pyparsing
 brew python-pyproject-hooks
+brew python-setuptools
 brew python-tabulate
 brew python-tk@3.10
 brew python-tk@3.9
@@ -216,6 +235,7 @@ brew python-toml
 brew python-typing-extensions
 brew python@3.10
 brew python@3.11
+brew python@3.12
 brew python@3.9
 brew pyyaml
 brew qemu
@@ -232,6 +252,7 @@ brew sdl2
 brew shared-mime-info
 brew shellcheck
 brew six
+brew sloth
 brew snappy
 brew speex
 brew sqlite
@@ -239,6 +260,7 @@ brew srt
 brew ssh-copy-id
 brew stern
 brew svt-av1
+brew tbb
 brew tcl-tk
 brew terraform-docs
 brew terrascan
@@ -283,7 +305,6 @@ cask c0re100-qbittorrent
 cask diffmerge
 cask discord
 cask disk-inventory-x
-cask expressvpn
 cask firefox
 cask google-chrome
 cask google-cloud-sdk
@@ -300,17 +321,17 @@ cask vlc
 cask zoom
 
 # App Store applications
-appstore 1569813296  1Password for Safari  (2.15.1)
-appstore 1432731683  Adblock Plus          (2.2.10)
-appstore 937984704   Amphetamine           (5.3)
-appstore 975937182   Fantastical           (3.8.4)
-appstore 1460836908  GoPro Player          (2.1.10)
+appstore 1569813296  1Password for Safari  (2.20.0)
+appstore 1432731683  Adblock Plus          (2.2.12)
+appstore 937984704   Amphetamine           (5.3.2)
+appstore 975937182   Fantastical           (3.8.10)
+appstore 1460836908  GoPro Player          (2.2)
 appstore 409183694   Keynote               (13.2)
 appstore 409203825   Numbers               (13.2)
 appstore 429449079   Patterns              (1.3)
-appstore 1472777122  PayPal Honey          (16.1.6)
-appstore 545519333   Prime Video           (10.6.1)
-appstore 803453959   Slack                 (4.34.119)
-appstore 747648890   Telegram              (10.1.1)
-appstore 1147396723  WhatsApp              (2.2341.18)
-appstore 497799835   Xcode                 (15.0)
+appstore 1472777122  PayPal Honey          (16.4.1)
+appstore 545519333   Prime Video           (10.14.1)
+appstore 803453959   Slack                 (4.36.140)
+appstore 747648890   Telegram              (10.7.1)
+appstore 1147396723  WhatsApp              (2.2353.68)
+appstore 497799835   Xcode                 (15.2)
