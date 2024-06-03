@@ -235,16 +235,16 @@ export LC_ALL=
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-asdf_unload() {
-  removeFromPath /Users/otaegui/.asdf/shims
-  removeFromPath /opt/homebrew/opt/asdf/libexec
-}
-
-asdf_load() {
-  source /opt/homebrew/opt/asdf/libexec/asdf.sh
-  source /opt/homebrew/opt/asdf/etc/bash_completion.d/asdf.bash
-}
-asdf_load
+#asdf_unload() {
+#  removeFromPath /Users/otaegui/.asdf/shims
+#  removeFromPath /opt/homebrew/opt/asdf/libexec
+#}
+#
+#asdf_load() {
+#  source /opt/homebrew/opt/asdf/libexec/asdf.sh
+#  source /opt/homebrew/opt/asdf/etc/bash_completion.d/asdf.bash
+#}
+#asdf_load
 
 #source <(kubectl completion zsh)
 #source <(kops completion zsh)
@@ -308,16 +308,13 @@ function rm_local_branches() {
   fi
 }
 
-###_begin_ttt_install_block_###
-export PATH=/Users/otaegui/.ttt_home:$PATH
-###_end_ttt_install_block_###
-
-# Created by `pipx` on 2021-04-29 02:19:17
-export PATH="$PATH:/Users/feniix/.local/bin"
+###_begin_tam_config_block_###
+export PATH=/Users/feniix/.config/tempus-app-manager/bin:$PATH
+###_end_tam_config_block_###
+#
 
 export PATH="$PATH:/Users/feniix/bin"
 export PATH="/opt/homebrew/opt/ssh-copy-id/bin:$PATH"
-export PATH="/usr/local/bin:$PATH"
 export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
 export PATH="$PATH:~/Library/Application Support/JetBrains/Toolbox/scripts"
 export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
@@ -332,3 +329,5 @@ source /Users/feniix/.fiberplane/zsh_completions
 
 export PATH=$HOME/.docker/bin:$PATH
 
+eval "$(mise activate zsh)"
+eval "$(mise completion zsh)"

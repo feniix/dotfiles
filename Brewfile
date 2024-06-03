@@ -2,9 +2,8 @@
 # tap repositories and their packages
 
 tap homebrew/cask-versions
-cask temurin11
-cask temurin17
-cask temurin8
+
+tap homeport/tap
 
 tap kubescape/tap
 
@@ -21,7 +20,7 @@ brew aribb24
 brew asdf
 brew autoconf
 brew automake
-brew aws-iam-authenticator
+brew bash
 brew bdw-gc
 brew bonnie++
 brew brotli
@@ -30,7 +29,7 @@ brew c-ares
 brew ca-certificates
 brew cairo
 brew capstone
-brew cffi
+brew certifi
 brew cfitsio
 brew checkov
 brew cjson
@@ -46,6 +45,7 @@ brew dive
 brew docker-slim
 brew docutils
 brew dtc
+brew dyff
 brew epsilon
 brew expat
 brew ffmpeg
@@ -87,7 +87,6 @@ brew harfbuzz
 brew hdf5
 brew highway
 brew hub
-brew hwloc
 brew icu4c
 brew imath
 brew infracost
@@ -98,7 +97,6 @@ brew jq
 brew jrsonnet
 brew json-c
 brew jsoncpp
-brew keyring
 brew krb5
 brew lame
 brew leptonica
@@ -158,7 +156,6 @@ brew libxml2
 brew libxrender
 brew libyaml
 brew little-cms2
-brew lpeg
 brew lua
 brew luajit
 brew luajit-openresty
@@ -194,7 +191,6 @@ brew openjpeg
 brew openldap
 brew openssl@1.1
 brew openssl@3
-brew openvino
 brew opus
 brew p11-kit
 brew pango
@@ -211,27 +207,10 @@ brew pre-commit
 brew prettier
 brew proj
 brew protobuf
-brew pugixml
-brew pycparser
-brew python-argcomplete
 brew python-build
-brew python-certifi
-brew python-click
-brew python-distlib
-brew python-filelock
-brew python-jinja
-brew python-markdown
-brew python-markupsafe
-brew python-networkx
-brew python-packaging
-brew python-platformdirs
-brew python-pyparsing
-brew python-pyproject-hooks
-brew python-setuptools
 brew python-tabulate
 brew python-tk@3.10
 brew python-tk@3.9
-brew python-toml
 brew python-typing-extensions
 brew python@3.10
 brew python@3.11
@@ -253,6 +232,7 @@ brew shared-mime-info
 brew shellcheck
 brew six
 brew sloth
+brew smartmontools
 brew snappy
 brew speex
 brew sqlite
@@ -260,7 +240,6 @@ brew srt
 brew ssh-copy-id
 brew stern
 brew svt-av1
-brew tbb
 brew tcl-tk
 brew terraform-docs
 brew terrascan
@@ -299,15 +278,17 @@ brew zstd
 
 # Other Cask applications
 cask 1password
-cask ableton-live-suite
+cask anydesk
 cask appcleaner
 cask c0re100-qbittorrent
+cask chatgpt
 cask diffmerge
 cask discord
 cask disk-inventory-x
 cask firefox
 cask google-chrome
 cask google-cloud-sdk
+cask handbrake
 cask iina
 cask iterm2
 cask orbstack
@@ -315,23 +296,26 @@ cask ripx
 cask skim
 cask spotify
 cask steam
+cask temurin11
+cask temurin17
+cask temurin8
 cask tor-browser
 cask visual-studio-code
 cask vlc
 cask zoom
 
 # App Store applications
-appstore 1569813296  1Password for Safari  (2.20.0)
-appstore 1432731683  Adblock Plus          (2.2.12)
+appstore 1569813296  1Password for Safari  (2.23.3)
+appstore 1432731683  Adblock Plus          (2.2.14)
 appstore 937984704   Amphetamine           (5.3.2)
-appstore 975937182   Fantastical           (3.8.10)
+appstore 975937182   Fantastical           (3.8.16)
 appstore 1460836908  GoPro Player          (2.2)
-appstore 409183694   Keynote               (13.2)
-appstore 409203825   Numbers               (13.2)
+appstore 409183694   Keynote               (14.0)
+appstore 409203825   Numbers               (14.0)
 appstore 429449079   Patterns              (1.3)
-appstore 1472777122  PayPal Honey          (16.4.1)
-appstore 545519333   Prime Video           (10.14.1)
-appstore 803453959   Slack                 (4.36.140)
-appstore 747648890   Telegram              (10.7.1)
-appstore 1147396723  WhatsApp              (2.2353.68)
-appstore 497799835   Xcode                 (15.2)
+appstore 1472777122  PayPal Honey          (16.5.1)
+appstore 545519333   Prime Video           (10.23)
+appstore 803453959   Slack                 (4.38.121)
+appstore 747648890   Telegram              (10.13)
+appstore 1147396723  WhatsApp              (2.2420.51)
+appstore 497799835   Xcode                 (15.4)

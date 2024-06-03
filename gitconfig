@@ -79,7 +79,7 @@
   trustExitCode = true
 [commit]
   template = ~/.stCommitMsg
-  gpgsign = true
+	gpgsign = true
 [diff "sopsdiffer"]
   textconv = sops -d
 [filter "lfs"]
