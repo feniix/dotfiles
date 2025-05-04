@@ -96,14 +96,21 @@ fi
 # Set up custom themes and plugins
 log_info "Setting up custom themes and plugins..."
 
-# Ensure zsh_custom directory exists
+# Define directories
 ZSH_CUSTOM_DIR="$HOME/dotfiles/zsh_custom"
+OMZ_CUSTOM_DIR="$HOME/.oh-my-zsh/custom"
+
+# Ensure our dotfiles custom directories exist
 mkdir -p "$ZSH_CUSTOM_DIR/themes"
 mkdir -p "$ZSH_CUSTOM_DIR/plugins"
 
+# Ensure oh-my-zsh custom directories exist (should be created by oh-my-zsh installer, but just in case)
+mkdir -p "$OMZ_CUSTOM_DIR/themes"
+mkdir -p "$OMZ_CUSTOM_DIR/plugins"
+
 # Check if our bullet-train theme exists
 if [ -f "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
-  log_info "Bullet Train theme already installed."
+  log_info "Bullet Train theme already exists in dotfiles."
 else
   log_info "Installing Bullet Train theme..."
   
@@ -119,10 +126,17 @@ else
   fi
 fi
 
+# Create symlink from oh-my-zsh custom themes to our theme
+if [ -f "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
+  log_info "Creating symlink for bullet-train theme in oh-my-zsh directory..."
+  ln -sf "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme"
+  log_success "Theme symlink created successfully."
+fi
+
 # Check for and install zsh-completions if missing
 ZSH_COMPLETIONS_DIR="$ZSH_CUSTOM_DIR/plugins/zsh-completions"
 if [ -d "$ZSH_COMPLETIONS_DIR" ]; then
-  log_info "zsh-completions plugin already installed."
+  log_info "zsh-completions plugin already installed in dotfiles."
   
   # Update if requested and not in check-only mode
   if [ "$CHECK_ONLY" = false ]; then
@@ -152,6 +166,13 @@ else
   fi
 fi
 
+# Create symlink from oh-my-zsh custom plugins to our plugins
+if [ -d "$ZSH_COMPLETIONS_DIR" ]; then
+  log_info "Creating symlink for zsh-completions plugin in oh-my-zsh directory..."
+  ln -sf "$ZSH_COMPLETIONS_DIR" "$OMZ_CUSTOM_DIR/plugins/zsh-completions"
+  log_success "Plugin symlink created successfully."
+fi
+
 # Ensure zshrc has correct paths
 log_info "Verifying zshrc configuration..."
 ZSHRC="$HOME/dotfiles/zshrc"
@@ -167,9 +188,9 @@ if [ -f "$ZSHRC" ]; then
   
   # Check if ZSH_CUSTOM path is correctly set
   if grep -q "export ZSH_CUSTOM=\$HOME/dotfiles/zsh_custom" "$ZSHRC"; then
-    log_success "ZSH_CUSTOM path is correctly configured in zshrc."
-  else
-    log_warning "ZSH_CUSTOM path in zshrc may not be correctly set. Please ensure it contains: export ZSH_CUSTOM=\$HOME/dotfiles/zsh_custom"
+    # This is a legacy approach - we now use symlinks to connect dotfiles/zsh_custom to .oh-my-zsh/custom
+    log_warning "Note: Your zshrc sets ZSH_CUSTOM to your dotfiles directory. This works but is redundant with our symlink approach."
+    log_info "To simplify your configuration, you can remove the ZSH_CUSTOM line from your zshrc."
   fi
 else
   log_error "zshrc file not found at $ZSHRC. Please check your configuration."
