@@ -1,14 +1,10 @@
 
 # tap repositories and their packages
 
-tap homebrew/cask-versions
-
-tap homeport/tap
+## Direct install
+brew neovim
 
 tap kubescape/tap
-
-tap minamijoyo/hcledit
-brew hcledit
 
 tap rcmdnk/file
 brew brew-file
@@ -30,6 +26,7 @@ brew ca-certificates
 brew cairo
 brew capstone
 brew certifi
+brew cffi
 brew cfitsio
 brew checkov
 brew cjson
@@ -42,12 +39,14 @@ brew diff-so-fancy
 brew diffutils
 brew direnv
 brew dive
-brew docker-slim
 brew docutils
+brew dos2unix
 brew dtc
 brew dyff
 brew epsilon
 brew expat
+brew eza
+brew fd
 brew ffmpeg
 brew findutils
 brew flac
@@ -74,20 +73,20 @@ brew gnu-sed
 brew gnu-tar
 brew gnu-time
 brew gnupg
-brew gnupg@2.2
 brew gnutls
+brew go
 brew gpgme
 brew graphite2
 brew grep
 brew grpc
 brew guile
 brew hadolint
-brew handbrake
 brew harfbuzz
+brew hcledit
 brew hdf5
 brew highway
 brew hub
-brew icu4c
+brew icu4c@77
 brew imath
 brew infracost
 brew isl
@@ -96,7 +95,6 @@ brew jpeg-xl
 brew jq
 brew jrsonnet
 brew json-c
-brew jsoncpp
 brew krb5
 brew lame
 brew leptonica
@@ -107,12 +105,13 @@ brew libass
 brew libassuan
 brew libb2
 brew libbluray
-brew libdap
 brew libde265
+brew libdeflate
 brew libevent
 brew libffi
 brew libgcrypt
 brew libgeotiff
+brew libgit2
 brew libgpg-error
 brew libheif
 brew libidn2
@@ -137,6 +136,7 @@ brew libssh2
 brew libtasn1
 brew libtermkey
 brew libtiff
+brew libtommath
 brew libtool
 brew libunibreak
 brew libunistring
@@ -156,6 +156,7 @@ brew libxml2
 brew libxrender
 brew libyaml
 brew little-cms2
+brew lpeg
 brew lua
 brew luajit
 brew luajit-openresty
@@ -168,6 +169,7 @@ brew make
 brew mas
 brew mbedtls
 brew minizip
+brew mintoolkit
 brew mkcert
 brew mpdecimal
 brew mpfr
@@ -182,24 +184,25 @@ brew npth
 brew nspr
 brew nss
 brew numpy
-brew nvm
 brew oniguruma
 brew openblas
 brew opencore-amr
 brew openexr
 brew openjpeg
 brew openldap
-brew openssl@1.1
 brew openssl@3
+brew operator-sdk
 brew opus
 brew p11-kit
+brew pandoc
 brew pango
 brew pcre
 brew pcre2
 brew pinentry
+brew pinentry-mac
 brew pipx
 brew pixman
-brew pkg-config
+brew pkgconf
 brew poetry
 brew poppler
 brew popt
@@ -207,21 +210,22 @@ brew pre-commit
 brew prettier
 brew proj
 brew protobuf
-brew python-build
+brew pycparser
+brew python-packaging
 brew python-tabulate
 brew python-tk@3.10
 brew python-tk@3.9
-brew python-typing-extensions
 brew python@3.10
 brew python@3.11
 brew python@3.12
+brew python@3.13
 brew python@3.9
-brew pyyaml
 brew qemu
 brew rapidjson
 brew rav1e
 brew re2
 brew readline
+brew redis@6.2
 brew ripgrep
 brew rsync
 brew rtmpdump
@@ -238,9 +242,11 @@ brew speex
 brew sqlite
 brew srt
 brew ssh-copy-id
+brew starship
 brew stern
 brew svt-av1
 brew tcl-tk
+brew tcl-tk@8
 brew terraform-docs
 brew terrascan
 brew tesseract
@@ -272,50 +278,54 @@ brew z3
 brew zeromq
 brew zimg
 brew zlib
-brew zsh
+brew zplug
 brew zsh-completions
 brew zstd
 
 # Other Cask applications
 cask 1password
-cask anydesk
 cask appcleaner
+cask basictex
 cask c0re100-qbittorrent
 cask chatgpt
+cask cursor
 cask diffmerge
 cask discord
 cask disk-inventory-x
+cask expressvpn
 cask firefox
 cask google-chrome
 cask google-cloud-sdk
 cask handbrake
 cask iina
 cask iterm2
+cask notion
 cask orbstack
+cask raspberry-pi-imager
 cask ripx
 cask skim
 cask spotify
 cask steam
-cask temurin11
-cask temurin17
-cask temurin8
+cask tigervnc-viewer
 cask tor-browser
 cask visual-studio-code
 cask vlc
 cask zoom
+cask zulu@21
 
 # App Store applications
-appstore 1569813296  1Password for Safari  (2.23.3)
-appstore 1432731683  Adblock Plus          (2.2.14)
+appstore 1569813296  1Password for Safari  (8.10.70)
 appstore 937984704   Amphetamine           (5.3.2)
-appstore 975937182   Fantastical           (3.8.16)
-appstore 1460836908  GoPro Player          (2.2)
-appstore 409183694   Keynote               (14.0)
-appstore 409203825   Numbers               (14.0)
+appstore 975937182   Fantastical           (4.0.10)
+appstore 1460836908  GoPro Player          (3.1.0)
+appstore 409183694   Keynote               (14.4)
+appstore 409203825   Numbers               (14.4)
+appstore 490179405   Okta Verify           (9.39.0)
 appstore 429449079   Patterns              (1.3)
-appstore 1472777122  PayPal Honey          (16.5.1)
-appstore 545519333   Prime Video           (10.23)
-appstore 803453959   Slack                 (4.38.121)
-appstore 747648890   Telegram              (10.13)
-appstore 1147396723  WhatsApp              (2.2420.51)
-appstore 497799835   Xcode                 (15.4)
+appstore 545519333   Prime Video           (10.69)
+appstore 803453959   Slack                 (4.43.52)
+appstore 747648890   Telegram              (11.9)
+appstore 310633997   WhatsApp              (25.13.74)
+appstore 1147396723  WhatsApp (old)        (2.2437.52)
+appstore 1295203466  Windows App           (11.1.4)
+appstore 497799835   Xcode                 (16.3)

@@ -5,3 +5,12 @@ sbin/lokoctl
 sbin/okta-personal-token
 sbin/ttt
 .DS_Store
+zsh_custom/plugins/zsh-completions/
+# Ignore SSH private keys
+ssh_keys/
+*.pem
+id_*
+*_id_*
+*.key
+known_hosts
+authorized_keys

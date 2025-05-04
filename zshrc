@@ -1,16 +1,7 @@
 # Path to your oh-my-zsh configuration.
-# Uncomment to profile zsh startup
-#zmodload zsh/zprof
-
-# === PERFORMANCE OPTIMIZATION FIRST ===
-# Compile zsh files for faster loading if changed
-[[ -e ~/.zshrc.zwc ]] || zcompile ~/.zshrc
-# Don't try to compile history, it can cause issues
-# [[ -e ~/.zsh_history.zwc ]] || zcompile ~/.zsh_history
 
 # === OH-MY-ZSH CONFIGURATION ===
 export ZSH=$HOME/.oh-my-zsh
-export ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
 
 # Theme configuration
 ZSH_THEME="bullet-train"
@@ -149,6 +140,13 @@ export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_AUTOREMOVE=1
 export HOMEBREW_NO_INSTALL_UPGRADE=1
 
+# Homebrew completions
+if type brew &>/dev/null; then
+  FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
+  autoload -Uz compinit
+  compinit
+fi
+
 # Homebrew base (highest priority)
 prepend_path "/opt/homebrew/bin"
 prepend_path "/opt/homebrew/sbin"
@@ -194,18 +192,18 @@ source "$ZSH/oh-my-zsh.sh"
 
 # === COMPLETION SETTINGS ===
 # Weekly compinit with safer approach
-autoload -Uz compinit
+#autoload -Uz compinit
 
 # Only rebuild completion cache once a week
-if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
-  compinit
-else
-  compinit -C
-fi
+#if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
+#  compinit
+#else
+#  compinit -C
+#fi
 
-if type brew &>/dev/null; then
-  FPATH=/opt/homebrew/completions/zsh:/opt/homebrew/share/zsh-completions:$FPATH
-fi
+#if type brew &>/dev/null; then
+#  FPATH="$(brew --prefix)/share/zsh/site-functions:$(brew --prefix)/share/zsh-completions:$FPATH"
+#fi
 
 # Bash completion compatibility
 complete () {
@@ -344,20 +342,6 @@ export PACKER_CACHE_DIR=${HOME}/.packer
 export JMETER_HOME=/usr/local/opt/jmeter
 export VAGRANT_DEFAULT_PROVIDER=virtualbox
 
-# === LAZY LOADING FUNCTIONS ===
-# Remove all NVM-related lazy loading functions
-
-# Simple lazy loading for a few key commands
-pip() {
-  unfunction pip
-  \pip "$@"
-}
-
-aws() {
-  unfunction aws
-  \aws "$@"
-}
-
 # === ALIASES ===
 alias mtr="mtr --curses"
 alias vim=nvim
@@ -416,7 +400,7 @@ function rm_local_branches() {
 # Remove FreeDRP known hosts to prevent issues
 rm -rf ~/.freerdp/known_hosts
 
-# === EXTERNAL TOOLS INTEGRATION (LAZY LOADED) ===
+# === EXTERNAL TOOLS INTEGRATION ===
 # iTerm2 integration
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
@@ -427,38 +411,18 @@ direnv() {
   direnv "$@"
 }
 
-# SDKMAN - lazy load
-sdk() {
-  unfunction sdk
+# SDKMAN
+if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
   source "$HOME/.sdkman/bin/sdkman-init.sh"
-  sdk "$@"
-}
+fi
 
-# Google Cloud SDK - lazy load
-gcloud() {
-  unfunction gcloud gsutil
-  if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
-    source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
-  fi
-  if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
-    source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
-  fi
-  gcloud "$@"
-}
-
-gsutil() {
-  unfunction gcloud gsutil
-  if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
-    source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
-  fi
-  if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
-    source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
-  fi
-  gsutil "$@"
-}
-
-# Uncomment to see zsh profiling info
-#zprof
+# Google Cloud SDK
+if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
+  source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
+fi
+if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
+  source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
+fi
 
 # History display improvements
 alias h='fc -li 1'
@@ -468,3 +432,12 @@ alias hs='history | grep'
 export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 export EDITOR=nvim
+
+# Use the async approach for compinit
+{
+  # Compile zcompdump if it's not fresh
+  if [[ -s "$ZSH_COMPDUMP" && (! -s "${ZSH_COMPDUMP}.zwc" || "$ZSH_COMPDUMP" -nt "${ZSH_COMPDUMP}.zwc") ]]; then
+    zcompile "$ZSH_COMPDUMP"
+  fi
+} &!
+export GPG_TTY=$(tty)
