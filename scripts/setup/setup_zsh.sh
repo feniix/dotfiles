@@ -145,10 +145,12 @@ if [ -d "$ZSH_COMPLETIONS_DIR" ]; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       log_info "Updating zsh-completions..."
       
+      # Use direct git commands instead of relying on submodule
       cd "$ZSH_COMPLETIONS_DIR"
       git pull origin master
       
       log_success "zsh-completions has been updated."
+      cd - > /dev/null # Return to previous directory
     fi
   fi
 else
@@ -156,6 +158,7 @@ else
   
   # Skip plugin installation in check-only mode
   if [ "$CHECK_ONLY" = false ]; then
+    # Clone directly instead of using git submodule
     git clone https://github.com/zsh-users/zsh-completions.git "$ZSH_COMPLETIONS_DIR"
     
     if [ $? -eq 0 ]; then

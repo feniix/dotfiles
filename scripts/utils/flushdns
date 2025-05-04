@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+#
+# Flush DNS caches on macOS
+# Compatible with macOS 10.14+ (Mojave through macOS 14 Sequoia)
+#
+# This script detects the macOS version and uses the appropriate
+# commands to clear DNS caches.
+
+set -e
+
+# Colors for better output
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Print status message
+echo -e "${BLUE}Flushing DNS caches...${NC}"
+
+# Get macOS major and minor version numbers
+os_version=$(sw_vers -productVersion)
+major_version=$(echo "$os_version" | cut -d. -f1)
+minor_version=$(echo "$os_version" | cut -d. -f2)
+
+# Display version information
+echo "macOS version detected: $os_version"
+
+# Use appropriate commands based on macOS version
+if [[ "$major_version" -ge 14 ]]; then
+  # macOS 14 Sequoia and newer
+  echo "Using Sequoia (14+) DNS flush method"
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder
+elif [[ "$major_version" -ge 11 ]]; then
+  # Big Sur (11.0) through Sonoma (13.x)
+  echo "Using Big Sur/Monterey/Ventura/Sonoma (11-13) DNS flush method"
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder
+elif [[ "$major_version" -eq 10 && "$minor_version" -ge 14 ]]; then
+  # Mojave (10.14) and Catalina (10.15)
+  echo "Using Mojave/Catalina (10.14-10.15) DNS flush method"
+  sudo killall -HUP mDNSResponder
+  sudo killall -HUP mDNSResponderHelper 2>/dev/null || true
+else
+  # Fallback for older versions (though this script targets 10.14+)
+  echo "Warning: Using legacy DNS flush method (for pre-Mojave systems)"
+  sudo dscacheutil -flushcache
+  sudo killall -HUP mDNSResponder 2>/dev/null || true
+fi
+
+echo -e "${GREEN}✅ DNS caches successfully flushed!${NC}"
+
+# Audio confirmation if 'say' command exists
+if command -v say >/dev/null 2>&1; then
+  say "DNS cache flushed"
+fi 
