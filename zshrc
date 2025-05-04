@@ -1,5 +1,94 @@
 # Path to your oh-my-zsh configuration.
 
+# === PATH CONFIGURATION ===
+# Reset PATH to ensure proper ordering
+reset_path() {
+  # Save important system paths that should be included but at lower priority
+  local usr_local_bin="/usr/local/bin"
+  local usr_bin="/usr/bin"
+  local usr_sbin="/usr/sbin"
+  local bin="/bin"
+  local sbin="/sbin"
+  
+  # Start with a minimal PATH that prioritizes Homebrew
+  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin"
+  
+  # Add homebrew core utils next (highest priority after base homebrew)
+  export PATH="$PATH:/opt/homebrew/opt/curl/bin"
+  export PATH="$PATH:/opt/homebrew/opt/make/libexec/gnubin"
+  export PATH="$PATH:/opt/homebrew/opt/gnu-getopt/bin"
+  export PATH="$PATH:/opt/homebrew/opt/python@3.11/bin"
+  export PATH="$PATH:/opt/homebrew/opt/gnupg@2.2/bin"
+  export PATH="$PATH:/opt/homebrew/opt/gnu-tar/libexec/gnubin"
+  export PATH="$PATH:/opt/homebrew/opt/findutils/bin"
+  export PATH="$PATH:/opt/homebrew/opt/gawk/bin"
+  export PATH="$PATH:/opt/homebrew/opt/less/bin"
+  export PATH="$PATH:/opt/homebrew/opt/openssl@1.1/bin"
+  export PATH="$PATH:/opt/homebrew/opt/libpq/bin"
+  export PATH="$PATH:/opt/homebrew/opt/ssh-copy-id/bin"
+  
+  # Add user directories next
+  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/go/bin"
+  
+  # Add system paths at lowest priority
+  export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
+}
+
+# Initialize with proper ordering
+reset_path
+
+# Helper functions for PATH management
+# Add to PATH only if directory exists (and only if not already in PATH)
+prepend_path() {
+  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$1:$PATH"
+  fi
+}
+
+append_path() {
+  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$PATH:$1"
+  fi
+}
+
+# Add to MANPATH only if directory exists
+prepend_manpath() {
+  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
+    export MANPATH="$1:$MANPATH"
+  fi
+}
+
+append_manpath() {
+  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
+    export MANPATH="$MANPATH:$1"
+  fi
+}
+
+# Debug PATH and MANPATH
+debug_path() {
+  echo "=== PATH ==="
+  echo $PATH | tr ':' '\n' | nl
+  echo ""
+  echo "=== MANPATH ==="
+  echo $MANPATH | tr ':' '\n' | nl
+  echo ""
+  
+  # Check for non-existent directories in PATH
+  echo "=== Non-existent directories in PATH ==="
+  for p in $(echo $PATH | tr ':' '\n'); do
+    if [[ ! -d "$p" ]]; then
+      echo "MISSING: $p"
+    fi
+  done
+}
+
+# Homebrew completions (initialize before oh-my-zsh)
+if type brew &>/dev/null; then
+  FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
+  autoload -Uz compinit
+  compinit
+fi
+
 # === OH-MY-ZSH CONFIGURATION ===
 export ZSH=$HOME/.oh-my-zsh
 
@@ -81,52 +170,6 @@ plugins=(
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
 
-# === PATH CONFIGURATION ===
-# Helper functions for PATH management
-# Add to PATH only if directory exists
-prepend_path() {
-  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
-    export PATH="$1:$PATH"
-  fi
-}
-
-append_path() {
-  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
-    export PATH="$PATH:$1"
-  fi
-}
-
-# Add to MANPATH only if directory exists
-prepend_manpath() {
-  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
-    export MANPATH="$1:$MANPATH"
-  fi
-}
-
-append_manpath() {
-  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
-    export MANPATH="$MANPATH:$1"
-  fi
-}
-
-# Debug PATH and MANPATH
-debug_path() {
-  echo "=== PATH ==="
-  echo $PATH | tr ':' '\n' | nl
-  echo ""
-  echo "=== MANPATH ==="
-  echo $MANPATH | tr ':' '\n' | nl
-  echo ""
-  
-  # Check for non-existent directories in PATH
-  echo "=== Non-existent directories in PATH ==="
-  for p in $(echo $PATH | tr ':' '\n'); do
-    if [[ ! -d "$p" ]]; then
-      echo "MISSING: $p"
-    fi
-  done
-}
-
 # Homebrew
 if [ -f /opt/homebrew/etc/brew-wrap ]; then
   source /opt/homebrew/etc/brew-wrap
@@ -140,46 +183,15 @@ export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_AUTOREMOVE=1
 export HOMEBREW_NO_INSTALL_UPGRADE=1
 
-# Homebrew completions
-if type brew &>/dev/null; then
-  FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
-  autoload -Uz compinit
-  compinit
-fi
-
-# Homebrew base (highest priority)
-prepend_path "/opt/homebrew/bin"
-prepend_path "/opt/homebrew/sbin"
-
-# GNU and core utils
-prepend_path "/opt/homebrew/opt/curl/bin"
-prepend_path "/opt/homebrew/opt/make/libexec/gnubin"
-prepend_path "/opt/homebrew/opt/gnu-getopt/bin"
-prepend_path "/opt/homebrew/opt/python@3.11/bin"
-prepend_path "/opt/homebrew/opt/gnupg@2.2/bin"
-prepend_path "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-prepend_path "/opt/homebrew/opt/findutils/bin"
-prepend_path "/opt/homebrew/opt/gawk/bin"
-prepend_path "/opt/homebrew/opt/less/bin"
-prepend_path "/opt/homebrew/opt/openssl@1.1/bin"
-prepend_path "/opt/homebrew/opt/libpq/bin"
-prepend_path "/opt/homebrew/opt/ssh-copy-id/bin"
-
-# Tool paths
+# Tool paths - use prepend_path to ensure they come before system paths
+# But after the homebrew paths we've already set
 prepend_path "${KREW_ROOT:-$HOME/.krew}/bin"
 prepend_path "$HOME/.linkerd2/bin"
 prepend_path "$HOME/.docker/bin"
 prepend_path "$HOME/.config/tempus-app-manager/bin"
-
-# Personal paths
-prepend_path "$HOME/sbin"
-prepend_path "$HOME/bin"
-prepend_path "$HOME/go/bin"
+prepend_path "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 prepend_path "/opt/homebrew/Cellar/bonnie++/2.00a/bin"
 prepend_path "/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
-
-# JetBrains Toolbox
-prepend_path "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
 # MANPATH settings
 prepend_manpath "/opt/homebrew/opt/findutils/share/man"
@@ -191,19 +203,7 @@ prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 source "$ZSH/oh-my-zsh.sh"
 
 # === COMPLETION SETTINGS ===
-# Weekly compinit with safer approach
-#autoload -Uz compinit
-
-# Only rebuild completion cache once a week
-#if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
-#  compinit
-#else
-#  compinit -C
-#fi
-
-#if type brew &>/dev/null; then
-#  FPATH="$(brew --prefix)/share/zsh/site-functions:$(brew --prefix)/share/zsh-completions:$FPATH"
-#fi
+# Removed duplicate Homebrew completion section that was here
 
 # Bash completion compatibility
 complete () {
@@ -441,3 +441,13 @@ export EDITOR=nvim
   fi
 } &!
 export GPG_TTY=$(tty)
+
+# Final PATH check - if /usr/bin is still before /opt/homebrew/bin, fix it
+if [[ "$PATH" =~ /usr/bin.*:/opt/homebrew/bin ]]; then
+  echo "PATH order issue detected - fixing Homebrew PATH priority"
+  # Remove homebrew bin from current position
+  PATH=${PATH//:\/opt\/homebrew\/bin/}
+  PATH=${PATH//:\/opt\/homebrew\/sbin/}
+  # Add homebrew bin at the beginning
+  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+fi
