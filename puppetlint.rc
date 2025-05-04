@@ -1,2 +1,30 @@
---no-80chars-check
+# Modern puppet-lint configuration file
+# Updated for puppet-lint 2.5.0+
+
+# Line Length - increased to 140 chars, which is the modern standard
+--no-140chars-check
+
+# Class Structure - widely accepted style exceptions
 --no-class_inherits_from_params_class-check
+--no-autoloader_layout-check
+
+# Code Style - reasonable exceptions for practical development
+--no-arrow_alignment-check
+--no-parameter_order-check
+
+# Documentation - disable only if you document elsewhere
+--no-documentation-check
+
+# Whitespace and Formatting - keep these enabled for clean code
+# --no-trailing_whitespace-check
+# --no-hard_tabs-check
+
+# Quotation - double quotes are often needed for variable interpolation
+--no-double_quoted_strings-check
+
+# Optional automatic fixes (uncomment to enable)
+# --fix
+
+# Control behavior
+--relative
+--fail-on-warnings

@@ -1,18 +1,28 @@
+# ~/.pryrc - Pry Ruby REPL Configuration
+# For best results, install additional gems:
+#   gem install awesome_print pry-clipboard interactive_editor pry-byebug
+
+# === REQUIRED LIBRARIES ===
 require 'date'
 require 'bigdecimal'
 
+# === BETTER OBJECT FORMATTING ===
+# Make Date output more readable
 class Date
   def inspect
     "#<Date: #{self}>"
   end
 end
 
+# Make BigDecimal output cleaner (without scientific notation)
 class BigDecimal
   def inspect
     "#{to_s('F')}bd"
   end
 end
 
+# === UTILITY METHODS ===
+# Calculate memory size of an object and its references
 def sizeof(target, seen = nil)
   require 'objspace'
   require 'set'
@@ -28,61 +38,108 @@ def sizeof(target, seen = nil)
   end
 end
 
-# === EDITOR ===
-Pry.editor = 'vim'
+# === EDITOR CONFIGURATION ===
+# Set editor for 'edit' command
+Pry.config.editor = ENV['EDITOR'] || 'vim'
 
-# == Pry-Nav - Using pry as a debugger ==
+# === COMMAND ALIASES ===
+# Make debugging workflow easier with single-letter commands
+# These aliases work with pry-byebug or pry-nav
 Pry.commands.alias_command 'c', 'continue' rescue nil
 Pry.commands.alias_command 's', 'step' rescue nil
 Pry.commands.alias_command 'n', 'next' rescue nil
 Pry.commands.alias_command 'r!', 'reload!' rescue nil
 
+# === COLOR CONFIGURATION ===
+# Enable colorized output
+begin
 Pry.config.color = true
+rescue NoMethodError
+  # For newer Pry versions
+  Pry.config.color_enabled = true rescue nil
+end
+
+# Use Solarized theme if possible
+begin
 Pry.config.theme = 'solarized'
+rescue NoMethodError
+  # Theme setting changed in newer Pry versions
+  puts "Note: Theme setting is not available in this Pry version"
+end
 
 # === CUSTOM PROMPT ===
-# This prompt shows the ruby version (useful for RVM)
-Pry.prompt = [proc { |obj, nest_level, _| "#{RUBY_VERSION} (#{obj}):#{nest_level} > " }, proc { |obj, nest_level, _| "#{RUBY_VERSION} (#{obj}):#{nest_level} * " }]
+# This prompt shows Ruby version and context
+Pry.prompt = [
+  proc { |obj, nest_level, _| 
+    ruby_info = RUBY_VERSION
+    ruby_info += " (#{RUBY_ENGINE})" if defined?(RUBY_ENGINE)
+    "#{ruby_info} [#{obj}]:#{nest_level} > " 
+  }, 
+  proc { |obj, nest_level, _| 
+    ruby_info = RUBY_VERSION
+    ruby_info += " (#{RUBY_ENGINE})" if defined?(RUBY_ENGINE)
+    "#{ruby_info} [#{obj}]:#{nest_level} * " 
+  }
+]
 
-# === Listing config ===
-# Better colors - by default the headings for methods are too
-# similar to method name colors leading to a "soup"
-# These colors are optimized for use with Solarized scheme
-# for your terminal
-Pry.config.ls.separator = '\n' # new lines between methods
+# === LISTING CONFIGURATION ===
+# Better colors for method listings
+# Colors optimized for Solarized scheme
+begin
+  Pry.config.ls.separator = "\n" # new lines between methods
 Pry.config.ls.heading_color = :magenta
 Pry.config.ls.public_method_color = :green
 Pry.config.ls.protected_method_color = :yellow
 Pry.config.ls.private_method_color = :bright_black
+rescue NoMethodError, StandardError
+  # Handle changes in newer Pry versions
+  puts "Note: Some ls configurations are not available in this Pry version"
+end
 
-# == PLUGINS ===
-# awesome_print gem: great syntax colorized printing
-# look at ~/.aprc for more settings for awesome_print
+# === PLUGINS ===
+# Load useful plugins with error handling
+
+# Interactive editor
 begin
   require 'interactive_editor'
-rescue LoadError
-  warn 'can\'t load gem "gem install interactive_editor"'
+rescue LoadError => e
+  puts "Note: Interactive editor not available. Install with 'gem install interactive_editor'"
 end
 
+# Awesome Print for better output formatting
 begin
-  require 'rubygems'
   require 'awesome_print'
-#  require 'awesome_print_colors'
-
-rescue LoadError
-  warn 'can\'t load gem "gem install awesome_print"'
+  
+  # Enable awesome_print for all output, with paging
+  Pry.config.print = proc do |output, value| 
+    Pry::Helpers::BaseHelpers.stagger_output("=> #{value.ai}", output)
+  end
+rescue LoadError => e
+  puts "Note: awesome_print not available. Install with 'gem install awesome_print'"
 end
 
+# Clipboard integration
 begin
   require 'pry-clipboard'
-  # aliases
+  
+  # Add clipboard shortcuts
   Pry.config.commands.alias_command 'ch', 'copy-history'
   Pry.config.commands.alias_command 'cr', 'copy-result'
-rescue LoadError
-  warn 'can\'t load gem "gem install pry-clipboard"'
+rescue LoadError => e
+  puts "Note: pry-clipboard not available. Install with 'gem install pry-clipboard'"
 end
 
-# The following line enables awesome_print for all pry output,
-# and it also enables paging
-Pry.config.print = proc { |output, value| Pry::Helpers::BaseHelpers.stagger_output("=> #{value.ai}", output) }
+# Try to load pry-byebug for debugging if available
+begin
+  require 'pry-byebug'
+  puts "pry-byebug loaded for debugging commands"
+rescue LoadError
+  # Try to load the lighter pry-nav as fallback
+  begin
+    require 'pry-nav'
+    puts "pry-nav loaded for debugging commands"
+  rescue LoadError
+    puts "Note: No debugger available. Install with 'gem install pry-byebug'"
+end
+end
 
