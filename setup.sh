@@ -33,6 +33,19 @@ setup_macos() {
   fi
 }
 
+# Setup Neovim configuration
+setup_nvim() {
+  echo "Setting up Neovim configuration..."
+  
+  # Run the dedicated Neovim setup script
+  # Pass the --install-plugins flag if requested
+  if [ "$1" = "--install-plugins" ]; then
+    sh "$DOTFILES_DIR/setup_nvim.sh" --install-plugins
+  else
+    sh "$DOTFILES_DIR/setup_nvim.sh"
+  fi
+}
+
 # Install or update dotfiles
 install_dotfiles() {
   echo "Setting up dotfiles in XDG locations..."
@@ -48,7 +61,7 @@ install_dotfiles() {
   
   # Link config files to XDG locations
   echo "Creating symlinks for configuration files..."
-  
+
   # ZSH configuration
   if [ -f "$DOTFILES_DIR/zshrc" ]; then
     ln -sf "$DOTFILES_DIR/zshrc" "$XDG_CONFIG_HOME/zsh/.zshrc"
@@ -74,33 +87,8 @@ install_dotfiles() {
     fi
   fi
   
-  # Neovim configuration
-  if [ -d "$DOTFILES_DIR/nvim" ]; then
-    # Link the main init.vim file
-    ln -sf "$DOTFILES_DIR/nvim/init.vim" "$XDG_CONFIG_HOME/nvim/init.vim"
-    echo "Linked nvim/init.vim → $XDG_CONFIG_HOME/nvim/init.vim"
-    
-    # Make sure Neovim lua directory exists
-    mkdir -p "$XDG_CONFIG_HOME/nvim/lua"
-    
-    # Link Lua configurations
-    if [ -f "$DOTFILES_DIR/nvim/lua/init.lua" ]; then
-      ln -sf "$DOTFILES_DIR/nvim/lua/init.lua" "$XDG_CONFIG_HOME/nvim/lua/init.lua"
-      echo "Linked nvim/lua/init.lua → $XDG_CONFIG_HOME/nvim/lua/init.lua"
-    fi
-    
-    # Link the user directory if it exists
-    if [ -d "$DOTFILES_DIR/nvim/lua/user" ]; then
-      mkdir -p "$XDG_CONFIG_HOME/nvim/lua/user"
-      for file in "$DOTFILES_DIR/nvim/lua/user"/*.lua; do
-        if [ -f "$file" ]; then
-          filename=$(basename "$file")
-          ln -sf "$file" "$XDG_CONFIG_HOME/nvim/lua/user/$filename"
-          echo "Linked nvim/lua/user/$filename → $XDG_CONFIG_HOME/nvim/lua/user/$filename"
-        fi
-      done
-    fi
-  fi
+  # Setup Neovim
+  setup_nvim
   
   # Git configuration
   if [ -f "$DOTFILES_DIR/gitconfig" ]; then
@@ -132,12 +120,9 @@ install_dotfiles() {
     chmod 600 "$HOME/.ssh/config"
     echo "Created/overwrote ~/.ssh/config to include the XDG config"
   fi
-  
+
   # Create additional symlinks for tools that don't fully support XDG
-  if [ -d "$DOTFILES_DIR/oh-my-zsh" ]; then
-    ln -sf "$DOTFILES_DIR/oh-my-zsh" "$XDG_DATA_HOME/oh-my-zsh"
-    echo "Linked oh-my-zsh → $XDG_DATA_HOME/oh-my-zsh"
-  fi
+  # oh-my-zsh is now installed via setup_zsh.sh
   
   if [ -d "$DOTFILES_DIR/sbin" ]; then
     ln -sf "$DOTFILES_DIR/sbin" "$HOME/sbin"
@@ -147,6 +132,10 @@ install_dotfiles() {
   # Run macOS-specific setup if on macOS
   setup_macos
   
+  # Setup oh-my-zsh
+  echo "Setting up oh-my-zsh..."
+  ./setup_zsh.sh
+  
   echo "XDG-compliant dotfiles installation completed!"
 }
 
@@ -155,6 +144,7 @@ make_scripts_executable() {
   echo "Making scripts executable..."
   [ -f "$DOTFILES_DIR/setup_xdg.sh" ] && chmod +x "$DOTFILES_DIR/setup_xdg.sh"
   [ -f "$DOTFILES_DIR/setup_macos.sh" ] && chmod +x "$DOTFILES_DIR/setup_macos.sh"
+  [ -f "$DOTFILES_DIR/setup_nvim.sh" ] && chmod +x "$DOTFILES_DIR/setup_nvim.sh"
   [ -f "$DOTFILES_DIR/osx-defaults" ] && chmod +x "$DOTFILES_DIR/osx-defaults"
   [ -f "$DOTFILES_DIR/setup.sh" ] && chmod +x "$DOTFILES_DIR/setup.sh"
 }
@@ -172,9 +162,10 @@ if [ -d "$DOTFILES_DIR" ]; then
   echo "1. Update existing dotfiles to XDG format"
   echo "2. Run XDG setup only (for migrating existing configs)"
   echo "3. Run macOS-specific setup only"
-  echo "4. Exit"
+  echo "4. Run Neovim setup only"
+  echo "5. Exit"
   
-  read -p "Enter your choice (1-4): " choice
+  read -p "Enter your choice (1-5): " choice
   
   case $choice in
     1)
@@ -189,6 +180,10 @@ if [ -d "$DOTFILES_DIR" ]; then
       echo "macOS-specific setup complete."
       ;;
     4)
+      setup_nvim
+      echo "Neovim setup complete."
+      ;;
+    5)
       echo "Exiting without changes."
       exit 0
       ;;
