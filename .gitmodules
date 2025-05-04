@@ -1,9 +1,6 @@
 [submodule "oh-my-zsh"]
 	path = oh-my-zsh
 	url = https://github.com/robbyrussell/oh-my-zsh.git
-[submodule "vimdir"]
-	path = vimdir
-	url = https://github.com/feniix/vimdir.git
 [submodule "zsh_custom/plugins/zsh-completions"]
 	path = zsh_custom/plugins/zsh-completions
 	url = https://github.com/zsh-users/zsh-completions
