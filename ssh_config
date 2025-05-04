@@ -1,0 +1,21 @@
+# SSH Configuration - XDG compliant version
+# This file should be linked to ~/.config/ssh/config
+# Add 'Include ~/.config/ssh/config' to ~/.ssh/config to use it
+
+Include ~/.orbstack/ssh/config
+
+#LogLevel VERBOSE
+Compression yes
+ForwardX11Trusted yes
+HashKnownHosts no
+
+Host *
+  ServerAliveInterval 60
+  ForwardAgent        yes
+  AddKeysToAgent      yes
+  # ControlPath for some unknown reason breaks port forwarding
+  #ControlPath         "~/.ssh/cms/%C"
+  #ControlMaster       auto
+  #ControlPersist      30s
+  UseRoaming          no
+

@@ -120,6 +120,27 @@ install_dotfiles() {
     fi
   fi
   
+  # SSH configuration
+  if [ -f "$DOTFILES_DIR/ssh_config" ]; then
+    ln -sf "$DOTFILES_DIR/ssh_config" "$XDG_CONFIG_HOME/ssh/config"
+    echo "Linked ssh_config → $XDG_CONFIG_HOME/ssh/config"
+    
+    # Check if we need to update ~/.ssh/config to include our XDG config
+    if [ -f "$HOME/.ssh/config" ]; then
+      if ! grep -q "Include.*config/ssh/config" "$HOME/.ssh/config"; then
+        echo "NOTE: To use your SSH config, add this line to ~/.ssh/config:"
+        echo "Include ~/.config/ssh/config"
+      fi
+    else
+      # Create a basic ~/.ssh/config that includes our XDG config
+      mkdir -p "$HOME/.ssh"
+      echo "# XDG-compliant SSH configuration" > "$HOME/.ssh/config"
+      echo "Include ~/.config/ssh/config" >> "$HOME/.ssh/config"
+      chmod 600 "$HOME/.ssh/config"
+      echo "Created minimal ~/.ssh/config that includes the XDG config"
+    fi
+  fi
+  
   # Create additional symlinks for tools that don't fully support XDG
   if [ -d "$DOTFILES_DIR/oh-my-zsh" ]; then
     ln -sf "$DOTFILES_DIR/oh-my-zsh" "$XDG_DATA_HOME/oh-my-zsh"
