@@ -312,9 +312,9 @@ fi
 # === DEVELOPMENT SETTINGS ===
 # Java
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
-export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
-export MAVEN_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
-export GRADLE_OPTS="-Xmx2024m -Xms2024m"
+export ANT_OPTS="-Xmx4096m"
+export MAVEN_OPTS="--Xmx4096m"
+export GRADLE_OPTS="-Xmx4096m -Xms2024m"
 export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
 
 # OpenSSL
