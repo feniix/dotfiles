@@ -27,6 +27,15 @@ reset_path() {
   export PATH="$PATH:/opt/homebrew/opt/libpq/bin"
   export PATH="$PATH:/opt/homebrew/opt/ssh-copy-id/bin"
   
+  # Tool-specific paths
+  export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
+  export PATH="$PATH:$HOME/.linkerd2/bin"
+  export PATH="$PATH:$HOME/.docker/bin"
+  export PATH="$PATH:$HOME/.config/tempus-app-manager/bin"
+  export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+  export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin"
+  export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
+  
   # Add user directories next
   export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/go/bin"
   
@@ -82,11 +91,30 @@ debug_path() {
   done
 }
 
-# Homebrew completions (initialize before oh-my-zsh)
+# === COMPLETION SETUP ===
+# Set up completions once, efficiently
 if type brew &>/dev/null; then
   FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
+  # Skip global compinit in oh-my-zsh, we'll call it once efficiently
+  skip_global_compinit=1
+  
+  # Load completions
   autoload -Uz compinit
-  compinit
+  # Only rebuild completion cache once a week
+  if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
+    compinit
+  else
+    compinit -C
+  fi
+  
+  # Completion caching
+  zstyle ':completion:*' use-cache on
+  zstyle ':completion:*' cache-path ~/.zsh/cache
+  
+  # Better completion options
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+  zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 fi
 
 # === OH-MY-ZSH CONFIGURATION ===
@@ -115,10 +143,7 @@ BULLETTRAIN_GIT_BG=black
 BULLETTRAIN_DIR_EXTENDED=2
 BULLETTRAIN_KCTX_FG=black
 
-# === MORE PERFORMANCE OPTIMIZATIONS ===
-# Skip all compinit in oh-my-zsh, we'll call it once efficiently
-skip_global_compinit=1
-
+# === PERFORMANCE OPTIMIZATIONS ===
 # Disable oh-my-zsh automatic update checks
 DISABLE_AUTO_UPDATE="true"
 DISABLE_UPDATE_PROMPT="true"
@@ -170,11 +195,13 @@ plugins=(
 zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
 
-# Homebrew
+# === HOMEBREW CONFIGURATION ===
+# Homebrew wrapper if available
 if [ -f /opt/homebrew/etc/brew-wrap ]; then
   source /opt/homebrew/etc/brew-wrap
 fi
 
+# Homebrew environment variables
 export HOMEBREW_BREWFILE=~/dotfiles/Brewfile
 export HOMEBREW_BREWFILE_BACKUP=~/dotfiles/Brewfile.bak
 export HOMEBREW_BREWFILE_APPSTORE=1
@@ -182,16 +209,6 @@ export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_AUTOREMOVE=1
 export HOMEBREW_NO_INSTALL_UPGRADE=1
-
-# Tool paths - use prepend_path to ensure they come before system paths
-# But after the homebrew paths we've already set
-prepend_path "${KREW_ROOT:-$HOME/.krew}/bin"
-prepend_path "$HOME/.linkerd2/bin"
-prepend_path "$HOME/.docker/bin"
-prepend_path "$HOME/.config/tempus-app-manager/bin"
-prepend_path "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
-prepend_path "/opt/homebrew/Cellar/bonnie++/2.00a/bin"
-prepend_path "/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
 
 # MANPATH settings
 prepend_manpath "/opt/homebrew/opt/findutils/share/man"
@@ -202,9 +219,7 @@ prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 # Load Oh-My-Zsh
 source "$ZSH/oh-my-zsh.sh"
 
-# === COMPLETION SETTINGS ===
-# Removed duplicate Homebrew completion section that was here
-
+# === BASH COMPATIBILITY ===
 # Bash completion compatibility
 complete () {
   emulate -L zsh
@@ -221,15 +236,6 @@ complete () {
     compdef _bash_complete\ ${(j. .)${(q)args[1,-1-$#]}} "$@"
   fi
 }
-
-# Completion caching
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ~/.zsh/cache
-
-# Better completion options
-zstyle ':completion:*' menu select
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 
 # === HISTORY SETTINGS ===
 # History file configuration
@@ -348,6 +354,8 @@ alias vim=nvim
 alias vi=nvim
 alias t="top -ocpu -R -F -s 2 -n30"
 alias gist='gist -p'
+alias h='fc -li 1'
+alias hs='history | grep'
 
 # Copy/move with progress bar
 alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h"
@@ -416,7 +424,7 @@ if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
   source "$HOME/.sdkman/bin/sdkman-init.sh"
 fi
 
-# Google Cloud SDK
+# Google Cloud SDK - load once
 if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
   source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
 fi
@@ -424,30 +432,8 @@ if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
   source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
 fi
 
-# History display improvements
-alias h='fc -li 1'
-alias hs='history | grep'
-
 # === PERSONAL SETTINGS ===
 export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 export EDITOR=nvim
-
-# Use the async approach for compinit
-{
-  # Compile zcompdump if it's not fresh
-  if [[ -s "$ZSH_COMPDUMP" && (! -s "${ZSH_COMPDUMP}.zwc" || "$ZSH_COMPDUMP" -nt "${ZSH_COMPDUMP}.zwc") ]]; then
-    zcompile "$ZSH_COMPDUMP"
-  fi
-} &!
 export GPG_TTY=$(tty)
-
-# Final PATH check - if /usr/bin is still before /opt/homebrew/bin, fix it
-if [[ "$PATH" =~ /usr/bin.*:/opt/homebrew/bin ]]; then
-  echo "PATH order issue detected - fixing Homebrew PATH priority"
-  # Remove homebrew bin from current position
-  PATH=${PATH//:\/opt\/homebrew\/bin/}
-  PATH=${PATH//:\/opt\/homebrew\/sbin/}
-  # Add homebrew bin at the beginning
-  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
-fi
