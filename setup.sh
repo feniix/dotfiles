@@ -399,6 +399,7 @@ install_dotfiles() {
   backup_file "$HOME/.gitconfig"
   backup_file "$XDG_CONFIG_HOME/ssh/config"
   backup_file "$HOME/.ssh/config"
+  backup_file "$HOME/.p10k.zsh"
 
   # ZSH configuration
   if [ -f "$DOTFILES_DIR/zshrc" ]; then
@@ -411,6 +412,12 @@ install_dotfiles() {
   if [ -f "$DOTFILES_DIR/zshenv" ]; then
     ln -sf "$DOTFILES_DIR/zshenv" "$HOME/.zshenv"
     log_success "Linked zshenv → $HOME/.zshenv"
+  fi
+  
+  # Powerlevel10k configuration
+  if [ -f "$DOTFILES_DIR/p10k.zsh" ]; then
+    ln -sf "$DOTFILES_DIR/p10k.zsh" "$HOME/.p10k.zsh"
+    log_success "Linked p10k.zsh → $HOME/.p10k.zsh"
   fi
   
   # tmux configuration

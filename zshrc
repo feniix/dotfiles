@@ -438,5 +438,5 @@ if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
   source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 fi
 
-# To customize prompt, run `p10k configure` or edit ~/dotfiles/p10k.zsh
-[[ -f ~/dotfiles/p10k.zsh ]] && source ~/dotfiles/p10k.zsh
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh

@@ -55,12 +55,14 @@ brew freetype
 brew freexl
 brew frei0r
 brew fribidi
+brew fzf
 brew gawk
 brew gcc
 brew gdbm
 brew geos
 brew gettext
 brew gflags
+brew gh
 brew giflib
 brew git-extras
 brew git-lfs
