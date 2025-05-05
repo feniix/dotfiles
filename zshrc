@@ -1,27 +1,139 @@
 # Path to your oh-my-zsh configuration.
-#zmodload zsh/zprof
 
+# === PATH CONFIGURATION ===
+# Reset PATH to ensure proper ordering
+reset_path() {
+  # Save important system paths that should be included but at lower priority
+  local usr_local_bin="/usr/local/bin"
+  local usr_bin="/usr/bin"
+  local usr_sbin="/usr/sbin"
+  local bin="/bin"
+  local sbin="/sbin"
+  
+  # Start with a minimal PATH that prioritizes Homebrew
+  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin"
+  
+  # Add homebrew core utils next (highest priority after base homebrew)
+  export PATH="$PATH:/opt/homebrew/opt/curl/bin"
+  export PATH="$PATH:/opt/homebrew/opt/make/libexec/gnubin"
+  export PATH="$PATH:/opt/homebrew/opt/gnu-getopt/bin"
+  export PATH="$PATH:/opt/homebrew/opt/python@3.11/bin"
+  export PATH="$PATH:/opt/homebrew/opt/gnupg@2.2/bin"
+  export PATH="$PATH:/opt/homebrew/opt/gnu-tar/libexec/gnubin"
+  export PATH="$PATH:/opt/homebrew/opt/findutils/bin"
+  export PATH="$PATH:/opt/homebrew/opt/gawk/bin"
+  export PATH="$PATH:/opt/homebrew/opt/less/bin"
+  export PATH="$PATH:/opt/homebrew/opt/openssl@1.1/bin"
+  export PATH="$PATH:/opt/homebrew/opt/libpq/bin"
+  export PATH="$PATH:/opt/homebrew/opt/ssh-copy-id/bin"
+  
+  # Tool-specific paths
+  export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
+  export PATH="$PATH:$HOME/.linkerd2/bin"
+  export PATH="$PATH:$HOME/.docker/bin"
+  export PATH="$PATH:$HOME/.config/tempus-app-manager/bin"
+  export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+  export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin"
+  export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
+  
+  # Add user directories next
+  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/go/bin"
+  
+  # Add system paths at lowest priority
+  export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
+}
+
+# Initialize with proper ordering
+reset_path
+
+# Helper functions for PATH management
+# Add to PATH only if directory exists (and only if not already in PATH)
+prepend_path() {
+  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$1:$PATH"
+  fi
+}
+
+append_path() {
+  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$PATH:$1"
+  fi
+}
+
+# Add to MANPATH only if directory exists
+prepend_manpath() {
+  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
+    export MANPATH="$1:$MANPATH"
+  fi
+}
+
+append_manpath() {
+  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
+    export MANPATH="$MANPATH:$1"
+  fi
+}
+
+# Debug PATH and MANPATH
+debug_path() {
+  echo "=== PATH ==="
+  echo $PATH | tr ':' '\n' | nl
+  echo ""
+  echo "=== MANPATH ==="
+  echo $MANPATH | tr ':' '\n' | nl
+  echo ""
+  
+  # Check for non-existent directories in PATH
+  echo "=== Non-existent directories in PATH ==="
+  for p in $(echo $PATH | tr ':' '\n'); do
+    if [[ ! -d "$p" ]]; then
+      echo "MISSING: $p"
+    fi
+  done
+}
+
+# === COMPLETION SETUP ===
+# Set up completions once, efficiently
+if type brew &>/dev/null; then
+  FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
+  # Skip global compinit in oh-my-zsh, we'll call it once efficiently
+  skip_global_compinit=1
+  
+  # Load completions
+  autoload -Uz compinit
+  # Only rebuild completion cache once a week
+  if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
+    compinit
+  else
+    compinit -C
+  fi
+  
+  # Completion caching
+  zstyle ':completion:*' use-cache on
+  zstyle ':completion:*' cache-path ~/.zsh/cache
+  
+  # Better completion options
+  zstyle ':completion:*' menu select
+  zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+  zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+fi
+
+# === OH-MY-ZSH CONFIGURATION ===
 export ZSH=$HOME/.oh-my-zsh
 
-export ZSH_CUSTOM=$HOME/dotfiles/zsh_custom
-
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
+# Theme configuration
 ZSH_THEME="bullet-train"
-
 BULLETTRAIN_PROMPT_ORDER=(
-status
-custom
-context
-dir
-kctx
-aws
-git
-cmd_exec_time
+  status
+  custom
+  context
+  dir
+  kctx
+  aws
+  git
+  cmd_exec_time
 )
 
+# Bullet train settings
 BULLETTRAIN_KCTX_KCONFIG="$HOME/.kube/config"
 BULLETTRAIN_STATUS_EXIT_SHOW=true
 BULLETTRAIN_RUBY_FG=black
@@ -31,193 +143,163 @@ BULLETTRAIN_GIT_BG=black
 BULLETTRAIN_DIR_EXTENDED=2
 BULLETTRAIN_KCTX_FG=black
 
+# === PERFORMANCE OPTIMIZATIONS ===
+# Disable oh-my-zsh automatic update checks
+DISABLE_AUTO_UPDATE="true"
+DISABLE_UPDATE_PROMPT="true"
 
+# Reduce oh-my-zsh startup time
+DISABLE_MAGIC_FUNCTIONS="true"
+COMPLETION_WAITING_DOTS="true"
+DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# === PLUGIN CONFIGURATION ===
+# Core plugins - always loaded
+plugins=(
+  # Essentials
+  history-substring-search
+  colored-man-pages
+  command-not-found
+  zsh-completions
+  
+  # Movement and navigation  
+  last-working-dir
+  
+  # Shell utilities
+  sudo
+  gnu-utils
+  
+  # Git and version control
+  git
+  git-extras
+  
+  # Development tools
+  python
+  pip
+  rust
+  
+  # Container & cloud
+  docker
+  docker-compose
+  kubectl
+  aws
+  
+  # Build tools
+  ant
+  gradle
+  mvn
+)
+
+# Plugin configurations
+# SSH Agent configuration
+zstyle :omz:plugins:ssh-agent agent-forwarding on
+zstyle :omz:plugins:ssh-agent identities id_rsa
+
+# === HOMEBREW CONFIGURATION ===
+# Homebrew wrapper if available
 if [ -f /opt/homebrew/etc/brew-wrap ]; then
   source /opt/homebrew/etc/brew-wrap
 fi
 
+# Homebrew environment variables
 export HOMEBREW_BREWFILE=~/dotfiles/Brewfile
 export HOMEBREW_BREWFILE_BACKUP=~/dotfiles/Brewfile.bak
 export HOMEBREW_BREWFILE_APPSTORE=1
+export HOMEBREW_NO_ENV_HINTS=1
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_AUTOREMOVE=1
+export HOMEBREW_NO_INSTALL_UPGRADE=1
 
-# this is for homebrew
-export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}"
+# MANPATH settings
+prepend_manpath "/opt/homebrew/opt/findutils/share/man"
+prepend_manpath "/opt/homebrew/opt/gawk/share/man"
+prepend_manpath "/opt/homebrew/opt/less/share/man"
+prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 
-export PATH="/opt/homebrew/opt/curl/bin:$PATH"
-export PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
-export PATH="/opt/homebrew/opt/gnu-getopt/bin:$PATH"
-export PATH="/opt/homebrew/opt/python@3.11/bin:$PATH"
-export PATH="/opt/homebrew/opt/gnupg@2.2/bin:$PATH"
-export PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
-
-#for coreutils
-#export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:${PATH}"
-#export MANPATH="/opt/homebrew/opt/coreutils/libexec/gnuman:${MANPATH}"
-
-# for findutils
-export PATH="/opt/homebrew/opt/findutils/bin:${PATH}"
-export MANPATH="/opt/homebrew/opt/findutils/share/man:${MANPATH}"
-
-# for gawk
-export PATH="/opt/homebrew/opt/gawk/bin:${PATH}"
-export MANPATH="/opt/homebrew/opt/gawk/share/man:${MANPATH}"
-
-# for less
-export PATH="/opt/homebrew/opt/less/bin:${PATH}"
-export MANPATH="/opt/homebrew/opt/less/share/man:${MANPATH}"
-
-# for grep
-#export PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
-#export MANPATH="/opt/homebrew/opt/grep/libexec/gnuman:${MANPATH}"
-
-# for gnu-sed
-#export PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:${PATH}"
-#export MANPATH="/opt/homebrew/opt/gnu-sed/libexec/gnuman:${MANPATH}"
-
-export MANPATH="/opt/homebrew/opt/erlang/lib/erlang/man:${MANPATH}"
-
-export PATH=${HOME}/sbin:$PATH
-
-plugins=(
-ant
-colored-man-pages
-command-not-found
-common-aliases
-docker
-docker-compose
-gem
-git
-git-extras
-gnu-utils
-gpg-agent
-gradle
-grails
-history-substring-search
-last-working-dir
-mix
-mvn
-nmap
-npm
-pip
-rsync
-rust
-ssh-agent
-sudo
-svn
-vagrant
-zsh-completions
-)
-
+# Load Oh-My-Zsh
 source "$ZSH/oh-my-zsh.sh"
 
-if type brew &>/dev/null; then
-  FPATH=/opt/homebrew/completions/zsh:/opt/homebrew/share/zsh-completions:$FPATH
-
-  autoload -Uz compinit && compinit
-fi
-
-
+# === BASH COMPATIBILITY ===
+# Bash completion compatibility
 complete () {
-	emulate -L zsh
-	local args void cmd print remove
-	args=("$@")
-	zparseopts -D -a void o: A: G: W: C: F: P: S: X: a b c d e f g j k u v p=print r=remove
-	if [[ -n $print ]]
-	then
-		printf 'complete %2$s %1$s\n' "${(@kv)_comps[(R)_bash*]#* }"
-	elif [[ -n $remove ]]
-	then
-		for cmd
-		do
-			unset "_comps[$cmd]"
-		done
-	else
-		compdef _bash_complete\ ${(j. .)${(q)args[1,-1-$#]}} "$@"
-	fi
-}
-
-export DEBFULLNAME="Sebastian Otaegui"
-export DEBEMAIL="feniix@gmail.com"
-
-# history settings
-HISTFILE=~/.zsh_history
-setopt INC_APPEND_HISTORY LIST_TYPES LONG_LIST_JOBS HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS HIST_IGNORE_SPACE AUTO_REMOVE_SLASH
-export EDITOR=nvim
-export HISTSIZE=100000
-export SAVEHIST=100000
-
-export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
-
-export MAVEN_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
-
-export GRADLE_OPTS="-Xmx2024m -Xms2024m "
-
-rm -rf ~/.freerdp/known_hosts
-
-#config for the ssh-agent plugin
-zstyle :omz:plugins:ssh-agent agent-forwarding on
-zstyle :omz:plugins:ssh-agent identities id_rsa
-
-
-bindkey -e
-bindkey "\e\e[D" backward-word # alt + <-
-bindkey "\e\e[C" forward-word # alt + ->
-
-export PACKER_CACHE_DIR=${HOME}/.packer
-
-[[ -f "$HOME/.aws/github_token" ]] && source "$HOME/.aws/github_token"
-
-#--------- begin alias ---------#
-
-#alias dos2unix="todos -d"
-#alias unix2dos="todos -u"
-alias mtr="mtr --curses"
-
-alias vim=nvim
-alias vi=nvim
-
-# copy / move with progress bar
-alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h "
-alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
-
-alias t="top -ocpu -R -F -s 2 -n30"
-alias k=kubectl
-
-export PATH=~/go/bin:${PATH}
-
-export JMETER_HOME=/usr/local/opt/jmeter
-
-# Java setup
-export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
-
-function setjdk() {
-  if [ $# -ne 0 ]; then
-    removeFromPath '/System/Library/Frameworks/JavaVM.framework/Home/bin'
-    if [ -n "${JAVA_HOME+x}" ]; then
-      removeFromPath $JAVA_HOME/bin
-    fi
-    declare -x JAVA_HOME
-    JAVA_HOME=$(/usr/libexec/java_home -v $@)
-    export PATH=$JAVA_HOME/bin:$PATH
+  emulate -L zsh
+  local args void cmd print remove
+  args=("$@")
+  zparseopts -D -a void o: A: G: W: C: F: P: S: X: a b c d e f g j k u v p=print r=remove
+  if [[ -n $print ]]; then
+    printf 'complete %2$s %1$s\n' "${(@kv)_comps[(R)_bash*]#* }"
+  elif [[ -n $remove ]]; then
+    for cmd; do
+      unset "_comps[$cmd]"
+    done
+  else
+    compdef _bash_complete\ ${(j. .)${(q)args[1,-1-$#]}} "$@"
   fi
 }
 
-function removeFromPath() {
-  export PATH=$(echo "$PATH" | sed -E -e "s;:$1;;" -e "s;$1:?;;")
-}
-setjdk 11
+# === HISTORY SETTINGS ===
+# History file configuration
+HISTFILE=~/.zsh_history
+HISTSIZE=1000000
+SAVEHIST=1000000
 
-export AWS_PAGER=""
+# History command configuration
+setopt EXTENDED_HISTORY       # Save timestamp and duration
+setopt HIST_EXPIRE_DUPS_FIRST # Delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt HIST_IGNORE_DUPS       # Don't record if same as previous command
+setopt HIST_IGNORE_ALL_DUPS   # Delete old duplicate entries
+setopt HIST_FIND_NO_DUPS      # Don't display duplicates during searches
+setopt HIST_IGNORE_SPACE      # Don't record commands starting with space
+setopt HIST_REDUCE_BLANKS     # Remove unnecessary blanks
+setopt HIST_SAVE_NO_DUPS      # Don't save duplicates
+setopt HIST_VERIFY            # Show command with history expansion before running it
+setopt HIST_BEEP              # Beep when accessing nonexistent history
+setopt INC_APPEND_HISTORY     # Add commands as they are typed, not at shell exit
+setopt SHARE_HISTORY          # Share history between different instances
 
-alias gist='gist -p'
+# History search functions
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
 
-export VAGRANT_DEFAULT_PROVIDER=virtualbox
-unalias run-help
-autoload run-help
-export HELPDIR=/opt/homebrew/share/zsh/help
+# === KEYBINDINGS ===
+bindkey -e  # Emacs style bindings (default)
 
-#-------------------------------#
+# Word movement with Option+Arrow keys
+bindkey "\e\e[D" backward-word          # Option+Left
+bindkey "\e\e[C" forward-word           # Option+Right
+bindkey "^[b" backward-word             # Option+b - alternative for terminals
+bindkey "^[f" forward-word              # Option+f - alternative for terminals
 
+# History search with Up/Down - search based on what you've typed
+bindkey "^[[A" up-line-or-beginning-search        # Up
+bindkey "^[[B" down-line-or-beginning-search      # Down
+
+# Line navigation
+bindkey "^[[H" beginning-of-line        # Home (Command+Left on Mac keyboard)
+bindkey "^[[F" end-of-line              # End (Command+Right on Mac keyboard)
+bindkey "^A" beginning-of-line          # Ctrl+A - alternative for terminals
+bindkey "^E" end-of-line                # Ctrl+E - alternative for terminals
+bindkey "^[[3~" delete-char             # Delete
+
+# History search with Ctrl+R/S
+bindkey '^R' history-incremental-search-backward  # Ctrl+R
+bindkey '^S' history-incremental-search-forward   # Ctrl+S
+
+# History navigation with Ctrl+P/N
+bindkey '^P' history-beginning-search-backward    # Ctrl+P
+bindkey '^N' history-beginning-search-forward     # Ctrl+N
+
+# Edit command in editor
+bindkey '^X^E' edit-command-line        # Ctrl+X then Ctrl+E - edit in $EDITOR
+
+# Common shell actions
+bindkey '^U' kill-whole-line            # Ctrl+U - delete entire line
+bindkey '^K' kill-line                  # Ctrl+K - delete from cursor to end
+bindkey '^W' backward-kill-word         # Ctrl+W - delete previous word
+bindkey '^Y' yank                       # Ctrl+Y - paste what was cut
+
+# === LANGUAGE AND LOCALE ===
 export LANG=en_US.UTF-8
 export LC_CTYPE=UTF-8
 export LC_NUMERIC="en_US.UTF-8"
@@ -233,62 +315,75 @@ export LC_MEASUREMENT="en_US.UTF-8"
 export LC_IDENTIFICATION="en_US.UTF-8"
 export LC_ALL=
 
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+# === DEVELOPMENT SETTINGS ===
+# Java
+export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
+export ANT_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
+export MAVEN_OPTS="-Xmx2024m -XX:MaxPermSize=256m"
+export GRADLE_OPTS="-Xmx2024m -Xms2024m"
+export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
 
-#asdf_unload() {
-#  removeFromPath /Users/otaegui/.asdf/shims
-#  removeFromPath /opt/homebrew/opt/asdf/libexec
-#}
-#
-#asdf_load() {
-#  source /opt/homebrew/opt/asdf/libexec/asdf.sh
-#  source /opt/homebrew/opt/asdf/etc/bash_completion.d/asdf.bash
-#}
-#asdf_load
-
-#source <(kubectl completion zsh)
-#source <(kops completion zsh)
-#source ~/sbin/kubectl-completion
-#source ~/sbin/kops-completion
-
-
-eval "$(direnv hook zsh)"
-
-export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
-
-
-export PATH="/opt/homebrew/opt/openssl@1.1/bin:$PATH"
+# OpenSSL
 export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
 export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@1.1/lib/pkgconfig"
 
-# this is needed to load the AWS credentials in some go apps that use the aws
-# sdk
+# AWS
+export AWS_PAGER=""
 export AWS_SDK_LOAD_CONFIG=1
+[[ -f "$HOME/.aws/github_token" ]] && source "$HOME/.aws/github_token"
 
+# Kubernetes
 export KUBECONFIG=$HOME/.kube/config
-zstyle ':completion:*' use-cache on
-zstyle ':completion:*' cache-path ~/.zsh/cache
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
+alias k=kubectl
 
+# Terraform
+export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
+export TFENV_ARCH=arm64
 
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-export PATH=$HOME/.linkerd2/bin:$PATH
-source "$HOME/.sdkman/bin/sdkman-init.sh"
+# Other dev tools
+export PACKER_CACHE_DIR=${HOME}/.packer
+export JMETER_HOME=/usr/local/opt/jmeter
+export VAGRANT_DEFAULT_PROVIDER=virtualbox
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
-  source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
-fi
+# === ALIASES ===
+alias mtr="mtr --curses"
+alias vim=nvim
+alias vi=nvim
+alias t="top -ocpu -R -F -s 2 -n30"
+alias gist='gist -p'
+alias h='fc -li 1'
+alias hs='history | grep'
 
-# The next line enables shell command completion for gcloud.
-if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
-  source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
-fi
+# Copy/move with progress bar
+alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h"
+alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
 
-export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
+# === FUNCTIONS ===
+# Compact JDK version switcher
+setjdk() {
+  [ -z "$1" ] && { /usr/libexec/java_home -V 2>&1 | grep -E "\s+\d" | cut -d, -f1; return; }
+  
+  local jhome=$(/usr/libexec/java_home -v "$1" 2>/dev/null) || { 
+    echo "Java $1 not found"; 
+    /usr/libexec/java_home -V 2>&1 | grep -E "\s+\d" | cut -d, -f1; 
+    return 1; 
+  }
+  
+  [ -n "$JAVA_HOME" ] && PATH=${PATH//$JAVA_HOME\/bin:/}
+  export JAVA_HOME=$jhome
+  export PATH=$JAVA_HOME/bin:$PATH
+  
+  # Only show version info if verbose flag is passed
+  [ "$2" = "-v" ] && java -version
+}
 
-#zprof
+# Set default Java version to 21
+setjdk 21
 
+# List GCP projects
 function list() {
   case $1 in
     projects)
@@ -299,6 +394,7 @@ function list() {
   esac
 }
 
+# Remove git branches that have been deleted upstream
 function rm_local_branches() {
   if [ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ]; then
     echo "deleting local branches that do not have a remote"
@@ -308,26 +404,36 @@ function rm_local_branches() {
   fi
 }
 
-###_begin_tam_config_block_###
-export PATH=/Users/feniix/.config/tempus-app-manager/bin:$PATH
-###_end_tam_config_block_###
-#
+# === SSH AGENT CONFIGURATION ===
+# Remove FreeDRP known hosts to prevent issues
+rm -rf ~/.freerdp/known_hosts
 
-export PATH="$PATH:/Users/feniix/bin"
-export PATH="/opt/homebrew/opt/ssh-copy-id/bin:$PATH"
-export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
-export PATH="$PATH:~/Library/Application Support/JetBrains/Toolbox/scripts"
-export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
-export TFENV_ARCH=arm64
-export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+# === EXTERNAL TOOLS INTEGRATION ===
+# iTerm2 integration
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+# direnv - lazy load
+direnv() {
+  unfunction direnv
+  eval "$(command direnv hook zsh)"
+  direnv "$@"
+}
 
-# Fiberplane CLI (fp)
-export PATH="/Users/feniix/.fiberplane:$PATH"
-source /Users/feniix/.fiberplane/zsh_completions
+# SDKMAN
+if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
+  source "$HOME/.sdkman/bin/sdkman-init.sh"
+fi
 
-export PATH=$HOME/.docker/bin:$PATH
+# Google Cloud SDK - load once
+if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
+  source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
+fi
+if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
+  source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
+fi
 
-eval "$(mise activate zsh)"
-eval "$(mise completion zsh)"
+# === PERSONAL SETTINGS ===
+export DEBFULLNAME="Sebastian Otaegui"
+export DEBEMAIL="feniix@gmail.com"
+export EDITOR=nvim
+export GPG_TTY=$(tty)

@@ -23,7 +23,7 @@
   append = commit --amend -C HEAD
 [core]
   autocrlf = input
-#  excludesfile = ~/.gitignore_global
+  excludesfile = ~/.config/git/ignore
   # deals with umlaits
   quotepath = false
   pager = diff-so-fancy | less --tabs=4 -RFX
@@ -78,8 +78,7 @@
   cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
   trustExitCode = true
 [commit]
-  template = ~/.stCommitMsg
-	gpgsign = true
+  gpgsign = true
 [diff "sopsdiffer"]
   textconv = sops -d
 [filter "lfs"]
@@ -98,5 +97,5 @@
 
 [init]
   defaultBranch = main
-  templateDir = /Users/feniix/.git-template
+  templateDir = ~/.config/git/template
 
