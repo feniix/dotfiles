@@ -121,27 +121,7 @@ fi
 export ZSH=$HOME/.oh-my-zsh
 
 # Theme configuration
-ZSH_THEME="bullet-train"
-BULLETTRAIN_PROMPT_ORDER=(
-  status
-  custom
-  context
-  dir
-  kctx
-  aws
-  git
-  cmd_exec_time
-)
-
-# Bullet train settings
-BULLETTRAIN_KCTX_KCONFIG="$HOME/.kube/config"
-BULLETTRAIN_STATUS_EXIT_SHOW=true
-BULLETTRAIN_RUBY_FG=black
-BULLETTRAIN_DIR_FG=black
-BULLETTRAIN_GIT_FG=white
-BULLETTRAIN_GIT_BG=black
-BULLETTRAIN_DIR_EXTENDED=2
-BULLETTRAIN_KCTX_FG=black
+ZSH_THEME=""  # Disabling Oh-My-Zsh themes as we're using Powerlevel10k via Homebrew
 
 # === PERFORMANCE OPTIMIZATIONS ===
 # Disable oh-my-zsh automatic update checks
@@ -451,3 +431,12 @@ export DEBFULLNAME="Sebastian Otaegui"
 export DEBEMAIL="feniix@gmail.com"
 export EDITOR=nvim
 export GPG_TTY=$(tty)
+
+# === POWERLEVEL10K ===
+# Source Powerlevel10k theme
+if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
+  source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+fi
+
+# To customize prompt, run `p10k configure` or edit ~/dotfiles/p10k.zsh
+[[ -f ~/dotfiles/p10k.zsh ]] && source ~/dotfiles/p10k.zsh
