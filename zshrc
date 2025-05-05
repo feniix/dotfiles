@@ -315,6 +315,20 @@ export LC_MEASUREMENT="en_US.UTF-8"
 export LC_IDENTIFICATION="en_US.UTF-8"
 export LC_ALL=
 
+# === ASDF VERSION MANAGER ===
+# Initialize ASDF
+if [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
+  . /opt/homebrew/opt/asdf/libexec/asdf.sh
+  
+  # Add asdf completions - needed for zsh
+  if [ -d "${ASDF_DIR}/completions" ]; then
+    fpath=(${ASDF_DIR}/completions $fpath)
+    # Ensure completions are loaded
+    autoload -Uz compinit
+    compinit
+  fi
+fi
+
 # === DEVELOPMENT SETTINGS ===
 # Java
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
