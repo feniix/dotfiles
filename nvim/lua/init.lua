@@ -54,47 +54,47 @@ function safe_require(module)
   return result
 end
 
--- Function to set up all modules
-local function setup_all()
-  -- Setup editor options
-  local options = safe_require('user.options')
-  if options then 
-    options.setup()
-  else
-    vim.notify("Options module not loaded. Using default editor settings.", vim.log.levels.WARN)
+-- Function to load the main user configuration
+local function load_user_config()
+  -- Get the user config module
+  local user_config_ok, user_config = pcall(require, "user")
+  if not user_config_ok then
+    vim.notify("Could not load main user configuration. Using fallback configuration.", vim.log.levels.ERROR)
+    
+    -- Load individual modules as fallback
+    -- Setup editor options
+    local options = safe_require('user.options')
+    if options then options.setup() end
+    
+    -- Setup plugin configurations
+    local plugins = safe_require('user.plugins')
+    if plugins then plugins.setup() end
+    
+    -- Setup UI components
+    local ui = safe_require('user.ui')
+    if ui then ui.setup() end
+    
+    -- Setup keymaps
+    local keymaps = safe_require('user.keymaps')
+    if keymaps then keymaps.setup() end
+    
+    -- Setup completion
+    local completion = safe_require('user.completion')
+    if completion then completion.setup() end
+    
+    return
   end
   
-  -- Setup plugin configurations
-  local plugins = safe_require('user.plugins')
-  if plugins then 
-    plugins.setup()
-  else
-    vim.notify("Plugins module not loaded. Plugin configuration may be limited.", vim.log.levels.WARN)
-  end
-
-  -- Setup UI components
-  local ui = safe_require('user.ui')
-  if ui then 
-    ui.setup()
-  else
-    vim.notify("UI module not loaded. Visual elements may be limited.", vim.log.levels.WARN)
-  end
-
-  -- Setup keymaps
-  local keymaps = safe_require('user.keymaps')
-  if keymaps then
-    keymaps.setup()
-  else
-    vim.notify("Keymaps module not loaded. Key bindings may be limited.", vim.log.levels.WARN)
-  end
-
-  -- Setup completion
-  local completion = safe_require('user.completion')
-  if completion then
-    completion.setup()
-  else
-    vim.notify("Completion module not loaded. Code completion may be limited.", vim.log.levels.WARN)
-  end
+  -- Use unified setup method
+  user_config.setup()
+  
+  -- Make individual setup functions available globally
+  _G.setup_options = user_config.setup_options
+  _G.setup_plugins = user_config.setup_plugins
+  _G.setup_ui = user_config.setup_ui
+  _G.setup_keymaps = user_config.setup_keymaps
+  _G.setup_completion = user_config.setup_completion
+  _G.setup_language = user_config.setup_language
 end
 
 -- Helper function for TypeScript development
@@ -132,38 +132,15 @@ vim.api.nvim_create_autocmd("VimEnter", {
         end
       end
 
-      -- Setup all modules after plugins are loaded
-      setup_all()
+      -- Load all configuration modules
+      load_user_config()
     end, 1000)
   end,
   pattern = "*"
 })
 
--- Make setup functions available to init.vim
-_G.setup_options = function()
-  local options = safe_require('user.options')
-  if options then options.setup() end
-end
-
-_G.setup_plugins = function()
-  local plugins = safe_require('user.plugins')
-  if plugins then plugins.setup() end
-end
-
-_G.setup_ui = function()
-  local ui = safe_require('user.ui')
-  if ui then ui.setup() end
-end
-
-_G.setup_keymaps = function()
-  local keymaps = safe_require('user.keymaps')
-  if keymaps then keymaps.setup() end
-end
-
-_G.setup_completion = function()
-  local completion = safe_require('user.completion')
-  if completion then completion.setup() end
-end
+-- Make safe_require globally available
+_G.safe_require = safe_require
 
 -- This file is loaded from init.vim with:
 -- lua require('init') 
