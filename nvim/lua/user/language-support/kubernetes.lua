@@ -134,12 +134,6 @@ M.setup = function(opts)
   })
   
   -- Load the yaml schemas module
-  local schemas_ok, yaml_schemas = pcall(require, "user.yaml_schemas")
-  if not schemas_ok then
-    vim.notify("YAML schema module not found. Using basic schema configuration.", vim.log.levels.WARN)
-  end
-  
-  -- Load the YAML LSP module
   local yaml_lsp_ok, yaml_lsp = pcall(require, "user.yaml_lsp")
   if not yaml_lsp_ok then
     vim.notify("YAML LSP module not found. Using basic LSP configuration.", vim.log.levels.WARN)
@@ -152,19 +146,16 @@ M.setup = function(opts)
     })
     
     -- Get all schemas for Kubernetes
-    local schemas = {}
-    if schemas_ok then
-      schemas = yaml_schemas.get_kubernetes_schemas()
-      
-      -- Add operator schemas if enabled
-      if config.operator_schemas then
-        schemas = vim.tbl_deep_extend("force", schemas, yaml_schemas.get_operator_schemas())
-      end
-      
-      -- Add custom schemas if provided
-      if config.custom_schemas then
-        schemas = yaml_schemas.add_custom_schemas(schemas, config.custom_schemas)
-      end
+    local schemas = yaml_lsp.get_kubernetes_schemas()
+    
+    -- Add operator schemas if enabled
+    if config.operator_schemas then
+      schemas = vim.tbl_deep_extend("force", schemas, yaml_lsp.get_operator_schemas())
+    end
+    
+    -- Add custom schemas if provided
+    if config.custom_schemas then
+      schemas = yaml_lsp.add_custom_schemas(schemas, config.custom_schemas)
     end
     
     -- If YAML LSP is already configured, just register our custom filetypes

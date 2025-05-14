@@ -17,13 +17,13 @@ local core_modules = {
 -- The order here determines which configuration takes precedence
 local language_modules = {
   -- Basic language support first
-  "json",        -- JSON support
-  "yaml",        -- YAML support (should be before kubernetes)
-  "terraform",   -- Terraform support
-  "go",          -- Go support
+  "json",          -- JSON support with schemas and formatting
+  "yaml",          -- YAML support with schemas and formatting
+  "terraform",     -- Terraform support with HCL formatting and validation
+  "go",            -- Go support with gopls configuration
   -- More specific language support that may build on basic ones
-  "kubernetes",  -- Kubernetes support (builds on YAML)
-  "typescript"   -- TypeScript support
+  "kubernetes",    -- Kubernetes support (builds on YAML)
+  "typescript"     -- TypeScript support with typescript-tools
 }
 
 -- Track LSP servers that have already been configured
@@ -32,7 +32,6 @@ local configured_lsp_servers = {}
 -- Utility modules that should be loaded
 local utility_modules = {
   "tools",            -- Tool installation utilities
-  "yaml_schemas",     -- YAML schema definitions
   "yaml_lsp",         -- YAML LSP configuration
   "lsp",
   "lsp_common",

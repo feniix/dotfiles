@@ -33,12 +33,6 @@ M.setup = function(opts)
     end
   end
   
-  -- Load the YAML schema module
-  local schemas_ok, yaml_schemas = pcall(require, "user.yaml_schemas")
-  if not schemas_ok then
-    vim.notify("YAML schema module not found. Using basic schema configuration.", vim.log.levels.WARN)
-  end
-  
   -- Load the YAML LSP module
   local yaml_lsp_ok, yaml_lsp = pcall(require, "user.yaml_lsp")
   if not yaml_lsp_ok then
@@ -52,20 +46,7 @@ M.setup = function(opts)
     })
     
     -- Get schemas for YAML files
-    local schemas = {}
-    if schemas_ok then
-      schemas = yaml_schemas.get_base_schemas()
-    else
-      -- Fallback schemas if yaml_schemas module not available
-      schemas = {
-        ["https://json.schemastore.org/github-workflow.json"] = {
-          ".github/workflows/*.{yml,yaml}"
-        },
-        ["https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json"] = {
-          "docker-compose.yml", "docker-compose.yaml"
-        }
-      }
-    end
+    local schemas = yaml_lsp.get_base_schemas()
     
     -- Set up the YAML language server with our schemas
     yaml_lsp.setup_yaml_ls(schemas)

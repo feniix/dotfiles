@@ -65,69 +65,6 @@ M.setup = function()
     nvim_lsp[server].setup(default_config)
   end
 
-  -- Check what language servers are available
-  local servers_available = true
-  
-  -- Go - This is now handled by the go language module
-  -- if nvim_lsp.gopls then
-  --   setup_server("gopls", {
-  --     settings = {
-  --       gopls = {
-  --         analyses = {
-  --           unusedparams = true,
-  --           shadow = true,
-  --           fieldalignment = true,
-  --           nilness = true,
-  --           unusedwrite = true,
-  --           useany = true,
-  --         },
-  --         staticcheck = true,
-  --         gofumpt = true,
-  --         usePlaceholders = true,
-  --         completeUnimported = true,
-  --         semanticTokens = true,
-  --         codelenses = {
-  --           gc_details = false,
-  --           generate = true,
-  --           regenerate_cgo = true,
-  --           run_govulncheck = true,
-  --           test = true,
-  --           tidy = true,
-  --           upgrade_dependency = true,
-  --           vendor = true,
-  --         },
-  --         hints = {
-  --           assignVariableTypes = true,
-  --           compositeLiteralFields = true,
-  --           compositeLiteralTypes = true,
-  --           constantValues = true,
-  --           functionTypeParameters = true,
-  --           parameterNames = true,
-  --           rangeVariableTypes = true,
-  --         },
-  --       },
-  --     },
-  --     on_attach = function(client, bufnr)
-  --       -- Call the base on_attach function
-  --       on_attach(client, bufnr)
-  --       
-  --       -- Add Go-specific keymaps here
-  --       local opts = { noremap = true, silent = true, buffer = bufnr }
-  --       vim.keymap.set('n', '<leader>gtj', vim.lsp.buf.type_definition, opts)
-  --       vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
-  --       
-  --       -- Auto-format on save
-  --       vim.api.nvim_create_autocmd("BufWritePre", {
-  --         group = vim.api.nvim_create_augroup("GoFormat", { clear = true }),
-  --         buffer = bufnr,
-  --         callback = function()
-  --           vim.lsp.buf.format({ async = false })
-  --         end,
-  --       })
-  --     end,
-  --   })
-  -- end
-
   -- Python
   if nvim_lsp.pyright then
     setup_server("pyright", {
@@ -153,56 +90,6 @@ M.setup = function()
       vim.notify("TypeScript module not loaded. TypeScript features will be limited.", vim.log.levels.WARN)
     end
   end
-
-  -- Terraform - Now handled by terraform language module
-  -- if nvim_lsp.terraformls then
-  --   setup_server("terraformls", {
-  --     settings = {
-  --       terraform = {
-  --         path = "terraform",
-  --         telemetry = { enable = false },
-  --         experimentalFeatures = {
-  --           validateOnSave = true,
-  --         },
-  --       },
-  --     },
-  --   })
-  --   
-  --   -- Format on save for terraform files
-  --   vim.api.nvim_create_autocmd("BufWritePre", {
-  --     pattern = { "*.tf", "*.tfvars" },
-  --     callback = function()
-  --       vim.lsp.buf.format({ async = false })
-  --     end,
-  --   })
-  -- end
-
-  -- JSON language server - Now handled by json language module
-  -- if nvim_lsp.jsonls then
-  --   -- Try to load SchemaStore, but handle if not yet available
-  --   local schemas = {}
-  --   local schemastore_ok, schemastore = pcall(require, 'schemastore')
-  --   if schemastore_ok then
-  --     schemas = schemastore.json.schemas()
-  --   end
-  --   
-  --   setup_server("jsonls", {
-  --     settings = {
-  --       json = {
-  --         schemas = schemas,
-  --         validate = { enable = true },
-  --         format = { enable = true },
-  --       },
-  --     },
-  --     commands = {
-  --       Format = {
-  --         function()
-  --           vim.lsp.buf.range_formatting({}, {0, 0}, {vim.fn.line("$"), 0})
-  --         end
-  --       }
-  --     }
-  --   })
-  -- end
 
   -- TOML language server
   if nvim_lsp.taplo then
@@ -273,26 +160,6 @@ M.setup = function()
   elseif nvim_lsp.ruby_ls then
     vim.notify("ruby_ls is deprecated, use ruby_lsp instead", vim.log.levels.WARN)
   end
-
-  -- YAML LSP - Now handled by yaml and kubernetes language modules
-  -- if nvim_lsp.yamlls then
-  --   setup_server("yamlls", {
-  --     settings = {
-  --       yaml = {
-  --         schemaStore = {
-  --           enable = true,
-  --           url = "https://www.schemastore.org/api/json/catalog.json",
-  --         },
-  --         validate = true,
-  --         completion = true,
-  --         hover = true,
-  --         format = {
-  --           enable = true,
-  --         },
-  --       },
-  --     },
-  --   })
-  -- end
 
   -- Lua (for Neovim configuration)
   if nvim_lsp.lua_ls then
