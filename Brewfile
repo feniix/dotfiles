@@ -1,15 +1,7 @@
 
 # tap repositories and their packages
 
-## Direct install
-brew neovim
-
-tap kubescape/tap
-
-tap rcmdnk/file
-brew brew-file
-
-# Other Homebrew packages
+tap homebrew/core
 brew abseil
 brew aom
 brew aribb24
@@ -179,6 +171,7 @@ brew mpg123
 brew msgpack
 brew ncdu
 brew ncurses
+brew neovim
 brew netcdf
 brew nettle
 brew node
@@ -196,6 +189,7 @@ brew openssl@3
 brew operator-sdk
 brew opus
 brew p11-kit
+brew p7zip
 brew pandoc
 brew pango
 brew pcre
@@ -208,6 +202,7 @@ brew pkgconf
 brew poetry
 brew poppler
 brew popt
+brew powerlevel10k
 brew pre-commit
 brew prettier
 brew proj
@@ -234,6 +229,7 @@ brew rtmpdump
 brew rubberband
 brew ruby-build
 brew sdl2
+brew sevenzip
 brew shared-mime-info
 brew shellcheck
 brew six
@@ -250,6 +246,7 @@ brew svt-av1
 brew tcl-tk
 brew tcl-tk@8
 brew terraform-docs
+brew terraform-ls
 brew terrascan
 brew tesseract
 brew tfenv
@@ -260,6 +257,7 @@ brew theora
 brew thrift
 brew tree
 brew tree-sitter
+brew unar
 brew unbound
 brew unibilium
 brew unixodbc
@@ -284,7 +282,7 @@ brew zplug
 brew zsh-completions
 brew zstd
 
-# Other Cask applications
+tap homebrew/cask
 cask 1password
 cask appcleaner
 cask basictex
@@ -315,19 +313,28 @@ cask vlc
 cask zoom
 cask zulu@21
 
+tap hashicorp/tap
+
+tap kubescape/tap
+
+tap rcmdnk/file
+brew brew-file
+
+tap romkatv/powerlevel10k
+
 # App Store applications
-appstore 1569813296  1Password for Safari  (8.10.70)
-appstore 937984704   Amphetamine           (5.3.2)
-appstore 975937182   Fantastical           (4.0.10)
-appstore 1460836908  GoPro Player          (3.1.0)
-appstore 409183694   Keynote               (14.4)
-appstore 409203825   Numbers               (14.4)
-appstore 490179405   Okta Verify           (9.39.0)
-appstore 429449079   Patterns              (1.3)
-appstore 545519333   Prime Video           (10.69)
-appstore 803453959   Slack                 (4.43.52)
-appstore 747648890   Telegram              (11.9)
-appstore 310633997   WhatsApp              (25.13.74)
-appstore 1147396723  WhatsApp (old)        (2.2437.52)
-appstore 1295203466  Windows App           (11.1.4)
-appstore 497799835   Xcode                 (16.3)
+appstore 1569813296 1Password for Safari (8.10.76)
+appstore 937984704 Amphetamine (5.3.2)
+appstore 975937182 Fantastical (4.0.11)
+appstore 1460836908 GoPro Player (3.1.0)
+appstore 1474276998 HP Smart (18.6.1)
+appstore 409183694 Keynote (14.4)
+appstore 409203825 Numbers (14.4)
+appstore 490179405 Okta Verify (9.39.0)
+appstore 429449079 Patterns (1.3)
+appstore 545519333 Prime Video (10.74)
+appstore 803453959 Slack (4.43.52)
+appstore 747648890 Telegram (11.11)
+appstore 1147396723 WhatsApp (2.2437.52)
+appstore 1295203466 Windows App (11.1.4)
+appstore 497799835 Xcode (16.3)
