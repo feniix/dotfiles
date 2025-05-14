@@ -15,7 +15,7 @@ M.setup = function()
     vim.notify("Could not load LSP common module. Using basic LSP configuration.", vim.log.levels.WARN)
     return
   end
-  
+
   -- Get capabilities from common module
   local capabilities = lsp_common.get_capabilities()
   
@@ -46,8 +46,8 @@ M.setup = function()
     if type(nvim_lsp[server].setup) ~= "function" then
       vim.notify(server .. " LSP setup function not available.", vim.log.levels.WARN)
       return
-    end
-    
+  end
+
     -- Default config with capabilities and on_attach
     local default_config = {
       on_attach = on_attach,

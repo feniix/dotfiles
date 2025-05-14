@@ -144,4 +144,4 @@ if has('nvim')
   " Load the Lua configuration
   " This will initialize all required modules through the unified loading mechanism
   lua require('init')
-endif 
+  endif

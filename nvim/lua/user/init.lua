@@ -31,6 +31,9 @@ local configured_lsp_servers = {}
 
 -- Utility modules that should be loaded
 local utility_modules = {
+  "tools",            -- Tool installation utilities
+  "yaml_schemas",     -- YAML schema definitions
+  "yaml_lsp",         -- YAML LSP configuration
   "lsp",
   "lsp_common",
   "treesitter",

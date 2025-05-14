@@ -9,47 +9,6 @@ local config = {
   configured_lsp_servers = {} -- To track which servers are already configured
 }
 
--- Function to check if a tool is installed and install it if needed
-local function ensure_yaml_tool(tool, install_cmd)
-  if not config.auto_install_tools then
-    return
-  end
-
-  -- Check if tool is already installed
-  if vim.fn.executable(tool) == 1 then
-    -- Tool is already installed and available
-    return
-  end
-  
-  vim.notify(tool .. " not found, installing...", vim.log.levels.INFO)
-  
-  -- Use vim's system function to install the tool
-  local install_result = vim.fn.system(install_cmd)
-  
-  if vim.v.shell_error ~= 0 then
-    vim.notify("Failed to install " .. tool .. ": " .. install_result, vim.log.levels.ERROR)
-  else
-    vim.notify(tool .. " installed successfully", vim.log.levels.INFO)
-  end
-end
-
--- Function to install all required YAML tools
-local function ensure_yaml_tools()
-  if vim.fn.has("mac") == 1 then
-    -- macOS installation via npm/Homebrew
-    ensure_yaml_tool("yq", "brew install yq")
-    ensure_yaml_tool("yamllint", "brew install yamllint")
-    -- Install the YAML language server if not already installed
-    ensure_yaml_tool("yaml-language-server", "npm install -g yaml-language-server")
-  elseif vim.fn.has("unix") == 1 then
-    -- Linux installation
-    ensure_yaml_tool("yq", "sudo apt-get install -y yq")
-    ensure_yaml_tool("yamllint", "sudo apt-get install -y yamllint")
-    -- Install the YAML language server if not already installed
-    ensure_yaml_tool("yaml-language-server", "npm install -g yaml-language-server")
-  end
-end
-
 -- Setup function with options
 M.setup = function(opts)
   -- Merge user options with defaults
@@ -57,102 +16,68 @@ M.setup = function(opts)
     config = vim.tbl_deep_extend("force", config, opts)
   end
 
-  -- Ensure YAML tools are installed
-  ensure_yaml_tools()
-  
-  -- Configure LSP for YAML if nvim-lspconfig is available
-  local lspconfig_ok, lspconfig = pcall(require, "lspconfig")
-  if lspconfig_ok and lspconfig.yamlls then
-    -- Set up YAML language server with enhanced settings
-    lspconfig.yamlls.setup({
-      on_attach = function(client, bufnr)
-        -- Call the base LSP on_attach if available
-        local lsp_common_ok, lsp_common = pcall(require, "user.lsp_common")
-        if lsp_common_ok and lsp_common.create_on_attach then
-          lsp_common.create_on_attach()(client, bufnr)
-        end
-        
-        -- Set up formatting on save
-        if config.auto_format_on_save then
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            group = vim.api.nvim_create_augroup("YAMLFormat", { clear = true }),
-            buffer = bufnr,
-            callback = function()
-              vim.lsp.buf.format({ async = false })
-            end,
-          })
-        end
-        
-        -- Add additional keymaps for YAML
-        local opts = { noremap = true, silent = true, buffer = bufnr }
-        vim.keymap.set('n', '<leader>yf', function() 
-          vim.lsp.buf.format({ async = true }) 
-        end, opts)
-        vim.keymap.set('n', '<leader>yv', function() 
-          if vim.fn.executable('yamllint') == 1 then
-            vim.cmd('!yamllint ' .. vim.fn.shellescape(vim.fn.expand('%')))
-          end
-        end, opts)
-      end,
-      settings = {
-        yaml = {
-          schemaStore = {
-            enable = config.use_schemas,
-            url = "https://www.schemastore.org/api/json/catalog.json",
-          },
-          schemas = {
-            kubernetes = {"/*.k8s.yaml", "/*.k8s.yml", "/kubernetes/**/*.yaml", "/kubernetes/**/*.yml"},
-            ["https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json"] = {
-              "docker-compose.yml", "docker-compose.yaml"
-            },
-            ["https://json.schemastore.org/github-workflow.json"] = {
-              ".github/workflows/*.{yml,yaml}"
-            },
-            ["https://json.schemastore.org/github-action.json"] = {
-              "action.{yml,yaml}"
-            },
-            ["https://json.schemastore.org/circleciconfig.json"] = {
-              ".circleci/config.{yml,yaml}"
-            },
-            ["https://json.schemastore.org/gitlab-ci.json"] = {
-              ".gitlab-ci.{yml,yaml}"
-            },
-            ["https://json.schemastore.org/kustomization.json"] = {
-              "kustomization.{yml,yaml}"
-            },
-            ["https://json.schemastore.org/helmfile.json"] = {
-              "helmfile.{yml,yaml}"
-            },
-          },
-          validate = true,
-          format = {
-            enable = true
-          },
-          hover = true,
-          completion = true,
-          customTags = {
-            "!include scalar",
-            "!vault scalar"
-          }
-        }
-      }
-    })
-    
-    -- Mark the YAML LSP as configured
-    if config.configured_lsp_servers then
-      config.configured_lsp_servers.yamlls = true
+  -- Load the common tools module
+  local tools_ok, tools = pcall(require, "user.tools")
+  if not tools_ok then
+    vim.notify("Tools module not found. Manual installation may be required.", vim.log.levels.WARN)
+  else
+    -- Install required tools using the common tools module
+    if vim.fn.has("mac") == 1 then
+      tools.ensure_tool("yq", "brew install yq", config.auto_install_tools)
+      tools.ensure_tool("yamllint", "brew install yamllint", config.auto_install_tools)
+      tools.ensure_tool("yaml-language-server", "npm install -g yaml-language-server", config.auto_install_tools)
+    elseif vim.fn.has("unix") == 1 then
+      tools.ensure_tool("yq", "sudo apt-get install -y yq", config.auto_install_tools)
+      tools.ensure_tool("yamllint", "sudo apt-get install -y yamllint", config.auto_install_tools)
+      tools.ensure_tool("yaml-language-server", "npm install -g yaml-language-server", config.auto_install_tools)
     end
   end
   
-  -- Configure YAML specific settings
+  -- Load the YAML schema module
+  local schemas_ok, yaml_schemas = pcall(require, "user.yaml_schemas")
+  if not schemas_ok then
+    vim.notify("YAML schema module not found. Using basic schema configuration.", vim.log.levels.WARN)
+  end
+  
+  -- Load the YAML LSP module
+  local yaml_lsp_ok, yaml_lsp = pcall(require, "user.yaml_lsp")
+  if not yaml_lsp_ok then
+    vim.notify("YAML LSP module not found. Using basic LSP configuration.", vim.log.levels.WARN)
+  else
+    -- Configure the YAML LSP module
+    yaml_lsp.setup({
+      auto_format_on_save = config.auto_format_on_save,
+      use_schemas = config.use_schemas,
+      configured_lsp_servers = config.configured_lsp_servers
+    })
+    
+    -- Get schemas for YAML files
+    local schemas = {}
+    if schemas_ok then
+      schemas = yaml_schemas.get_base_schemas()
+    else
+      -- Fallback schemas if yaml_schemas module not available
+      schemas = {
+        ["https://json.schemastore.org/github-workflow.json"] = {
+          ".github/workflows/*.{yml,yaml}"
+        },
+        ["https://raw.githubusercontent.com/docker/compose/master/compose/config/compose_spec.json"] = {
+          "docker-compose.yml", "docker-compose.yaml"
+        }
+      }
+    end
+    
+    -- Set up the YAML language server with our schemas
+    yaml_lsp.setup_yaml_ls(schemas)
+    
+    -- Set up YAML filetypes
+    yaml_lsp.setup_yaml_filetypes({"yaml", "yml"})
+  end
+  
+  -- Configure YAML specific commands
   vim.api.nvim_create_autocmd({"FileType"}, {
     pattern = {"yaml", "yml"},
     callback = function()
-      -- Set YAML-specific options
-      vim.opt_local.tabstop = 2
-      vim.opt_local.shiftwidth = 2
-      vim.opt_local.expandtab = true
-      
       -- Add YAML-specific commands
       vim.api.nvim_buf_create_user_command(0, "YAMLLint", function()
         if vim.fn.executable("yamllint") == 1 then
