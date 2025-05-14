@@ -61,46 +61,34 @@ endif
 call plug#begin(data_dir . '/plugged')
 
 " ---- Core ----
-Plug 'vim-scripts/L9'                      " Utility functions
-Plug 'tpope/vim-sensible'                  " Sensible defaults
-Plug 'ryanoasis/vim-devicons'              " File type icons
-Plug 'ntpeters/vim-better-whitespace'      " Highlight trailing whitespace
-Plug 'airblade/vim-gitgutter'              " Git diff in sign column
-Plug 'tpope/vim-endwise'                   " Add 'end' in ruby, shell, etc.
-Plug 'tpope/vim-surround'                  " Surround text objects
+" Removed vim-sensible (redundant with Neovim defaults)
 Plug 'editorconfig/editorconfig-vim'       " Support for .editorconfig
 
 " ---- UI ----
-Plug 'altercation/vim-colors-solarized'    " Solarized colorscheme
-Plug 'vim-airline/vim-airline'             " Status line
-Plug 'vim-airline/vim-airline-themes'      " Status line themes
-Plug 'luochen1990/rainbow'                 " Rainbow parentheses
+Plug 'shaunsingh/solarized.nvim'          " Modern Solarized colorscheme in Lua
 
 " ---- Navigation ----
-Plug 'majutsushi/tagbar'                   " Tag sidebar
-Plug 'ctrlpvim/ctrlp.vim'                  " Fuzzy file finder
+" Removed tagbar and ctrlp (outdated)
 
 " ---- Language Support ----
 " Syntax and linting
-Plug 'dense-analysis/ale'                  " Asynchronous Lint Engine
-Plug 'elzr/vim-json'                       " JSON syntax highlighting
-Plug 'cespare/vim-toml'                    " TOML syntax
-Plug 'ekalinin/Dockerfile.vim'             " Dockerfile syntax
-Plug 'hashivim/vim-terraform'              " Terraform
-Plug 'juliosueiras/vim-terraform-completion' " Terraform completion
-Plug 'google/vim-jsonnet'                  " Jsonnet
+" Removed vim-json (replaced by Tree-sitter + LSP)
+" Removed vim-toml (replaced by Tree-sitter)
+" Removed Dockerfile.vim (replaced by Tree-sitter + LSP)
+Plug 'hashivim/vim-terraform'              " Terraform syntax & formatting
 
 " Languages
-Plug 'vim-ruby/vim-ruby'                   " Ruby
 Plug 'rodjek/vim-puppet'                   " Puppet
-Plug 'stephpy/vim-yaml'                    " YAML
-Plug 'hdiniz/vim-gradle'                   " Gradle
-Plug 'udalov/kotlin-vim'                   " Kotlin
+" Removed vim-gradle (replaced by LSP)
 
 " Go
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries', 'for': 'go' }
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'SirVer/ultisnips'
+" Go enhanced plugins
+Plug 'ray-x/go.nvim', { 'for': 'go' }
+Plug 'ray-x/guihua.lua'  " Required by go.nvim for floating windows
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.4' }  " Modern fuzzy finder
+Plug 'edolphin-ydf/goimpl.nvim', { 'for': 'go' }  " Generate interface implementations
 
 " ---- Neovim Specific ----
 if has('nvim')
@@ -125,10 +113,20 @@ if has('nvim')
   " Treesitter for better syntax highlighting
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
   
+  " Modern replacements
+  Plug 'lewis6991/gitsigns.nvim'          " Git integration (replaces vim-gitgutter)
+  Plug 'RRethy/nvim-treesitter-endwise'   " Auto-add end (replaces vim-endwise)
+  Plug 'kylechui/nvim-surround'           " Surround text objects (replaces vim-surround)
+  Plug 'kaplanz/retrail.nvim'             " Whitespace management (replaces vim-better-whitespace)
+  Plug 'nvim-tree/nvim-web-devicons'      " File icons (replaces vim-devicons)
+  Plug 'nvim-lualine/lualine.nvim'        " Status line (replaces vim-airline)
+  Plug 'HiPhish/rainbow-delimiters.nvim'  " Rainbow parentheses (replaces rainbow)
+  
+  " JSON Support
+  Plug 'b0o/SchemaStore.nvim'             " JSON Schema store
   
   " Extra niceties
   Plug 'folke/todo-comments.nvim'         " TODO comments
-  Plug 'lewis6991/gitsigns.nvim'          " Git decorations
   Plug 'numToStr/Comment.nvim'            " Commenting plugin
   Plug 'windwp/nvim-autopairs'            " Auto pairs
 endif
@@ -143,28 +141,48 @@ syntax on
 " Plugin Configuration
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" ALE (replaces Syntastic for Neovim)
-let g:ale_sign_error = '✘'
-let g:ale_sign_warning = '⚠'
-let g:ale_linters = {
-\   'python': ['flake8'],
-\   'go': ['gopls', 'golangci-lint'],
-\   'javascript': ['eslint']
-\}
-let g:ale_fixers = {
-\   '*': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['black', 'isort'],
-\   'go': ['gofmt', 'goimports'],
-\   'javascript': ['prettier'],
-\   'typescript': ['prettier'],
-\}
-let g:ale_fix_on_save = 1
-let g:ale_hover_cursor = 1
+" Terraform
+let g:terraform_align=0
+let g:terraform_fmt_on_save=0
+autocmd FileType terraform setlocal commentstring=#%s
+autocmd BufNewFile,BufRead *.hcl set filetype=terraform
+
+" Go settings
+let g:go_fmt_command = 'goimports'
+let g:go_list_type = 'quickfix'
+let g:go_test_timeout = '10s'
+let g:go_highlight_types = 0  " Let tree-sitter handle highlighting
+let g:go_highlight_fields = 0
+let g:go_highlight_functions = 0
+let g:go_highlight_methods = 0
+let g:go_highlight_operators = 0
+let g:go_highlight_build_constraints = 0
+let g:go_highlight_function_calls = 0
+let g:go_highlight_extra_types = 0
+let g:go_highlight_generate_tags = 0
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
+let g:go_gopls_enabled = 0  " Disable gopls in vim-go as we use LSP
+let g:go_code_completion_enabled = 0  " Disable vim-go completion as we use LSP
+let g:go_doc_keywordprg_enabled = 0   " Disable K mapping as we use LSP
+let g:go_mod_fmt_autosave = 0         " LSP handles formatting
+let g:go_fmt_autosave = 0             " LSP handles formatting
+let g:go_imports_autosave = 0         " LSP handles formatting
+let g:go_diagnostics_enabled = 0      " LSP handles diagnostics
+let g:go_metalinter_enabled = 0       " LSP handles linting
+
+" Removed JSON config (now using Tree-sitter + LSP)
 
 if has('nvim')
   " Load init.lua which contains utility functions
   lua require('init')
   
+  " Set up global_safe_require function
+  lua << EOF
+  -- Make safe_require globally available
+  _G.safe_require = safe_require
+EOF
+
   " Set up todo-comments
   lua << EOF
   local todo_comments_ok, todo_comments = pcall(require, "todo-comments")
@@ -259,6 +277,12 @@ EOF
   -- Setup LSP if available
   safe_require('user.lsp').setup()
   
+  -- Load common LSP functions
+  local lsp_common = safe_require('user.lsp_common')
+  if not lsp_common then
+    vim.notify("Could not load LSP common module. Check your configuration.", vim.log.levels.ERROR)
+  end
+  
   -- Setup Treesitter if available
   local treesitter = safe_require('user.treesitter')
   if treesitter then treesitter.setup() end
@@ -293,50 +317,124 @@ EOF
     end
   end
   
+  -- Setup configuration tester
+  local config_test = safe_require('user.config_test')
+  if config_test then
+    config_test.create_commands()
+  end
+  
+  -- Setup Go development
+  local ok, go_module = pcall(require, 'user.go')
+  if ok then
+    go_module.setup({
+      auto_install_tools = true -- Set to false to disable automatic installation
+    })
+  else
+    vim.notify("Could not load Go module: " .. (go_module or "unknown error"), vim.log.levels.WARN)
+  end
+  
   -- Setup additional modules with fallback options
   local autopairs_ok, autopairs = pcall(require, 'nvim-autopairs')
   if autopairs_ok then autopairs.setup{} end
   
-  local gitsigns_ok, gitsigns = pcall(require, 'gitsigns')
-  if gitsigns_ok then gitsigns.setup() end
+  -- Setup new plugins
   
+  -- Setup gitsigns (replacement for vim-gitgutter)
+  local gitsigns_ok, gitsigns = pcall(require, 'gitsigns')
+  if gitsigns_ok then 
+    gitsigns.setup({
+      signs = {
+        add          = { text = '┃' },
+        change       = { text = '┃' },
+        delete       = { text = '_' },
+        topdelete    = { text = '‾' },
+        changedelete = { text = '~' },
+        untracked    = { text = '┆' },
+      },
+      current_line_blame = false,
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol',
+        delay = 1000,
+      },
+    })
+  end
+  
+  -- Setup nvim-surround (replacement for vim-surround)
+  local surround_ok, surround = pcall(require, 'nvim-surround')
+  if surround_ok then surround.setup{} end
+  
+  -- Setup retrail (replacement for vim-better-whitespace)
+  local retrail_ok, retrail = pcall(require, 'retrail')
+  if retrail_ok then 
+    retrail.setup({
+      trim = {
+        auto = true,
+        whitespace = true,
+        blanklines = false,
+      }
+    })
+  end
+  
+  -- Setup Comment.nvim
   local comment_ok, comment = pcall(require, 'Comment')
   if comment_ok then comment.setup() end
+  
+  -- Setup lualine (replacement for vim-airline)
+  local lualine_ok, lualine = pcall(require, 'lualine')
+  if lualine_ok then
+    lualine.setup({
+      options = {
+        theme = 'solarized',
+        icons_enabled = true,
+        component_separators = { left = '', right = ''},
+        section_separators = { left = '', right = ''},
+      },
+      sections = {
+        lualine_a = {'mode'},
+        lualine_b = {'branch', 'diff', 'diagnostics'},
+        lualine_c = {'filename'},
+        lualine_x = {'encoding', 'fileformat', 'filetype'},
+        lualine_y = {'progress'},
+        lualine_z = {'location'}
+      },
+      tabline = {
+        lualine_a = {'buffers'},
+        lualine_z = {'tabs'}
+      },
+      extensions = {'fugitive'}
+    })
+  end
+  
+  -- Setup rainbow-delimiters (replacement for rainbow)
+  local rainbow_delimiters_ok, rainbow_delimiters = pcall(require, 'rainbow-delimiters')
+  if rainbow_delimiters_ok then
+    vim.g.rainbow_delimiters = {
+      strategy = {
+        [''] = rainbow_delimiters.strategy['global'],
+      },
+      query = {
+        [''] = 'rainbow-delimiters',
+      },
+    }
+  end
+  
+  -- Setup solarized colorscheme
+  local solarized_ok, solarized = pcall(require, 'solarized')
+  if solarized_ok then
+    -- Configure the colorscheme
+    pcall(function()
+      solarized.setup({
+        theme = 'neo', -- or 'default'
+        transparent = false,
+        colors = {},  -- Override specific color values
+        highlights = {}, -- Override specific highlight groups
+        enable_italics = true,
+      })
+    end)
+  end
 EOF
 endif
-
-" Rainbow Parentheses
-let g:rainbow_active = 1
-
-" Terraform
-let g:terraform_align=0
-let g:terraform_fmt_on_save=1
-autocmd FileType terraform setlocal commentstring=#%s
-autocmd BufNewFile,BufRead *.hcl set filetype=terraform
-
-" Go settings
-let g:go_fmt_command = 'goimports'
-let g:go_list_type = 'quickfix'
-let g:go_test_timeout = '10s'
-let g:go_highlight_types = 1
-let g:go_highlight_fields = 1
-let g:go_highlight_functions = 1
-let g:go_highlight_methods = 1
-let g:go_highlight_operators = 1
-let g:go_highlight_build_constraints = 1
-let g:go_highlight_function_calls = 1
-let g:go_highlight_extra_types = 1
-let g:go_highlight_generate_tags = 1
-let g:go_def_mode='gopls'
-let g:go_info_mode='gopls'
-
-" JSON
-let g:vim_json_syntax_conceal=0
-
-" Airline
-let g:airline_powerline_fonts = 1
-let g:airline_theme = 'solarized'
-let g:airline#extensions#tabline#enabled = 1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " Editor Settings
@@ -403,9 +501,9 @@ set clipboard^=unnamedplus
 set listchars=tab:▸\ ,trail:.,eol:¬,extends:❯,precedes:❮,nbsp:·
 
 " Colorscheme
-let g:solarized_termcolors=256
 set background=dark
-colorscheme solarized
+" Use solarized if available, with fallback to default
+autocmd VimEnter * lua pcall(function() vim.cmd('colorscheme solarized') end)
 
 " Highlight overlength
 highlight ColorColumn ctermbg=magenta
@@ -423,9 +521,6 @@ nmap <leader>n :set relativenumber!<CR>
 
 " Clear search highlight
 nmap <leader>q :nohlsearch<CR>
-
-" Open tagbar
-nmap <F8> :TagbarToggle<CR>
 
 " Buffer navigation
 nmap <leader>bn :bnext<CR>
@@ -503,11 +598,11 @@ endif
 " Autocommands
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-" Return to last edit position when opening files
+" Return to last edit position when opening files (except git commit messages)
 augroup last_edit
   autocmd!
   autocmd BufReadPost *
-    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \ if line("'\"") > 0 && line("'\"") <= line("$") && &filetype !~# 'git\(commit\)\@!' |
     \   exe "normal! g`\"" |
     \ endif
 augroup END
@@ -524,8 +619,23 @@ augroup packerfile
   autocmd BufNewFile,BufRead Packerfile set filetype=json
 augroup END
 
-" Trim trailing whitespace on save
-autocmd BufWritePre * %s/\s\+$//e
+" TOML filetype detection
+augroup toml_ft
+  autocmd!
+  autocmd BufNewFile,BufRead *.toml set filetype=toml
+augroup END
+
+" Dockerfile filetype detection
+augroup dockerfile_ft
+  autocmd!
+  autocmd BufNewFile,BufRead Dockerfile,*.dockerfile,*.Dockerfile set filetype=dockerfile
+augroup END
+
+" Jsonnet filetype detection
+augroup jsonnet_ft
+  autocmd!
+  autocmd BufNewFile,BufRead *.jsonnet,*.libsonnet set filetype=jsonnet
+augroup END
 
 " Helper function for Go files
 function! s:build_go_files()
@@ -535,11 +645,4 @@ function! s:build_go_files()
   elseif l:file =~# '^\f\+\.go$'
     call go#cmd#Build(0)
   endif
-endfunction
-
-" Rust settings
-let g:rustfmt_autosave = 1
-let g:racer_experimental_completer = 1
-
-" Elixir settings
-let g:mix_format_on_save = 1 
+endfunction 

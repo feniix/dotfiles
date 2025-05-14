@@ -9,31 +9,15 @@ M.setup = function()
     return
   end
 
-  -- Get lsp shared on_attach function if available
-  local on_attach = function(client, bufnr)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+  -- Get common LSP configuration
+  local lsp_common_ok, lsp_common = pcall(require, "user.lsp_common")
+  if not lsp_common_ok then
+    vim.notify("Could not load LSP common module. Using basic TypeScript configuration.", vim.log.levels.WARN)
+    return
+  end
 
-    -- Mappings
-    local bufopts = { noremap=true, silent=true, buffer=bufnr }
-    
-    -- Go to declarations/definitions
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-    
-    -- Documentation and help
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-    
-    -- Code actions and refactoring
-    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-    vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
-    
-    -- TypeScript specific commands
+  -- TypeScript specific mappings to add to the common on_attach
+  local ts_on_attach_extra = function(client, bufnr, bufopts)
     if client.name == "typescript-tools" or client.name == "tsserver" then
       vim.keymap.set("n", "<leader>to", "<cmd>TSToolsOrganizeImports<cr>", bufopts)
       vim.keymap.set("n", "<leader>ta", "<cmd>TSToolsAddMissingImports<cr>", bufopts)
@@ -43,20 +27,11 @@ M.setup = function()
     end
   end
 
-  -- Safely get capabilities from cmp_nvim_lsp if available
-  local capabilities
-  local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
-  if cmp_nvim_lsp_ok then
-    capabilities = cmp_nvim_lsp.default_capabilities()
-  else
-    capabilities = vim.lsp.protocol.make_client_capabilities()
-  end
-
   -- Configure typescript-tools with optimal settings
   typescript_tools.setup({
     -- Server settings
-    on_attach = on_attach,
-    capabilities = capabilities,
+    on_attach = lsp_common.create_on_attach(ts_on_attach_extra),
+    capabilities = lsp_common.get_capabilities(),
     settings = {
       -- Specify typescript-tools.nvim specific settings
       expose_as_code_action = "all",
@@ -98,14 +73,6 @@ M.setup = function()
       end,
     },
   })
-  
-  -- Disable ALE for TypeScript files since LSP will handle diagnostics
-  vim.cmd([[
-    augroup typescript_ale_disable
-      autocmd!
-      autocmd FileType typescript,typescriptreact,javascript,javascriptreact let b:ale_disable_lsp = 1
-    augroup END
-  ]])
 end
 
 return M 

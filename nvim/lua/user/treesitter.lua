@@ -22,6 +22,7 @@ M.setup = function()
       "html",
       "javascript",
       "json",
+      "jsonnet",
       "lua",
       "markdown",
       "python",

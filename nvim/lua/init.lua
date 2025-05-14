@@ -10,13 +10,14 @@ end
 vim.g.skip_telescope = true  -- Disable Telescope
 vim.g.skip_ts_tools = false  -- Set to true to disable TypeScript
 vim.g.skip_treesitter_setup = false
-vim.g.skip_plugin_installer = true
+vim.g.skip_plugin_installer = false  -- Enable the plugin installer
 
 -- Add our lua directory to package.path
 local config_path = vim.fn.stdpath('config')
 local runtime_path = vim.fn.stdpath('data')
 package.path = config_path .. "/lua/?.lua;" .. 
                config_path .. "/lua/?/init.lua;" ..
+               config_path .. "/lua/user/?.lua;" ..
                runtime_path .. "/site/pack/packer/start/*/lua/?.lua;" ..
                package.path
 

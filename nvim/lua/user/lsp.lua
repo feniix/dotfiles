@@ -9,94 +9,114 @@ M.setup = function()
     return
   end
   
-  -- Safely get capabilities from cmp_nvim_lsp if available
-  local capabilities
-  local cmp_nvim_lsp_ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
-  if cmp_nvim_lsp_ok then
-    capabilities = cmp_nvim_lsp.default_capabilities()
-  else
-    capabilities = vim.lsp.protocol.make_client_capabilities()
-    vim.notify("cmp_nvim_lsp not found. Using basic LSP capabilities.", vim.log.levels.INFO)
+  -- Load common LSP configuration
+  local lsp_common_ok, lsp_common = pcall(require, 'user.lsp_common')
+  if not lsp_common_ok then
+    vim.notify("Could not load LSP common module. Using basic LSP configuration.", vim.log.levels.WARN)
+    return
+  end
+  
+  -- Get capabilities from common module
+  local capabilities = lsp_common.get_capabilities()
+  
+  -- Get the base on_attach function
+  local on_attach = lsp_common.create_on_attach()
+  
+  -- Setup diagnostics
+  lsp_common.setup_diagnostics()
+  
+  -- Helper function to safely setup LSP servers
+  local function setup_server(server, config)
+    if not nvim_lsp[server] then return end
+    
+    if type(nvim_lsp[server].setup) ~= "function" then
+      vim.notify(server .. " LSP setup function not available.", vim.log.levels.WARN)
+      return
+    end
+    
+    -- Default config with capabilities and on_attach
+    local default_config = {
+      on_attach = on_attach,
+      capabilities = capabilities,
+    }
+    
+    -- Merge with provided config
+    if config then
+      for k, v in pairs(config) do
+        default_config[k] = v
+      end
+    end
+    
+    -- Setup the server
+    nvim_lsp[server].setup(default_config)
   end
 
-  -- Use an on_attach function to set keymaps for each buffer with an active LSP
-  local on_attach = function(client, bufnr)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-    -- Mappings
-    local bufopts = { noremap=true, silent=true, buffer=bufnr }
-    
-    -- Go to declarations/definitions
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-    vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-    
-    -- Documentation and help
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-    
-    -- Workspace management
-    vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
-    vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
-    vim.keymap.set('n', '<space>wl', function()
-      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, bufopts)
-    
-    -- Code actions and refactoring
-    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-    vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
-    
-    -- Diagnostics
-    vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, bufopts)
-    vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, bufopts)
-    vim.keymap.set('n', ']d', vim.diagnostic.goto_next, bufopts)
-    vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, bufopts)
-  end
-
-  -- Configure diagnostics
-  vim.diagnostic.config({
-    virtual_text = true,
-    signs = true,
-    underline = true,
-    update_in_insert = false,
-    severity_sort = true,
-  })
-
-  -- Change diagnostic symbols in the sign column
-  local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-  for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-  end
-
-  -- Configure individual language servers
+  -- Check what language servers are available
+  local servers_available = true
   
   -- Go
   if nvim_lsp.gopls then
-    nvim_lsp.gopls.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
+    setup_server("gopls", {
       settings = {
         gopls = {
           analyses = {
             unusedparams = true,
+            shadow = true,
+            fieldalignment = true,
+            nilness = true,
+            unusedwrite = true,
+            useany = true,
           },
           staticcheck = true,
           gofumpt = true,
+          usePlaceholders = true,
+          completeUnimported = true,
+          semanticTokens = true,
+          codelenses = {
+            gc_details = false,
+            generate = true,
+            regenerate_cgo = true,
+            run_govulncheck = true,
+            test = true,
+            tidy = true,
+            upgrade_dependency = true,
+            vendor = true,
+          },
+          hints = {
+            assignVariableTypes = true,
+            compositeLiteralFields = true,
+            compositeLiteralTypes = true,
+            constantValues = true,
+            functionTypeParameters = true,
+            parameterNames = true,
+            rangeVariableTypes = true,
+          },
         },
       },
-    }
+      on_attach = function(client, bufnr)
+        -- Call the base on_attach function
+        on_attach(client, bufnr)
+        
+        -- Add Go-specific keymaps here
+        local opts = { noremap = true, silent = true, buffer = bufnr }
+        vim.keymap.set('n', '<leader>gtj', vim.lsp.buf.type_definition, opts)
+        vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
+        
+        -- Auto-format on save
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          group = vim.api.nvim_create_augroup("GoFormat", { clear = true }),
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({ async = false })
+          end,
+        })
+      end,
+    })
   end
 
   -- Python
   if nvim_lsp.pyright then
-    nvim_lsp.pyright.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
+    setup_server("pyright", {
       settings = {
         python = {
           analysis = {
@@ -106,15 +126,14 @@ M.setup = function()
           }
         }
       }
-    }
+    })
   end
 
   -- TypeScript/JavaScript - using typescript-tools.nvim (modern alternative to tsserver)
-  -- We've moved TypeScript configuration to its own module
   -- This module handles the setup of typescript-tools.nvim and related settings
   if not vim.g.skip_ts_tools then
-    local ts = safe_require('user.typescript')
-    if ts then
+    local ts_ok, ts = pcall(require, 'user.typescript')
+    if ts_ok and ts then
       ts.setup()
     else
       vim.notify("TypeScript module not loaded. TypeScript features will be limited.", vim.log.levels.WARN)
@@ -123,17 +142,147 @@ M.setup = function()
 
   -- Terraform
   if nvim_lsp.terraformls then
-    nvim_lsp.terraformls.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-    }
+    setup_server("terraformls", {
+      settings = {
+        terraform = {
+          path = "terraform",
+          telemetry = { enable = false },
+          experimentalFeatures = {
+            validateOnSave = true,
+          },
+        },
+      },
+    })
+    
+    -- Format on save for terraform files
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = { "*.tf", "*.tfvars" },
+      callback = function()
+        vim.lsp.buf.format({ async = false })
+      end,
+    })
+  end
+
+  -- JSON language server
+  if nvim_lsp.jsonls then
+    -- Try to load SchemaStore, but handle if not yet available
+    local schemas = {}
+    local schemastore_ok, schemastore = pcall(require, 'schemastore')
+    if schemastore_ok then
+      schemas = schemastore.json.schemas()
+    end
+    
+    setup_server("jsonls", {
+      settings = {
+        json = {
+          schemas = schemas,
+          validate = { enable = true },
+          format = { enable = true },
+        },
+      },
+      commands = {
+        Format = {
+          function()
+            vim.lsp.buf.range_formatting({}, {0, 0}, {vim.fn.line("$"), 0})
+          end
+        }
+      }
+    })
+  end
+
+  -- TOML language server
+  if nvim_lsp.taplo then
+    setup_server("taplo", {
+      settings = {
+        taplo = {
+          diagnostics = {
+            enable = true,
+          },
+          formatter = {
+            enable = true,
+            indentTables = true,
+          },
+        },
+      }
+    })
+  end
+
+  -- Docker language server
+  if nvim_lsp.dockerls then
+    setup_server("dockerls", {
+      -- Default config is usually sufficient
+      filetypes = { "dockerfile" },
+    })
+  end
+
+  -- Jsonnet language server
+  if nvim_lsp.jsonnet_ls then
+    setup_server("jsonnet_ls", {
+      -- Basic configuration for jsonnet-language-server
+      cmd = { "jsonnet-language-server", "--stdio" },
+      filetypes = { "jsonnet", "libsonnet" },
+      settings = {
+        jsonnet = {
+          extStrs = {}, -- Provide external string values if needed
+          formatting = {
+            options = {
+              -- Default formatting options
+              indent = 2,
+              padding = 2,
+              disableSuggestStringMistakes = false,
+            }
+          },
+        }
+      },
+    })
+  end
+
+  -- Ruby LSP
+  -- Note: As of lspconfig 0.2.1, ruby_ls is deprecated in favor of ruby_lsp
+  if nvim_lsp.ruby_lsp then
+    setup_server("ruby_lsp", {
+      settings = {
+        rubyLsp = {
+          formatter = "auto", -- "rubocop", "standardrb", "auto", or nil
+          enabledFeatures = {
+            "documentHighlights",
+            "documentSymbols",
+            "foldingRanges",
+            "selectionRanges",
+            "semanticHighlighting",
+            "formatting",
+            "diagnostics",
+          },
+        }
+      }
+    })
+  elseif nvim_lsp.ruby_ls then
+    vim.notify("ruby_ls is deprecated, use ruby_lsp instead", vim.log.levels.WARN)
+  end
+
+  -- YAML LSP
+  if nvim_lsp.yamlls then
+    setup_server("yamlls", {
+      settings = {
+        yaml = {
+          schemaStore = {
+            enable = true,
+            url = "https://www.schemastore.org/api/json/catalog.json",
+          },
+          validate = true,
+          completion = true,
+          hover = true,
+          format = {
+            enable = true,
+          },
+        },
+      },
+    })
   end
 
   -- Lua (for Neovim configuration)
   if nvim_lsp.lua_ls then
-    nvim_lsp.lua_ls.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
+    setup_server("lua_ls", {
       settings = {
         Lua = {
           runtime = {
@@ -151,29 +300,7 @@ M.setup = function()
           },
         },
       },
-    }
-  end
-
-  -- Rust
-  if nvim_lsp.rust_analyzer then
-    nvim_lsp.rust_analyzer.setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-      settings = {
-        ["rust-analyzer"] = {
-          assist = {
-            importGranularity = "module",
-            importPrefix = "self",
-          },
-          cargo = {
-            loadOutDirsFromCheck = true
-          },
-          procMacro = {
-            enable = true
-          },
-        }
-      }
-    }
+    })
   end
 end
 
