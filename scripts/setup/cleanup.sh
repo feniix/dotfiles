@@ -54,7 +54,6 @@ DEPRECATED_FILES=(
   "fix_treesitter.sh"
   "stripped_init.lua"
   "use_minimal_config.sh"
-  "cleanup_nvim.sh"
   "debug_theme.sh"
 )
 
