@@ -12,15 +12,22 @@ local core_modules = {
   "completion", -- Completion system (depends on plugins)
 }
 
--- Language modules to load (these generally depend on LSP being set up)
+-- Language modules to load in specific order (dependencies first)
+-- Note: Some modules configure the same LSP server (e.g., yaml and kubernetes both use yamlls)
+-- The order here determines which configuration takes precedence
 local language_modules = {
-  "go",
-  "terraform",
-  "json",
-  "yaml",
-  "kubernetes",
-  "typescript"
+  -- Basic language support first
+  "json",        -- JSON support
+  "yaml",        -- YAML support (should be before kubernetes)
+  "terraform",   -- Terraform support
+  "go",          -- Go support
+  -- More specific language support that may build on basic ones
+  "kubernetes",  -- Kubernetes support (builds on YAML)
+  "typescript"   -- TypeScript support
 }
+
+-- Track LSP servers that have already been configured
+local configured_lsp_servers = {}
 
 -- Utility modules that should be loaded
 local utility_modules = {
@@ -50,6 +57,18 @@ local function setup_module(name, full_path, options)
   if type(module.setup) ~= "function" then
     vim.notify("Module " .. name .. " does not have a setup function", vim.log.levels.WARN)
     return false, module
+  end
+  
+  -- Handle language modules that configure LSP servers
+  if full_path:match("language%-support") then
+    -- Pass the configured_lsp_servers table to language modules
+    -- This allows them to check if a server is already configured
+    if not options then
+      options = {}
+    end
+    
+    -- Add the configured_lsp_servers table to options
+    options.configured_lsp_servers = configured_lsp_servers
   end
   
   -- Call the setup function with provided options or defaults

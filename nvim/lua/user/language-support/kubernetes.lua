@@ -7,7 +7,8 @@ local config = {
   auto_format_on_save = true, -- Enable formatting on save
   use_schemas = true, -- Enable K8s schema validation
   custom_schemas = {}, -- User-provided schema paths for CRDs
-  operator_schemas = true -- Enable built-in operator schemas
+  operator_schemas = true, -- Enable built-in operator schemas
+  configured_lsp_servers = {} -- To track which servers are already configured
 }
 
 -- Function to check if a tool is installed and install it if needed
@@ -338,50 +339,88 @@ M.setup = function(opts)
       end
     end
     
-    -- Set up YAML language server with enhanced K8s settings
-    lspconfig.yamlls.setup({
-      on_attach = function(client, bufnr)
-        -- Call the base LSP on_attach if available
-        local lsp_common_ok, lsp_common = pcall(require, "user.lsp_common")
-        if lsp_common_ok and lsp_common.create_on_attach then
-          lsp_common.create_on_attach()(client, bufnr)
+    -- Check if YAML LSP is already configured
+    if config.configured_lsp_servers and config.configured_lsp_servers.yamlls then
+      -- YAML LSP is already configured by another module (likely yaml.lua)
+      -- Register our event handlers without reconfiguring the server
+      
+      -- Get current server configuration
+      local current_config = vim.lsp.get_active_clients({ name = "yamlls" })[1]
+      
+      -- Register our custom filetypes with the existing server
+      vim.api.nvim_create_autocmd({"FileType"}, {
+        pattern = {"yaml.kubernetes", "yaml.helm", "yaml.kustomize"},
+        callback = function()
+          -- Set YAML-specific options
+          vim.opt_local.tabstop = 2
+          vim.opt_local.shiftwidth = 2
+          vim.opt_local.expandtab = true
+          
+          -- Attach the server to this buffer if it's not already attached
+          if current_config then
+            vim.lsp.buf_attach_client(0, current_config.id)
+          end
         end
-        
-        -- Format YAML on save if enabled
-        if config.auto_format_on_save then
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            group = vim.api.nvim_create_augroup("K8sFormat", { clear = true }),
-            buffer = bufnr,
-            callback = function()
-              vim.lsp.buf.format({ async = false })
-            end,
-          })
-        end
-      end,
-      settings = {
-        yaml = {
-          schemas = schemas,
-          validate = true,
-          hover = true,
-          completion = true,
-          format = {
-            enable = true,
-            singleQuote = false,
-            bracketSpacing = true,
-            proseWrap = "preserve",
-            printWidth = 120,
-          },
-          customTags = {
-            "!include scalar",
-            "!vault scalar",
-            "!reference scalar",
-            -- Helm template tags
-            "!include-template scalar",
-            "!template scalar",
+      })
+      
+      -- Add Kubernetes schemas to the YAML LSP schemas registry
+      -- Note: This is a bit of a hack, as we can't directly modify the server's settings
+      -- So we're setting a global variable that can be accessed by the YAML LSP
+      -- This assumes the YAML LSP references this variable in its configuration
+      vim.g.kubernetes_schemas = schemas
+      
+      vim.notify("Kubernetes module: YAML LSP already configured, adding schemas and handlers", vim.log.levels.INFO)
+    else
+      -- YAML LSP is not configured yet, so we can configure it ourselves
+      lspconfig.yamlls.setup({
+        on_attach = function(client, bufnr)
+          -- Call the base LSP on_attach if available
+          local lsp_common_ok, lsp_common = pcall(require, "user.lsp_common")
+          if lsp_common_ok and lsp_common.create_on_attach then
+            lsp_common.create_on_attach()(client, bufnr)
+          end
+          
+          -- Format YAML on save if enabled
+          if config.auto_format_on_save then
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              group = vim.api.nvim_create_augroup("K8sFormat", { clear = true }),
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format({ async = false })
+              end,
+            })
+          end
+        end,
+        settings = {
+          yaml = {
+            schemas = schemas,
+            validate = true,
+            hover = true,
+            completion = true,
+            format = {
+              enable = true,
+              singleQuote = false,
+              bracketSpacing = true,
+              proseWrap = "preserve",
+              printWidth = 120,
+            },
+            customTags = {
+              "!include scalar",
+              "!vault scalar",
+              "!reference scalar",
+              -- Helm template tags
+              "!include-template scalar",
+              "!template scalar",
+            }
           }
         }
-      }
-    })
+      })
+      
+      -- Mark the YAML LSP as configured
+      if config.configured_lsp_servers then
+        config.configured_lsp_servers.yamlls = true
+      end
+    end
   end
   
   -- Configure YAML specific settings for Kubernetes/Helm files

@@ -5,7 +5,8 @@ local M = {}
 local config = {
   auto_install_tools = true, -- Set to false to disable automatic installation
   auto_format_on_save = true, -- Enable formatting on save
-  use_schemas = true -- Enable YAML schema validation
+  use_schemas = true, -- Enable YAML schema validation
+  configured_lsp_servers = {} -- To track which servers are already configured
 }
 
 -- Function to check if a tool is installed and install it if needed
@@ -136,6 +137,11 @@ M.setup = function(opts)
         }
       }
     })
+    
+    -- Mark the YAML LSP as configured
+    if config.configured_lsp_servers then
+      config.configured_lsp_servers.yamlls = true
+    end
   end
   
   -- Configure YAML specific settings
