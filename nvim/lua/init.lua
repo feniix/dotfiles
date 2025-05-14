@@ -54,6 +54,49 @@ function safe_require(module)
   return result
 end
 
+-- Function to set up all modules
+local function setup_all()
+  -- Setup editor options
+  local options = safe_require('user.options')
+  if options then 
+    options.setup()
+  else
+    vim.notify("Options module not loaded. Using default editor settings.", vim.log.levels.WARN)
+  end
+  
+  -- Setup plugin configurations
+  local plugins = safe_require('user.plugins')
+  if plugins then 
+    plugins.setup()
+  else
+    vim.notify("Plugins module not loaded. Plugin configuration may be limited.", vim.log.levels.WARN)
+  end
+
+  -- Setup UI components
+  local ui = safe_require('user.ui')
+  if ui then 
+    ui.setup()
+  else
+    vim.notify("UI module not loaded. Visual elements may be limited.", vim.log.levels.WARN)
+  end
+
+  -- Setup keymaps
+  local keymaps = safe_require('user.keymaps')
+  if keymaps then
+    keymaps.setup()
+  else
+    vim.notify("Keymaps module not loaded. Key bindings may be limited.", vim.log.levels.WARN)
+  end
+
+  -- Setup completion
+  local completion = safe_require('user.completion')
+  if completion then
+    completion.setup()
+  else
+    vim.notify("Completion module not loaded. Code completion may be limited.", vim.log.levels.WARN)
+  end
+end
+
 -- Helper function for TypeScript development
 function setup_typescript()
   -- Check for typescript-tools.nvim
@@ -88,14 +131,45 @@ vim.api.nvim_create_autocmd("VimEnter", {
           vim.notify(desc .. " plugin not found. Run :PlugInstall to install missing plugins.", vim.log.levels.WARN)
         end
       end
+
+      -- Setup all modules after plugins are loaded
+      setup_all()
     end, 1000)
   end,
   pattern = "*"
 })
 
--- We're keeping most configuration in init.vim with only some
--- minimal Lua configuration as requested by the user.
--- Individual Lua modules will be loaded directly from init.vim.
+-- Make setup functions available to init.vim
+_G.setup_options = function()
+  local options = safe_require('user.options')
+  if options then options.setup() end
+end
+
+_G.setup_plugins = function()
+  local plugins = safe_require('user.plugins')
+  if plugins then plugins.setup() end
+end
+
+_G.setup_ui = function()
+  local ui = safe_require('user.ui')
+  if ui then ui.setup() end
+end
+
+_G.setup_keymaps = function()
+  local keymaps = safe_require('user.keymaps')
+  if keymaps then keymaps.setup() end
+end
+
+_G.setup_completion = function()
+  local completion = safe_require('user.completion')
+  if completion then completion.setup() end
+end
 
 -- This file is loaded from init.vim with:
 -- lua require('init') 
+-- Individual modules can be loaded with:
+-- lua _G.setup_options()
+-- lua _G.setup_plugins()
+-- lua _G.setup_ui()
+-- lua _G.setup_keymaps()
+-- lua _G.setup_completion() 
