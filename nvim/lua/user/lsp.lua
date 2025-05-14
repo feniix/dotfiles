@@ -132,7 +132,7 @@ M.setup = function()
   -- TypeScript/JavaScript - using typescript-tools.nvim (modern alternative to tsserver)
   -- This module handles the setup of typescript-tools.nvim and related settings
   if not vim.g.skip_ts_tools then
-    local ts_ok, ts = pcall(require, 'user.typescript')
+    local ts_ok, ts = pcall(require, 'user.language-support.typescript')
     if ts_ok and ts then
       ts.setup()
     else

@@ -289,7 +289,7 @@ EOF
   
   -- Setup TypeScript if available
   if not vim.g.skip_ts_tools then
-    local typescript = safe_require('user.typescript')
+    local typescript = safe_require('user.language-support.typescript')
     if typescript then typescript.setup() end
   end
   
@@ -324,13 +324,65 @@ EOF
   end
   
   -- Setup Go development
-  local ok, go_module = pcall(require, 'user.go')
+  local ok, go_module = pcall(require, 'user.language-support.go')
   if ok then
     go_module.setup({
       auto_install_tools = true -- Set to false to disable automatic installation
     })
   else
     vim.notify("Could not load Go module: " .. (go_module or "unknown error"), vim.log.levels.WARN)
+  end
+  
+  -- Setup Terraform development
+  local tf_ok, tf_module = pcall(require, 'user.language-support.terraform')
+  if tf_ok then
+    tf_module.setup({
+      auto_install_tools = true, -- Set to false to disable automatic installation
+      auto_format_on_save = true -- Set to false to disable auto-formatting
+    })
+  else
+    vim.notify("Could not load Terraform module: " .. (tf_module or "unknown error"), vim.log.levels.WARN)
+  end
+  
+  -- Setup JSON development
+  local json_ok, json_module = pcall(require, 'user.language-support.json')
+  if json_ok then
+    json_module.setup({
+      auto_install_tools = true, -- Set to false to disable automatic installation
+      auto_format_on_save = true, -- Set to false to disable auto-formatting
+      use_schemas = true -- Enable JSON schema validation
+    })
+  else
+    vim.notify("Could not load JSON module: " .. (json_module or "unknown error"), vim.log.levels.WARN)
+  end
+  
+  -- Setup YAML development
+  local yaml_ok, yaml_module = pcall(require, 'user.language-support.yaml')
+  if yaml_ok then
+    yaml_module.setup({
+      auto_install_tools = true, -- Set to false to disable automatic installation
+      auto_format_on_save = true, -- Set to false to disable auto-formatting
+      use_schemas = true -- Enable YAML schema validation
+    })
+  else
+    vim.notify("Could not load YAML module: " .. (yaml_module or "unknown error"), vim.log.levels.WARN)
+  end
+  
+  -- Setup Kubernetes development
+  local k8s_ok, k8s_module = pcall(require, 'user.language-support.kubernetes')
+  if k8s_ok then
+    k8s_module.setup({
+      auto_install_tools = true, -- Set to false to disable automatic installation
+      auto_format_on_save = true, -- Set to false to disable auto-formatting
+      use_schemas = true, -- Enable Kubernetes schema validation
+      operator_schemas = true, -- Enable schemas for common operators (Argo, Cert-Manager, Prometheus, etc.)
+      custom_schemas = {
+        -- Add any custom CRD schemas you need here, for example:
+        -- ["https://raw.githubusercontent.com/my-org/my-operator/main/crds/my-crd.yaml"] = {"*mycrd*.yaml", "*mycrd*.yml"}
+      }
+    })
+  else
+    vim.notify("Could not load Kubernetes module: " .. (k8s_module or "unknown error"), vim.log.levels.WARN)
   end
   
   -- Setup additional modules with fallback options
