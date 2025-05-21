@@ -44,4 +44,12 @@ export CURLOPT_COOKIEFILE="$XDG_DATA_HOME/curl/cookies"
 # Source the actual zshrc if it exists
 if [ -f "$ZDOTDIR/.zshrc" ]; then
   source "$ZDOTDIR/.zshrc"
-fi 
+fi
+
+# AWS CLI Configuration
+export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
+export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
+export AWS_CLI_HISTORY_FILE="$XDG_DATA_HOME/aws/history"
+export AWS_WEB_IDENTITY_TOKEN_FILE="$XDG_DATA_HOME/aws/token"
+eval "$(/opt/homebrew/bin/brew shellenv)"
+export ASDF_HASHICORP_SKIP_VERIFY=0
