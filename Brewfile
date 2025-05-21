@@ -210,11 +210,8 @@ brew protobuf
 brew pycparser
 brew python-packaging
 brew python-tabulate
-brew python-tk@3.10
-brew python-tk@3.9
 brew python@3.10
 brew python@3.11
-brew python@3.12
 brew python@3.13
 brew python@3.9
 brew qemu
@@ -222,7 +219,7 @@ brew rapidjson
 brew rav1e
 brew re2
 brew readline
-brew redis@6.2
+brew redis
 brew ripgrep
 brew rsync
 brew rtmpdump
@@ -244,9 +241,7 @@ brew starship
 brew stern
 brew svt-av1
 brew tcl-tk
-brew tcl-tk@8
 brew terraform-docs
-brew terraform-ls
 brew terrascan
 brew tesseract
 brew tfenv
@@ -273,6 +268,7 @@ brew xorgproto
 brew xvid
 brew xxhash
 brew xz
+brew yamllint
 brew yq
 brew z3
 brew zeromq
@@ -295,7 +291,6 @@ cask disk-inventory-x
 cask expressvpn
 cask firefox
 cask google-chrome
-cask google-cloud-sdk
 cask handbrake
 cask iina
 cask iterm2
@@ -313,8 +308,6 @@ cask vlc
 cask zoom
 cask zulu@21
 
-tap hashicorp/tap
-
 tap kubescape/tap
 
 tap rcmdnk/file
@@ -325,15 +318,15 @@ tap romkatv/powerlevel10k
 # App Store applications
 appstore 1569813296 1Password for Safari (8.10.76)
 appstore 937984704 Amphetamine (5.3.2)
-appstore 975937182 Fantastical (4.0.11)
+appstore 975937182 Fantastical (4.0.12)
 appstore 1460836908 GoPro Player (3.1.0)
-appstore 1474276998 HP Smart (18.6.1)
+appstore 1474276998 HP Smart (18.10.1)
 appstore 409183694 Keynote (14.4)
 appstore 409203825 Numbers (14.4)
 appstore 490179405 Okta Verify (9.39.0)
 appstore 429449079 Patterns (1.3)
-appstore 545519333 Prime Video (10.74)
-appstore 803453959 Slack (4.43.52)
+appstore 545519333 Prime Video (10.75)
+appstore 803453959 Slack (4.44.59)
 appstore 747648890 Telegram (11.11)
 appstore 1147396723 WhatsApp (2.2437.52)
 appstore 1295203466 Windows App (11.1.4)
