@@ -4,7 +4,7 @@
 [credential]
   helper = osxkeychain
 [push]
-  default = tracking
+	default = current
 [merge]
   tool = diffmerge
   stat = true
@@ -78,7 +78,7 @@
   cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
   trustExitCode = true
 [commit]
-  gpgsign = true
+	gpgsign = true
 [diff "sopsdiffer"]
   textconv = sops -d
 [filter "lfs"]
