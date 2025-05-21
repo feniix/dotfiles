@@ -9,24 +9,18 @@ reset_path() {
   local usr_sbin="/usr/sbin"
   local bin="/bin"
   local sbin="/sbin"
-  
-  # Start with a minimal PATH that prioritizes Homebrew
-  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin"
-  
+
   # Add homebrew core utils next (highest priority after base homebrew)
   export PATH="$PATH:/opt/homebrew/opt/curl/bin"
   export PATH="$PATH:/opt/homebrew/opt/make/libexec/gnubin"
   export PATH="$PATH:/opt/homebrew/opt/gnu-getopt/bin"
-  export PATH="$PATH:/opt/homebrew/opt/python@3.11/bin"
-  export PATH="$PATH:/opt/homebrew/opt/gnupg@2.2/bin"
   export PATH="$PATH:/opt/homebrew/opt/gnu-tar/libexec/gnubin"
   export PATH="$PATH:/opt/homebrew/opt/findutils/bin"
   export PATH="$PATH:/opt/homebrew/opt/gawk/bin"
   export PATH="$PATH:/opt/homebrew/opt/less/bin"
-  export PATH="$PATH:/opt/homebrew/opt/openssl@1.1/bin"
   export PATH="$PATH:/opt/homebrew/opt/libpq/bin"
   export PATH="$PATH:/opt/homebrew/opt/ssh-copy-id/bin"
-  
+
   # Tool-specific paths
   export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
   export PATH="$PATH:$HOME/.linkerd2/bin"
@@ -35,10 +29,10 @@ reset_path() {
   export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
   export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin"
   export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
-  
+
   # Add user directories next
-  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/go/bin"
-  
+  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/.local/share/go/bin"
+
   # Add system paths at lowest priority
   export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
 }
@@ -81,7 +75,7 @@ debug_path() {
   echo "=== MANPATH ==="
   echo $MANPATH | tr ':' '\n' | nl
   echo ""
-  
+
   # Check for non-existent directories in PATH
   echo "=== Non-existent directories in PATH ==="
   for p in $(echo $PATH | tr ':' '\n'); do
@@ -97,20 +91,20 @@ if type brew &>/dev/null; then
   FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
   # Skip global compinit in oh-my-zsh, we'll call it once efficiently
   skip_global_compinit=1
-  
-  # Load completions
+
+  # Load completions without compiling
   autoload -Uz compinit
-  # Only rebuild completion cache once a week
+  # Only rebuild completion cache once a week, without compiling
   if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
-    compinit
+    compinit -D
   else
-    compinit -C
+    compinit -D -C
   fi
-  
+
   # Completion caching
   zstyle ':completion:*' use-cache on
   zstyle ':completion:*' cache-path ~/.zsh/cache
-  
+
   # Better completion options
   zstyle ':completion:*' menu select
   zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
@@ -130,7 +124,7 @@ DISABLE_UPDATE_PROMPT="true"
 
 # Reduce oh-my-zsh startup time
 DISABLE_MAGIC_FUNCTIONS="true"
-COMPLETION_WAITING_DOTS="true"
+COMPLETION_WAITING_DOTS="false"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 
 # === PLUGIN CONFIGURATION ===
@@ -141,29 +135,29 @@ plugins=(
   colored-man-pages
   command-not-found
   zsh-completions
-  
-  # Movement and navigation  
+
+  # Movement and navigation
   last-working-dir
-  
+
   # Shell utilities
   sudo
   gnu-utils
-  
+
   # Git and version control
   git
   git-extras
-  
+
   # Development tools
   python
   pip
   rust
-  
+
   # Container & cloud
   docker
   docker-compose
   kubectl
   aws
-  
+
   # Build tools
   ant
   gradle
@@ -299,13 +293,13 @@ export LC_ALL=
 # Initialize ASDF
 if [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
   . /opt/homebrew/opt/asdf/libexec/asdf.sh
-  
+
   # Add asdf completions - needed for zsh
   if [ -d "${ASDF_DIR}/completions" ]; then
     fpath=(${ASDF_DIR}/completions $fpath)
-    # Ensure completions are loaded
+    # Ensure completions are loaded without compiling
     autoload -Uz compinit
-    compinit
+    compinit -D
   fi
 fi
 
@@ -313,14 +307,8 @@ fi
 # Java
 export JAVA_TOOL_OPTIONS="-Dfile.encoding=UTF8 -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false"
 export ANT_OPTS="-Xmx4096m"
-export MAVEN_OPTS="--Xmx4096m"
+export MAVEN_OPTS="-Xmx4096m"
 export GRADLE_OPTS="-Xmx4096m -Xms2024m"
-export RUBY_CONFIGURE_OPTS="--with-openssl-dir=/opt/homebrew/opt/openssl@1.1"
-
-# OpenSSL
-export LDFLAGS="-L/opt/homebrew/opt/openssl@1.1/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/openssl@1.1/include"
-export PKG_CONFIG_PATH="/opt/homebrew/opt/openssl@1.1/lib/pkgconfig"
 
 # AWS
 export AWS_PAGER=""
@@ -328,7 +316,7 @@ export AWS_SDK_LOAD_CONFIG=1
 [[ -f "$HOME/.aws/github_token" ]] && source "$HOME/.aws/github_token"
 
 # Kubernetes
-export KUBECONFIG=$HOME/.kube/config
+export KUBECONFIG="$XDG_CONFIG_HOME/kube/config"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
 alias k=kubectl
@@ -359,17 +347,17 @@ alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-se
 # Compact JDK version switcher
 setjdk() {
   [ -z "$1" ] && { /usr/libexec/java_home -V 2>&1 | grep -E "\s+\d" | cut -d, -f1; return; }
-  
-  local jhome=$(/usr/libexec/java_home -v "$1" 2>/dev/null) || { 
-    echo "Java $1 not found"; 
-    /usr/libexec/java_home -V 2>&1 | grep -E "\s+\d" | cut -d, -f1; 
-    return 1; 
+
+  local jhome=$(/usr/libexec/java_home -v "$1" 2>/dev/null) || {
+    echo "Java $1 not found";
+    /usr/libexec/java_home -V 2>&1 | grep -E "\s+\d" | cut -d, -f1;
+    return 1;
   }
-  
+
   [ -n "$JAVA_HOME" ] && PATH=${PATH//$JAVA_HOME\/bin:/}
   export JAVA_HOME=$jhome
   export PATH=$JAVA_HOME/bin:$PATH
-  
+
   # Only show version info if verbose flag is passed
   [ "$2" = "-v" ] && java -version
 }
@@ -440,3 +428,4 @@ fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+echo "Loading $0"
