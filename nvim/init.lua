@@ -235,7 +235,10 @@ end
 
 -- Setup Comment.nvim
 if safe_require('Comment') then
-  require('Comment').setup()
+  require('Comment').setup({
+    -- Add ts-context-commentstring integration
+    pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
+  })
 end
 
 -- Setup lualine (replacement for vim-airline)
@@ -293,6 +296,16 @@ if safe_require('nvim-web-devicons') then
     },
     -- Same color for all identical icons
     color_icons = true,
+  })
+end
+
+-- Setup ts_context_commentstring
+if safe_require('ts_context_commentstring') then
+  -- Skip the deprecated module to speed up loading
+  vim.g.skip_ts_context_commentstring_module = true
+  
+  require('ts_context_commentstring').setup({
+    enable_autocmd = false, -- Let Comment.nvim handle this
   })
 end
 

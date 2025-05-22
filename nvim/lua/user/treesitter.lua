@@ -137,7 +137,54 @@ M.setup = function()
       updatetime = 25, -- Debounced time for highlighting nodes in the playground from source code
       persist_queries = false, -- Whether the query persists across vim sessions
     },
+    
+    -- Autotag extension configuration (auto close/rename HTML tags)
+    autotag = {
+      enable = true,
+    },
   }
+  
+  -- Setup treesitter-context (shows context at top of buffer)
+  local context_ok, context = pcall(require, 'treesitter-context')
+  if context_ok then
+    context.setup({
+      enable = true,
+      max_lines = 3, -- How many lines the context will try to show
+      min_window_height = 20, -- Only show context if window has enough height
+      multiline_threshold = 5, -- Maximum number of lines for a multi-line node
+      trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded 
+      patterns = { -- Which nodes to show in context
+        default = {
+          'class',
+          'function',
+          'method',
+          'for',
+          'while',
+          'if',
+          'switch',
+          'case',
+          'interface',
+          'struct',
+          'enum',
+        },
+        -- Add language-specific patterns here if needed
+        go = {
+          'func_literal',
+          'function_declaration',
+          'method_declaration',
+          'struct_type',
+          'interface_type',
+        },
+        typescript = {
+          'class_declaration',
+          'function_declaration',
+          'method_declaration',
+          'arrow_function',
+          'function',
+        },
+      },
+    })
+  end
   
   -- Create custom command to manually install parsers
   vim.api.nvim_create_user_command("TSInstallFromGit", function(opts)

@@ -121,6 +121,12 @@ return packer.startup(function(use)
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate'
   }
+  
+  -- Treesitter extensions
+  use 'nvim-treesitter/nvim-treesitter-context'  -- Show code context at top of screen
+  use 'nvim-treesitter/nvim-treesitter-textobjects' -- Enhanced textobjects
+  use 'JoosepAlviste/nvim-ts-context-commentstring' -- Context-aware commenting
+  use 'windwp/nvim-ts-autotag' -- Auto close/rename HTML/JSX tags
 
   -- Modern replacements
   use 'lewis6991/gitsigns.nvim'          -- Git integration (replaces vim-gitgutter)
