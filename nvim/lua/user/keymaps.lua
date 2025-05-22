@@ -19,6 +19,12 @@ function M.setup()
   keymap("n", "<leader>bd", ":bdelete<CR>", opts)
   keymap("n", "<leader>bl", ":buffers<CR>", opts)
 
+  -- Mason keybindings
+  keymap("n", "<leader>mm", ":Mason<CR>", opts)
+  keymap("n", "<leader>mi", ":MasonInstallAll<CR>", opts)
+  keymap("n", "<leader>mu", ":MasonUpdate<CR>", opts)
+  keymap("n", "<leader>ml", ":Mason<CR>", opts) -- Alias for Mason
+
   -- Window navigation
   keymap("n", "<C-h>", "<C-w>h", opts)
   keymap("n", "<C-j>", "<C-w>j", opts)
@@ -40,8 +46,81 @@ function M.setup()
     keymap("n", "¬", "w", opts)
   end
 
+  -- VSCode-like keyboard shortcuts
+  -- Save with Ctrl+S
+  keymap("n", "<C-s>", ":w<CR>", opts)
+  keymap("i", "<C-s>", "<Esc>:w<CR>", opts)
+  
+  -- Select all with Ctrl+A
+  keymap("n", "<C-a>", "ggVG", opts)
+  
+  -- Undo with Ctrl+Z
+  keymap("n", "<C-z>", "u", opts)
+  keymap("i", "<C-z>", "<C-o>u", opts)
+  
+  -- Redo with Ctrl+Y (VSCode's default is Ctrl+Shift+Z, but Ctrl+Y is also common)
+  keymap("n", "<C-y>", "<C-r>", opts)
+  keymap("i", "<C-y>", "<C-o><C-r>", opts)
+  
+  -- Find with Ctrl+F
+  keymap("n", "<C-f>", "/", opts)
+  keymap("i", "<C-f>", "<Esc>/", opts)
+  
+  -- Comment line/block with Ctrl+/
+  -- Note: this might not work in all terminals, depends on how Ctrl+/ is sent
+  keymap("n", "<C-_>", ":lua require('Comment.api').toggle.linewise.current()<CR>", opts)
+  keymap("v", "<C-_>", ":lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", opts)
+
   -- Terminal mode escape
   keymap("t", "<Esc>", "<C-\\><C-n>", opts)
+  
+  -- Mouse shortcuts - Make Ctrl+Left/Right click simulate common GUI browser behavior
+  if vim.fn.has("mouse") == 1 then
+    -- Detect iTerm2
+    local is_iterm = false
+    if vim.env.TERM_PROGRAM == "iTerm.app" or string.match(vim.env.TERM, "^iterm") or vim.env.LC_TERMINAL == "iTerm2" then
+      is_iterm = true
+    end
+    
+    -- Ctrl+Left Click to go to definition (like VSCode)
+    keymap("n", "<C-LeftMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.definition()<CR>", opts)
+    
+    -- Ctrl+Right Click to go back (like VSCode/browser back)
+    keymap("n", "<C-RightMouse>", "<LeftMouse><C-o>", opts)
+    
+    -- Alt+Left Click for references (like VSCode)
+    keymap("n", "<A-LeftMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.references()<CR>", opts)
+    
+    -- VSCode-like dragging behaviors
+    keymap("v", "<LeftDrag>", "<LeftDrag>", opts)  -- Continue selection with drag
+    keymap("v", "<LeftRelease>", "<LeftRelease>", opts)
+    
+    -- VSCode-like multi-cursor with Alt+Click (similar but not exactly the same)
+    keymap("n", "<A-LeftMouse>", "<LeftMouse><cmd>normal! viw<CR>gn", opts)
+    
+    -- Shift+Click to select text (like VSCode)
+    keymap("n", "<S-LeftMouse>", "<LeftMouse>v", opts)
+    
+    -- Double click to select word (already works in Neovim)
+    
+    -- Triple click to select line (already works in Neovim)
+    
+    -- Mouse wheel scroll speed adjustments handled in options.lua
+    
+    -- iTerm2-specific: Enable smooth scrolling
+    if is_iterm then
+      -- Better mouse wheel handling in iTerm2
+      vim.cmd([[
+        " Smoother mouse wheel scrolling for iTerm2
+        map <ScrollWheelUp> <C-Y><C-Y>
+        map <ScrollWheelDown> <C-E><C-E>
+        
+        " Enable scroll acceleration
+        map <S-ScrollWheelUp> <C-Y><C-Y><C-Y><C-Y>
+        map <S-ScrollWheelDown> <C-E><C-E><C-E><C-E>
+      ]])
+    end
+  end
 end
 
 -- Setup Go specific keybindings in a separate function so they can be called from an autocommand

@@ -142,6 +142,11 @@ if safe_require('cmp') and safe_require('luasnip') then
   })
 end
 
+-- Setup Mason (do this before LSP)
+if safe_require('user.mason') then
+  require('user.mason').setup()
+end
+
 -- Setup LSP if available
 safe_require('user.lsp').setup()
 
@@ -183,7 +188,8 @@ end
 -- Setup Go development
 if safe_require('user.go') then
   require('user.go').setup({
-    auto_install_tools = true -- Set to false to disable automatic installation
+    auto_install_tools = true, -- Set to false to disable automatic installation
+    suppress_mason_notifications = true -- Suppress repetitive notifications about Mason tools
   })
 end
 
@@ -299,6 +305,44 @@ if safe_require('nvim-web-devicons') then
   })
 end
 
+-- Setup custom popup menu for mouse right-click (VSCode-style)
+vim.cmd([[
+  " Clear existing PopUp menu
+  aunmenu PopUp
+  
+  " Define VSCode-like popup menu items
+  menu PopUp.Cut                      "+d
+  menu PopUp.Copy                     "+y
+  menu PopUp.Paste                    "+p
+  menu PopUp.-sep1-                   :
+  menu PopUp.Go\ To\ Definition       :lua vim.lsp.buf.definition()<CR>
+  menu PopUp.Peek\ Definition         :lua require('telescope.builtin').lsp_definitions()<CR>
+  menu PopUp.Go\ To\ References       :lua vim.lsp.buf.references()<CR>
+  menu PopUp.Go\ To\ Implementations  :lua vim.lsp.buf.implementation()<CR>
+  menu PopUp.Find\ Symbol             :lua require('telescope.builtin').lsp_document_symbols()<CR>
+  menu PopUp.-sep2-                   :
+  menu PopUp.Rename\ Symbol           :lua vim.lsp.buf.rename()<CR>
+  menu PopUp.Format\ Document         :lua vim.lsp.buf.format({ async = true })<CR>
+  menu PopUp.Code\ Actions            :lua vim.lsp.buf.code_action()<CR>
+  menu PopUp.-sep3-                   :
+  menu PopUp.Toggle\ Breakpoint       :lua require('dap').toggle_breakpoint()<CR>
+  menu PopUp.-sep4-                   :
+  menu PopUp.Select\ All              ggVG
+  
+  " Include editor context menus
+  menu PopUp.Command\ Palette         :Telescope commands<CR>
+]])
+
+-- Set up auto-hover documentation (VSCode-like)
+vim.cmd([[
+  " Show documentation on hover (K) automatically
+  autocmd CursorHold * lua vim.lsp.buf.hover()
+  
+  " Set updatetime for CursorHold
+  " 300ms of no cursor movement to trigger CursorHold
+  set updatetime=300
+]])
+
 -- Setup ts_context_commentstring
 if safe_require('ts_context_commentstring') then
   -- Skip the deprecated module to speed up loading
@@ -308,6 +352,15 @@ if safe_require('ts_context_commentstring') then
     enable_autocmd = false, -- Let Comment.nvim handle this
   })
 end
+
+-- iTerm2 specific integrations
+vim.cmd([[
+  " Check if we're in iTerm2
+  if $TERM_PROGRAM ==# "iTerm.app" || $TERM =~# "^iterm" || $LC_TERMINAL ==# "iTerm2"
+    " Enable true color support
+    set termguicolors
+  endif
+]])
 
 -- Create Packer commands
 vim.api.nvim_create_user_command('PackerInstall', function()

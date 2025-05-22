@@ -3,11 +3,15 @@ local M = {}
 
 -- Configuration
 local config = {
-  auto_install_tools = true -- Set to false to disable automatic installation
+  auto_install_tools = true, -- Set to false to disable automatic installation
+  suppress_mason_notifications = false -- Set to true to completely suppress notifications about Mason tools
 }
 
 -- Add setup guard to prevent recursion
 local setup_in_progress = false
+
+-- Track which tools we've already notified about
+local mason_notified_tools = {}
 
 -- Function to get the Go binary directory
 local function get_go_bin_path()
@@ -28,6 +32,33 @@ local function ensure_go_tool(tool, package, version)
     return
   end
 
+  -- Check if Mason is managing this tool
+  local mason_ok, mason_registry = pcall(require, "mason-registry")
+  if mason_ok then
+    -- List of tools preferably managed by Mason
+    local mason_managed_tools = {
+      "gopls", "gofumpt", "goimports", "golangci-lint", "gomodifytags", "gotests", "impl"
+    }
+    
+    -- If the tool is in the list of Mason-managed tools, let Mason handle it
+    for _, managed_tool in ipairs(mason_managed_tools) do
+      if tool == managed_tool then
+        -- Check if Mason has it installed
+        if mason_registry.is_installed(tool) then
+          return -- Tool is managed by Mason, no need to install manually
+        else
+          -- Only notify once per tool per session and if notifications are not globally disabled
+          if not mason_notified_tools[tool] and not config.suppress_mason_notifications and not vim.g.disable_mason_notifications then
+            vim.notify(tool .. " should be installed via Mason. Run :Mason to install.", vim.log.levels.INFO)
+            mason_notified_tools[tool] = true
+          end
+          return
+        end
+      end
+    end
+  end
+
+  -- Fallback to manual installation for tools not managed by Mason
   -- Check if tool exists in go bin path
   local tool_path = go_bin_path .. "/" .. tool
   if vim.fn.filereadable(tool_path) == 1 then
@@ -63,29 +94,59 @@ end
 
 -- Function to install all required Go tools
 local function ensure_go_tools()
+  -- Define list of Mason-managed tools to skip
+  local mason_tools = {
+    gopls = true,
+    gofumpt = true,
+    goimports = true,
+    golangci_lint = true,
+    gomodifytags = true,
+    gotests = true,
+    impl = true
+  }
+
   -- Essential tools
-  ensure_go_tool("gopls", "golang.org/x/tools/gopls", "latest")
-  
-  -- Try direct installation if the first method failed
-  if vim.fn.executable("gopls") ~= 1 and vim.fn.filereadable(go_bin_path .. "/gopls") ~= 1 then
-    vim.notify("Trying alternative method to install gopls...", vim.log.levels.INFO)
-    local cmd = "go install golang.org/x/tools/gopls@latest"
-    local result = vim.fn.system(cmd)
-    if vim.v.shell_error ~= 0 then
-      vim.notify("Failed to install gopls: " .. result, vim.log.levels.ERROR)
-    else
-      vim.notify("gopls installed successfully", vim.log.levels.INFO)
+  if not mason_tools["gopls"] then
+    ensure_go_tool("gopls", "golang.org/x/tools/gopls", "latest")
+    
+    -- Try direct installation if the first method failed
+    if vim.fn.executable("gopls") ~= 1 and vim.fn.filereadable(go_bin_path .. "/gopls") ~= 1 then
+      vim.notify("Trying alternative method to install gopls...", vim.log.levels.INFO)
+      local cmd = "go install golang.org/x/tools/gopls@latest"
+      local result = vim.fn.system(cmd)
+      if vim.v.shell_error ~= 0 then
+        vim.notify("Failed to install gopls: " .. result, vim.log.levels.ERROR)
+      else
+        vim.notify("gopls installed successfully", vim.log.levels.INFO)
+      end
     end
   end
   
-  ensure_go_tool("goimports", "golang.org/x/tools/cmd/goimports", "latest")
-  ensure_go_tool("golangci-lint", "github.com/golangci/golangci-lint/cmd/golangci-lint", "latest") -- Always use latest stable version
-  ensure_go_tool("gomodifytags", "github.com/fatih/gomodifytags", "latest")
-  ensure_go_tool("gotests", "github.com/cweill/gotests/...", "latest")
-  ensure_go_tool("impl", "github.com/josharian/impl", "latest")
-  ensure_go_tool("gofumpt", "mvdan.cc/gofumpt", "latest")
+  if not mason_tools["goimports"] then
+    ensure_go_tool("goimports", "golang.org/x/tools/cmd/goimports", "latest")
+  end
   
-  -- Additional tools from checkhealth
+  if not mason_tools["golangci_lint"] then
+    ensure_go_tool("golangci-lint", "github.com/golangci/golangci-lint/cmd/golangci-lint", "latest")
+  end
+  
+  if not mason_tools["gomodifytags"] then
+    ensure_go_tool("gomodifytags", "github.com/fatih/gomodifytags", "latest")
+  end
+  
+  if not mason_tools["gotests"] then
+    ensure_go_tool("gotests", "github.com/cweill/gotests/...", "latest")
+  end
+  
+  if not mason_tools["impl"] then
+    ensure_go_tool("impl", "github.com/josharian/impl", "latest")
+  end
+  
+  if not mason_tools["gofumpt"] then
+    ensure_go_tool("gofumpt", "mvdan.cc/gofumpt", "latest")
+  end
+  
+  -- Additional tools from checkhealth (these are not managed by Mason, so we keep them)
   ensure_go_tool("iferr", "github.com/koron/iferr", "latest")
   ensure_go_tool("callgraph", "golang.org/x/tools/cmd/callgraph", "latest")
   ensure_go_tool("golines", "github.com/segmentio/golines", "latest")
@@ -104,6 +165,8 @@ local function ensure_go_tools()
 end
 
 -- Setup function with options
+-- opts.auto_install_tools (boolean): Set to false to disable automatic installation
+-- opts.suppress_mason_notifications (boolean): Set to true to suppress notifications about Mason tools
 function M.setup(opts)
   -- Check for recursion
   if setup_in_progress then

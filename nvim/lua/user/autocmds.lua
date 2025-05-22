@@ -4,6 +4,83 @@ function M.setup()
   local augroup = vim.api.nvim_create_augroup
   local autocmd = vim.api.nvim_create_autocmd
 
+  -- Create autogroup
+  local setup_group = augroup("dotfileSetup", { clear = true })
+
+  -- Highlight yanked text
+  autocmd("TextYankPost", {
+    group = setup_group,
+    callback = function()
+      vim.highlight.on_yank({ higroup = "IncSearch", timeout = 300 })
+    end,
+  })
+
+  -- Auto compile plugins.lua after changes
+  autocmd("BufWritePost", {
+    group = setup_group,
+    pattern = "plugins.lua",
+    command = "source <afile> | PackerCompile",
+  })
+
+  -- Trim trailing whitespace on save
+  -- (Now handled by retrail.nvim)
+
+  -- Go filetype customizations
+  autocmd("FileType", {
+    group = setup_group,
+    pattern = "go",
+    callback = function()
+      -- Load Go keymaps
+      local km_ok, keymaps = pcall(require, "user.keymaps")
+      if km_ok then
+        keymaps.setup_go_keymaps()
+      end
+    end,
+  })
+  
+  -- Terraform file formatting
+  autocmd("BufWritePre", {
+    group = setup_group,
+    pattern = { "*.tf", "*.tfvars" },
+    callback = function()
+      vim.lsp.buf.format({ async = false })
+    end,
+  })
+  
+  -- Mason Installation Check
+  autocmd("User", {
+    group = setup_group,
+    pattern = "MasonToolsUpdateCompleted",
+    callback = function()
+      vim.notify("Mason tools installation/update complete!", vim.log.levels.INFO)
+    end,
+  })
+
+  -- iTerm2 specific integrations
+  if vim.env.TERM_PROGRAM == "iTerm.app" or string.match(vim.env.TERM or "", "^iterm") or vim.env.LC_TERMINAL == "iTerm2" then
+    -- Enable focus events
+    autocmd({"FocusGained", "FocusLost"}, {
+      group = augroup("iTerm2Focus", { clear = true }),
+      callback = function(ev)
+        if ev.event == "FocusGained" then
+          -- Refresh file when Neovim gets focus
+          vim.cmd("checktime")
+        end
+      end,
+    })
+    
+    -- Fix mouse paste in iTerm2
+    autocmd("TextYankPost", {
+      group = augroup("iTerm2MousePaste", { clear = true }),
+      callback = function()
+        -- Delay the clipboard update slightly to ensure it's ready for paste
+        vim.defer_fn(function()
+          -- This is empty on purpose, just triggering the event loop
+        end, 10)
+      end,
+    })
+  end
+
   -- Return to last edit position when opening files (except git commit messages)
   local last_edit = augroup("LastEdit", { clear = true })
   autocmd("BufReadPost", {
@@ -91,6 +168,44 @@ function M.setup()
     group = terraform_settings,
     pattern = "*.hcl",
     command = "set filetype=terraform",
+  })
+  
+  -- Git commit message settings
+  local git_commit = augroup("GitCommitSettings", { clear = true })
+  
+  -- Position cursor at the beginning of git commit messages
+  autocmd("FileType", {
+    group = git_commit,
+    pattern = { "gitcommit", "gitrebase" },
+    callback = function()
+      -- Go to beginning of file and enter insert mode
+      vim.cmd("normal! gg")
+      
+      -- If it's a standard git commit (not interactive rebase, etc.)
+      if vim.bo.filetype == "gitcommit" then
+        -- For git commit, insert mode is often desirable
+        vim.cmd("startinsert")
+      end
+    end,
+  })
+  
+  -- Make sure to enforce cursor position even if the file has viminfo data
+  autocmd("BufReadPost", {
+    group = git_commit,
+    pattern = { "COMMIT_EDITMSG", "MERGE_MSG", "git-rebase-todo" },
+    callback = function()
+      vim.cmd("normal! gg")
+    end,
+  })
+  
+  -- Disable the "jump to last position" behavior for git files
+  autocmd("BufReadPost", {
+    group = git_commit,
+    pattern = { "COMMIT_EDITMSG", "MERGE_MSG", "git-rebase-todo" },
+    callback = function()
+      -- Disable the last position marker
+      vim.opt_local.viminfo:append("!")
+    end,
   })
 end
 
