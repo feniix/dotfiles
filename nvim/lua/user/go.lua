@@ -188,4 +188,31 @@ M.setup = function(opts)
   end, { desc = 'Manually reinstall gopls' })
 end
 
+-- Add the build_go_files function used in keymaps
+function M.build_go_files()
+  local file = vim.fn.expand('%')
+  if file:match('_test%.go$') then
+    vim.cmd('GoTest')
+  elseif file:match('%.go$') then
+    vim.cmd('GoBuild')
+  end
+end
+
+-- Add Go alternate file commands
+function M.go_alternate_edit()
+  vim.fn['go#alternate#Switch'](0, 'edit')
+end
+
+function M.go_alternate_vertical()
+  vim.fn['go#alternate#Switch'](0, 'vsplit')
+end
+
+function M.go_alternate_split()
+  vim.fn['go#alternate#Switch'](0, 'split')
+end
+
+function M.go_alternate_tab()
+  vim.fn['go#alternate#Switch'](0, 'tabe')
+end
+
 return M 
