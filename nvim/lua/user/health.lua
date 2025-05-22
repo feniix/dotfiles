@@ -9,11 +9,25 @@ local warn = health.warn or health.report_warn
 local error = health.error or health.report_error
 local info = health.info or health.report_info
 
--- Check if plugin exists
+-- Check if plugin exists in any of the possible locations
 local function has_plugin(plugin_name)
-  local plugins_dir = vim.fn.stdpath("data") .. "/plugged/"
-  local plugin_path = plugins_dir .. plugin_name
-  return vim.fn.isdirectory(plugin_path) == 1
+  -- Check in Packer paths (preferred)
+  local packer_start = vim.fn.stdpath("data") .. "/site/pack/packer/start/" .. plugin_name
+  local packer_opt = vim.fn.stdpath("data") .. "/site/pack/packer/opt/" .. plugin_name
+  
+  if vim.fn.isdirectory(packer_start) == 1 then
+    return true, "Packer/start"
+  elseif vim.fn.isdirectory(packer_opt) == 1 then
+    return true, "Packer/opt"
+  end
+  
+  -- Legacy path check for vim-plug (for backward compatibility)
+  local vimplug_path = vim.fn.stdpath("data") .. "/plugged/" .. plugin_name
+  if vim.fn.isdirectory(vimplug_path) == 1 then
+    return true, "vim-plug"
+  end
+  
+  return false, nil
 end
 
 -- Check if executable exists in path
@@ -41,10 +55,11 @@ local function check_lsp()
   end
   
   -- Check lspconfig plugin
-  if has_plugin("nvim-lspconfig") then
-    ok("nvim-lspconfig is installed")
+  local has_lspconfig, location = has_plugin("nvim-lspconfig")
+  if has_lspconfig then
+    ok("nvim-lspconfig is installed via " .. location)
   else
-    error("nvim-lspconfig is missing, install with :PlugInstall")
+    error("nvim-lspconfig is missing, install with :PackerSync")
   end
   
   -- Check language servers
@@ -62,8 +77,9 @@ local function check_lsp()
   end
   
   -- TypeScript - typescript-tools
-  if has_plugin("typescript-tools.nvim") then
-    ok("typescript-tools.nvim is installed")
+  local has_ts_tools, location = has_plugin("typescript-tools.nvim") 
+  if has_ts_tools then
+    ok("typescript-tools.nvim is installed via " .. location)
   else
     warn("typescript-tools.nvim is missing, TypeScript support may be limited")
   end
@@ -96,29 +112,32 @@ local function check_dap()
   end
   
   -- Check DAP UI
-  if has_plugin("nvim-dap-ui") then
+  local has_dapui, dapui_location = has_plugin("nvim-dap-ui")
+  if has_dapui then
     local dapui_ok, _ = pcall(require, "dapui")
     if dapui_ok then
-      ok("nvim-dap-ui is installed and loaded correctly")
+      ok("nvim-dap-ui is installed via " .. dapui_location .. " and loaded correctly")
     else
       warn("nvim-dap-ui is installed but cannot be loaded")
     end
   else
-    warn("nvim-dap-ui is missing, install with :PlugInstall")
+    warn("nvim-dap-ui is missing, install with :PackerSync")
   end
   
   -- Check nvim-nio dependency
-  if has_plugin("nvim-nio") then
-    ok("nvim-nio is installed (required by nvim-dap-ui)")
+  local has_nio, nio_location = has_plugin("nvim-nio")
+  if has_nio then
+    ok("nvim-nio is installed via " .. nio_location .. " (required by nvim-dap-ui)")
   else
-    error("nvim-nio is missing, but is required by nvim-dap-ui. Install with :PlugInstall")
+    error("nvim-nio is missing, but is required by nvim-dap-ui. Install with :PackerSync")
   end
   
   -- Check virtual text 
-  if has_plugin("nvim-dap-virtual-text") then
+  local has_vt, vt_location = has_plugin("nvim-dap-virtual-text")
+  if has_vt then
     local vt_ok, _ = pcall(require, "nvim-dap-virtual-text")
     if vt_ok then
-      ok("nvim-dap-virtual-text is installed and loaded correctly")
+      ok("nvim-dap-virtual-text is installed via " .. vt_location .. " and loaded correctly")
     else
       warn("nvim-dap-virtual-text is installed but cannot be loaded")
     end
@@ -148,10 +167,11 @@ local function check_go()
   end
   
   -- Check go.nvim
-  if has_plugin("go.nvim") then
+  local has_gonvim, gonvim_location = has_plugin("go.nvim")
+  if has_gonvim then
     local gonvim_ok, gonvim = pcall(require, "go")
     if gonvim_ok then
-      ok("go.nvim is installed and loaded correctly")
+      ok("go.nvim is installed via " .. gonvim_location .. " and loaded correctly")
       
       -- Check lsp_cfg settings
       if gonvim.lsp_cfg == true then
@@ -163,12 +183,13 @@ local function check_go()
       warn("go.nvim is installed but cannot be loaded")
     end
   else
-    warn("go.nvim is missing, install with :PlugInstall")
+    warn("go.nvim is missing, install with :PackerSync")
   end
   
   -- Check vim-go
-  if has_plugin("vim-go") then
-    ok("vim-go is installed")
+  local has_vimgo, vimgo_location = has_plugin("vim-go")
+  if has_vimgo then
+    ok("vim-go is installed via " .. vimgo_location)
   else
     info("vim-go is missing. Basic Go functionality may still work with go.nvim")
   end
@@ -203,10 +224,11 @@ end
 local function check_treesitter()
   start("Treesitter Configuration")
   
-  if has_plugin("nvim-treesitter") then
+  local has_ts, ts_location = has_plugin("nvim-treesitter")
+  if has_ts then
     local ts_ok, _ = pcall(require, "nvim-treesitter")
     if ts_ok then
-      ok("nvim-treesitter is installed and loaded correctly")
+      ok("nvim-treesitter is installed via " .. ts_location .. " and loaded correctly")
     else
       warn("nvim-treesitter is installed but cannot be loaded")
     end
@@ -238,7 +260,7 @@ local function check_treesitter()
       warn("Could not check installed parsers")
     end
   else
-    error("nvim-treesitter is missing, install with :PlugInstall")
+    error("nvim-treesitter is missing, install with :PackerSync")
   end
 end
 
@@ -247,27 +269,29 @@ local function check_completion()
   start("Completion Configuration")
   
   -- Check nvim-cmp
-  if has_plugin("nvim-cmp") then
+  local has_cmp, cmp_location = has_plugin("nvim-cmp")
+  if has_cmp then
     local cmp_ok, _ = pcall(require, "cmp")
     if cmp_ok then
-      ok("nvim-cmp is installed and loaded correctly")
+      ok("nvim-cmp is installed via " .. cmp_location .. " and loaded correctly")
     else
       warn("nvim-cmp is installed but cannot be loaded")
     end
   else
-    error("nvim-cmp is missing, install with :PlugInstall")
+    error("nvim-cmp is missing, install with :PackerSync")
   end
   
   -- Check snippet engine
-  if has_plugin("LuaSnip") then
+  local has_luasnip, luasnip_location = has_plugin("LuaSnip")
+  if has_luasnip then
     local ls_ok, _ = pcall(require, "luasnip")
     if ls_ok then
-      ok("LuaSnip is installed and loaded correctly")
+      ok("LuaSnip is installed via " .. luasnip_location .. " and loaded correctly")
     else
       warn("LuaSnip is installed but cannot be loaded")
     end
   else
-    warn("LuaSnip is missing, install with :PlugInstall")
+    warn("LuaSnip is missing, install with :PackerSync")
   end
   
   -- Check sources
@@ -277,8 +301,9 @@ local function check_completion()
   }
   
   for _, source in ipairs(sources) do
-    if has_plugin(source) then
-      ok(source .. " is installed")
+    local has_source, location = has_plugin(source)
+    if has_source then
+      ok(source .. " is installed via " .. location)
     else
       info(source .. " is missing, install for enhanced completion")
     end

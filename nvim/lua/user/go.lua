@@ -6,6 +6,9 @@ local config = {
   auto_install_tools = true -- Set to false to disable automatic installation
 }
 
+-- Add setup guard to prevent recursion
+local setup_in_progress = false
+
 -- Function to get the Go binary directory
 local function get_go_bin_path()
   local gopath = vim.fn.trim(vim.fn.system("go env GOPATH"))
@@ -101,10 +104,16 @@ local function ensure_go_tools()
 end
 
 -- Setup function with options
-M.setup = function(opts)
+function M.setup(opts)
+  -- Check for recursion
+  if setup_in_progress then
+    return
+  end
+  setup_in_progress = true
+
   -- Merge user options with defaults
   if opts then
-    config = vim.tbl_deep_extend("force", config, opts)
+    config = vim.tbl_extend("force", config, opts)
   end
 
   -- Ensure Go tools are installed
@@ -113,63 +122,66 @@ M.setup = function(opts)
   -- Set up go.nvim
   local go_ok, go = pcall(require, "go")
   if go_ok then
-    go.setup({
-      -- Configure go.nvim
-      go = 'go', -- Go command
-      goimports = 'gopls', -- Use gopls for imports (fix for deprecated goimport)
-      gofmt = 'gofumpt', -- Use gofumpt for formatting
-      lsp_cfg = true, -- Enable LSP configuration in go.nvim
-      lsp_on_attach = function(client, bufnr)
-        -- Call our custom LSP on_attach function
-        local lsp_common_ok, lsp_common = pcall(require, 'user.lsp_common')
-        if lsp_common_ok then
-          local on_attach = lsp_common.create_on_attach()
-          on_attach(client, bufnr)
-        end
-        
-        -- Add specific Go keybindings
-        local opts = { noremap = true, silent = true, buffer = bufnr }
-        vim.keymap.set('n', '<leader>gtj', vim.lsp.buf.type_definition, opts)
-        vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
-        
-        -- Auto-format on save
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          group = vim.api.nvim_create_augroup("GoFormat", { clear = true }),
-          buffer = bufnr,
-          callback = function()
-            vim.lsp.buf.format({ async = false })
-          end,
-        })
-      end,
-      lsp_gofumpt = true,
-      dap_debug = true, -- Enable debugging support
-      test_runner = 'go', -- Use standard go test
-      verbose_tests = true,
-      run_in_floaterm = false, -- Use built-in terminal
-    })
+    -- Protect against unexpected errors in go.nvim
+    local ok, err = pcall(function()
+      go.setup({
+        -- Configure go.nvim
+        go = 'go', -- Go command
+        goimports = 'gopls', -- Use gopls for imports (fix for deprecated goimport)
+        gofmt = 'gofumpt', -- Use gofumpt for formatting
+        lsp_cfg = true, -- Enable LSP configuration in go.nvim
+        lsp_on_attach = function(client, bufnr)
+          -- Call our custom LSP on_attach function
+          local lsp_common_ok, lsp_common = pcall(require, 'user.lsp_common')
+          if lsp_common_ok then
+            local on_attach = lsp_common.create_on_attach()
+            on_attach(client, bufnr)
+          end
+          
+          -- Add specific Go keybindings
+          local opts = { noremap = true, silent = true, buffer = bufnr }
+          vim.keymap.set('n', '<leader>gtj', vim.lsp.buf.type_definition, opts)
+          
+          -- Safely setup the goimpl keybinding only if telescope is available and not disabled
+          if vim.g.skip_telescope ~= true then
+            pcall(function()
+              vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
+            end)
+          end
+          
+          -- Auto-format on save
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            group = vim.api.nvim_create_augroup("GoFormat", { clear = true }),
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format({ async = false })
+            end,
+          })
+        end,
+        lsp_gofumpt = true,
+        dap_debug = true, -- Enable debugging support
+        test_runner = 'go', -- Use standard go test
+        verbose_tests = true,
+        run_in_floaterm = false, -- Use built-in terminal
+      })
+    end)
     
-    -- Ensure gopls is always set up correctly
-    vim.api.nvim_create_autocmd("FileType", {
-      pattern = "go",
-      callback = function()
-        local lsp_ok, lsp = pcall(require, "user.lsp")
-        if lsp_ok then 
-          -- Ensure LSP module is properly loaded for Go files
-          pcall(function() lsp.setup() end)
-        end
-      end,
-    })
+    if not ok then
+      vim.notify("Error setting up go.nvim: " .. tostring(err), vim.log.levels.ERROR)
+    end
   else
     vim.notify("go.nvim not found", vim.log.levels.WARN)
   end
 
-  -- Set up goimpl
-  local goimpl_ok, goimpl = pcall(require, "telescope")
-  if goimpl_ok then
-    -- Setup the goimpl extension if telescope is available
-    pcall(function()
-      require("telescope").load_extension("goimpl")
-    end)
+  -- Set up goimpl with telescope only if telescope is not disabled
+  if vim.g.skip_telescope ~= true then
+    local telescope_ok = pcall(require, "telescope")
+    if telescope_ok then
+      -- Setup the goimpl extension if telescope is available
+      pcall(function()
+        require("telescope").load_extension("goimpl")
+      end)
+    end
   end
   
   -- Create a command to manually reinstall gopls
@@ -186,9 +198,12 @@ M.setup = function(opts)
       vim.notify("gopls installed successfully. Please restart Neovim.", vim.log.levels.INFO)
     end
   end, { desc = 'Manually reinstall gopls' })
+
+  -- Reset the recursion guard
+  setup_in_progress = false
 end
 
--- Add the build_go_files function used in keymaps
+-- Helper function for Go files - replaces the VimScript function s:build_go_files()
 function M.build_go_files()
   local file = vim.fn.expand('%')
   if file:match('_test%.go$') then
@@ -198,21 +213,21 @@ function M.build_go_files()
   end
 end
 
--- Add Go alternate file commands
+-- Go alternate file functions
 function M.go_alternate_edit()
-  vim.fn['go#alternate#Switch'](0, 'edit')
+  vim.cmd('call go#alternate#Switch(0, "edit")')
 end
 
 function M.go_alternate_vertical()
-  vim.fn['go#alternate#Switch'](0, 'vsplit')
+  vim.cmd('call go#alternate#Switch(0, "vsplit")')
 end
 
 function M.go_alternate_split()
-  vim.fn['go#alternate#Switch'](0, 'split')
+  vim.cmd('call go#alternate#Switch(0, "split")')
 end
 
 function M.go_alternate_tab()
-  vim.fn['go#alternate#Switch'](0, 'tabe')
+  vim.cmd('call go#alternate#Switch(0, "tabe")')
 end
 
 return M 

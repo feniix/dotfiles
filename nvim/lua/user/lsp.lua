@@ -1,11 +1,21 @@
 local M = {}
 
+-- Add a guard to prevent recursive setup
+local setup_in_progress = false
+
 -- LSP settings
 M.setup = function()
+  -- Prevent recursive setup
+  if setup_in_progress then
+    return
+  end
+  setup_in_progress = true
+
   -- Safely load LSP configuration
   local lspconfig_ok, nvim_lsp = pcall(require, 'lspconfig')
   if not lspconfig_ok then
     vim.notify("nvim-lspconfig not found. LSP features will be disabled.", vim.log.levels.WARN)
+    setup_in_progress = false
     return
   end
   
@@ -13,6 +23,7 @@ M.setup = function()
   local lsp_common_ok, lsp_common = pcall(require, 'user.lsp_common')
   if not lsp_common_ok then
     vim.notify("Could not load LSP common module. Using basic LSP configuration.", vim.log.levels.WARN)
+    setup_in_progress = false
     return
   end
   
@@ -141,7 +152,13 @@ M.setup = function()
         -- Add Go-specific keymaps here
         local opts = { noremap = true, silent = true, buffer = bufnr }
         vim.keymap.set('n', '<leader>gtj', vim.lsp.buf.type_definition, opts)
-        vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
+        
+        -- Add telescope Go implementation keybinding only if telescope is available and not disabled
+        if vim.g.skip_telescope ~= true then
+          pcall(function()
+            vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
+          end)
+        end
         
         -- Auto-format on save
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -346,6 +363,9 @@ M.setup = function()
       },
     })
   end
+
+  -- Reset the recursion guard when done
+  setup_in_progress = false
 end
 
 return M 

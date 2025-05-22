@@ -1,65 +1,65 @@
--- Plugin installer module for vim-plug integration
+-- Plugin installer module for Packer integration
 local M = {}
 
--- Check if vim-plug is available
-local function is_vim_plug_available()
-  return vim.fn.exists('*plug#begin') == 1
+-- Check if packer is available
+local function is_packer_available()
+  return pcall(require, 'packer')
 end
 
--- Install plugins using vim-plug
+-- Install plugins using Packer
 local function install_plugins()
-  if not is_vim_plug_available() then
-    vim.notify("vim-plug is not available", vim.log.levels.ERROR)
+  local packer_ok, packer = pcall(require, 'packer')
+  if not packer_ok then
+    vim.notify("Packer is not available", vim.log.levels.ERROR)
     return
   end
 
-  -- Try to run PlugInstall
-  local result = vim.fn.system('nvim --headless -c "PlugInstall --sync" -c "qa!"')
-  vim.notify("Plugin installation complete. Restart Neovim to load new plugins.", vim.log.levels.INFO)
+  -- Run PackerInstall
+  vim.cmd('PackerInstall')
 end
 
--- Update plugins using vim-plug
+-- Update plugins using Packer
 local function update_plugins()
-  if not is_vim_plug_available() then
-    vim.notify("vim-plug is not available", vim.log.levels.ERROR)
+  local packer_ok, packer = pcall(require, 'packer')
+  if not packer_ok then
+    vim.notify("Packer is not available", vim.log.levels.ERROR)
     return
   end
 
-  -- Try to run PlugUpdate
-  local result = vim.fn.system('nvim --headless -c "PlugUpdate --sync" -c "qa!"')
-  vim.notify("Plugin update complete. Restart Neovim to load updated plugins.", vim.log.levels.INFO)
+  -- Reload plugins module then run PackerSync
+  package.loaded['user.plugins'] = nil
+  require('user.plugins')
+  vim.cmd('PackerSync')
 end
 
 -- Clean plugins (remove unused)
 local function clean_plugins()
-  if not is_vim_plug_available() then
-    vim.notify("vim-plug is not available", vim.log.levels.ERROR)
+  local packer_ok, packer = pcall(require, 'packer')
+  if not packer_ok then
+    vim.notify("Packer is not available", vim.log.levels.ERROR)
     return
   end
   
-  -- Try to run PlugClean
-  local result = vim.fn.system('nvim --headless -c "PlugClean!" -c "qa!"')
-  vim.notify("Plugin cleanup complete.", vim.log.levels.INFO)
+  -- Run PackerClean
+  vim.cmd('PackerClean')
 end
 
 -- Status of plugins 
 local function status_plugins()
-  if not is_vim_plug_available() then
-    vim.notify("vim-plug is not available", vim.log.levels.ERROR)
+  local packer_ok, packer = pcall(require, 'packer')
+  if not packer_ok then
+    vim.notify("Packer is not available", vim.log.levels.ERROR)
     return
   end
   
-  -- Open a new buffer with PlugStatus
-  vim.cmd("PlugStatus")
+  -- Run PackerStatus
+  vim.cmd('PackerStatus')
 end
 
 -- Create user commands for plugin management
 function M.create_commands()
-  -- Only create commands if vim-plug is available
-  if not is_vim_plug_available() then
-    vim.notify("vim-plug is not available, plugin installer commands not created", vim.log.levels.WARN)
-    return
-  end
+  -- Create user commands regardless of Packer availability
+  -- They will check for Packer when executed
   
   -- Create user commands
   vim.api.nvim_create_user_command('InstallPlugins', install_plugins, {

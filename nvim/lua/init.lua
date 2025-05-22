@@ -7,8 +7,8 @@ if vim.fn.has('nvim') == 0 then
 end
 
 -- Permanently disable components that were causing issues
-vim.g.skip_telescope = true  -- Disable Telescope
-vim.g.skip_ts_tools = false  -- Set to true to disable TypeScript
+vim.g.skip_telescope = false  -- Enable Telescope
+vim.g.skip_ts_tools = false   -- Enable TypeScript
 vim.g.skip_treesitter_setup = false
 vim.g.skip_plugin_installer = false  -- Enable the plugin installer
 
@@ -54,17 +54,6 @@ function safe_require(module)
   return result
 end
 
--- Helper function for TypeScript development
-function setup_typescript()
-  -- Check for typescript-tools.nvim
-  local ts_tools = safe_require('typescript-tools')
-  if not ts_tools then
-    vim.notify("typescript-tools.nvim not found. TypeScript support will be limited.", vim.log.levels.WARN)
-    return false
-  end
-  return true
-end
-
 -- Set up health check module
 pcall(function() 
   local health = require("user.health")
@@ -91,5 +80,5 @@ _G.safe_require = safe_require
 -- We're keeping most configuration in individual Lua modules for better organization
 -- The entry point is now init.lua in the nvim directory root
 
--- This file is loaded from init.vim with:
--- lua require('init') 
+-- This file is loaded from init.lua with:
+-- require('init') 

@@ -41,8 +41,8 @@ vim.g.go_imports_autosave = 0         -- LSP handles formatting
 vim.g.go_diagnostics_enabled = 0      -- LSP handles diagnostics
 vim.g.go_metalinter_enabled = 0       -- LSP handles linting
 
--- Load plugins
-safe_require('user.plugins')
+-- Load plugins via Packer
+require('user.plugins')
 
 -- Set colorscheme (fallback to default if not available)
 vim.cmd('set background=dark')
@@ -253,28 +253,38 @@ end
 
 -- Setup rainbow-delimiters (replacement for rainbow)
 if safe_require('rainbow-delimiters') then
-  vim.g.rainbow_delimiters = {
-    strategy = {
-      [''] = require('rainbow-delimiters').strategy['global'],
-    },
-    query = {
-      [''] = 'rainbow-delimiters',
-    },
-  }
+  local rainbow_delimiters = require('rainbow-delimiters')
+  if rainbow_delimiters and rainbow_delimiters.strategy then
+    vim.g.rainbow_delimiters = {
+      strategy = {
+        [''] = rainbow_delimiters.strategy['global'],
+      },
+      query = {
+        [''] = 'rainbow-delimiters',
+      },
+    }
+  end
 end
 
 -- Setup solarized colorscheme
-if safe_require('solarized') then
-  require('solarized').setup({
-    theme = 'neo', -- or 'default'
-    transparent = false,
-    colors = {},  -- Override specific color values
-    highlights = {}, -- Override specific highlight groups
-    enable_italics = true,
-  })
+local solarized_ok, solarized = pcall(require, 'solarized')
+if solarized_ok and solarized.setup then
+  pcall(function()
+    solarized.setup({
+      theme = 'neo', -- or 'default'
+      transparent = false,
+      colors = {},  -- Override specific color values
+      highlights = {}, -- Override specific highlight groups
+      enable_italics = true,
+    })
+  end)
 end
 
--- Create a command to compile and sync Packer
+-- Create Packer commands
+vim.api.nvim_create_user_command('PackerInstall', function()
+  vim.cmd('PackerInstall')
+end, { desc = 'Install missing plugins' })
+
 vim.api.nvim_create_user_command('PackerUpdate', function()
   -- Reload the plugins module first
   package.loaded['user.plugins'] = nil
@@ -282,6 +292,10 @@ vim.api.nvim_create_user_command('PackerUpdate', function()
   -- Then run PackerSync
   vim.cmd('PackerSync')
 end, { desc = 'Reload plugins configuration and run PackerSync' })
+
+vim.api.nvim_create_user_command('PackerClean', function()
+  vim.cmd('PackerClean')
+end, { desc = 'Remove unused plugins' })
 
 -- Helper function for Go files - must be defined at global scope
 function _G.build_go_files()
