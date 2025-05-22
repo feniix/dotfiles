@@ -80,28 +80,16 @@ vim.api.nvim_create_autocmd("VimEnter", {
       if vim.fn.isdirectory(treesitter_cache) == 1 then
         vim.fn.delete(treesitter_cache, 'rf')
       end
-      
-      -- Check for key plugins
-      local plugin_checks = {
-        {"typescript-tools", "TypeScript tools"},
-        {"nvim-treesitter", "Treesitter"}
-      }
-      
-      for _, plugin in ipairs(plugin_checks) do
-        local name, desc = unpack(plugin)
-        local ok, _ = pcall(require, name)
-        if not ok then
-          vim.notify(desc .. " plugin not found. Run :PlugInstall to install missing plugins.", vim.log.levels.WARN)
-        end
-      end
     end, 1000)
   end,
   pattern = "*"
 })
 
--- We're keeping most configuration in init.vim with only some
--- minimal Lua configuration as requested by the user.
--- Individual Lua modules will be loaded directly from init.vim.
+-- Make safe_require globally available
+_G.safe_require = safe_require
+
+-- We're keeping most configuration in individual Lua modules for better organization
+-- The entry point is now init.lua in the nvim directory root
 
 -- This file is loaded from init.vim with:
 -- lua require('init') 

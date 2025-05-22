@@ -47,7 +47,6 @@ MACOS_FILES=(
 
 # Files that have been moved or are no longer needed
 DEPRECATED_FILES=(
-  "vimrc"
   "update.sh"
   "create_symlinks.sh"
   "modify_config.sh"
