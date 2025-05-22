@@ -68,7 +68,6 @@ brew gnu-tar
 brew gnu-time
 brew gnupg
 brew gnutls
-brew go
 brew gpgme
 brew graphite2
 brew grep
@@ -174,7 +173,6 @@ brew ncurses
 brew neovim
 brew netcdf
 brew nettle
-brew node
 brew npth
 brew nspr
 brew nss
@@ -186,7 +184,6 @@ brew openexr
 brew openjpeg
 brew openldap
 brew openssl@3
-brew operator-sdk
 brew opus
 brew p11-kit
 brew p7zip
@@ -204,16 +201,12 @@ brew poppler
 brew popt
 brew powerlevel10k
 brew pre-commit
-brew prettier
 brew proj
 brew protobuf
 brew pycparser
 brew python-packaging
 brew python-tabulate
-brew python@3.10
-brew python@3.11
 brew python@3.13
-brew python@3.9
 brew qemu
 brew rapidjson
 brew rav1e
@@ -241,12 +234,8 @@ brew starship
 brew stern
 brew svt-av1
 brew tcl-tk
-brew terraform-docs
 brew terrascan
 brew tesseract
-brew tfenv
-brew tflint
-brew tfsec
 brew tfupdate
 brew theora
 brew thrift
