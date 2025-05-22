@@ -399,7 +399,7 @@ EOF
   if lualine_ok then
     lualine.setup({
       options = {
-        theme = 'solarized',
+        theme = 'solarized_dark', -- Change from 'solarized' to 'solarized_dark'
         icons_enabled = true,
         component_separators = { left = '', right = ''},
         section_separators = { left = '', right = ''},
