@@ -19,7 +19,6 @@ function M.setup()
       background_set = false, -- Let Neovim control the background
       transparent = false,    -- Set to true for transparent background
     })
-    vim.notify("NeoSolarized colorscheme applied", vim.log.levels.INFO)
     return
   else
     vim.notify("NeoSolarized not found. Install with :PackerSync", vim.log.levels.WARN)
