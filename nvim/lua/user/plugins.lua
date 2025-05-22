@@ -80,6 +80,15 @@ return packer.startup(function(use)
   -- LSP & Completion
   use 'neovim/nvim-lspconfig'             -- LSP configuration
   
+  -- Mason for managing LSP servers, linters, and formatters
+  use {
+    'williamboman/mason.nvim',           -- Main package manager
+    requires = {
+      'williamboman/mason-lspconfig.nvim', -- Bridge between mason and lspconfig
+      'WhoIsSethDaniel/mason-tool-installer.nvim', -- Auto-install tools
+    }
+  }
+  
   -- Debugging
   use {
     'mfussenegger/nvim-dap',              -- Debug Adapter Protocol client

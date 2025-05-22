@@ -283,6 +283,7 @@ cask google-chrome
 cask handbrake
 cask iina
 cask iterm2
+cask neovide
 cask notion
 cask orbstack
 cask raspberry-pi-imager
@@ -312,7 +313,7 @@ appstore 1460836908 GoPro Player (3.1.0)
 appstore 1474276998 HP Smart (18.10.1)
 appstore 409183694 Keynote (14.4)
 appstore 409203825 Numbers (14.4)
-appstore 490179405 Okta Verify (9.39.0)
+appstore 490179405 Okta Verify (9.42.0)
 appstore 429449079 Patterns (1.3)
 appstore 545519333 Prime Video (10.75)
 appstore 803453959 Slack (4.44.59)

@@ -158,6 +158,21 @@ _G.packer_plugins = {
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/lualine.nvim",
     url = "https://github.com/nvim-lualine/lualine.nvim"
   },
+  ["mason-lspconfig.nvim"] = {
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/mason-lspconfig.nvim",
+    url = "https://github.com/williamboman/mason-lspconfig.nvim"
+  },
+  ["mason-tool-installer.nvim"] = {
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/mason-tool-installer.nvim",
+    url = "https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim"
+  },
+  ["mason.nvim"] = {
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/mason.nvim",
+    url = "https://github.com/williamboman/mason.nvim"
+  },
   ["neosolarized.nvim"] = {
     loaded = true,
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/neosolarized.nvim",
@@ -302,16 +317,16 @@ vim.cmd [[augroup packer_load_aucmds]]
 vim.cmd [[au!]]
   -- Filetype lazy-loads
 time([[Defining lazy-load filetype autocommands]], true)
-vim.cmd [[au FileType go ++once lua require("packer.load")({'go.nvim', 'vim-go', 'goimpl.nvim'}, { ft = "go" }, _G.packer_plugins)]]
+vim.cmd [[au FileType go ++once lua require("packer.load")({'vim-go', 'go.nvim', 'goimpl.nvim'}, { ft = "go" }, _G.packer_plugins)]]
 time([[Defining lazy-load filetype autocommands]], false)
 vim.cmd("augroup END")
 vim.cmd [[augroup filetypedetect]]
-time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]], true)
-vim.cmd [[source /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]]
-time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]], false)
 time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]], true)
 vim.cmd [[source /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]]
 time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]], false)
+time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]], true)
+vim.cmd [[source /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]]
+time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]], false)
 vim.cmd("augroup END")
 
 _G._packer.inside_compile = false
