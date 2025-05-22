@@ -114,6 +114,11 @@ _G.packer_plugins = {
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/cmp_luasnip",
     url = "https://github.com/saadparwaiz1/cmp_luasnip"
   },
+  ["colorbuddy.nvim"] = {
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/colorbuddy.nvim",
+    url = "https://github.com/tjdevries/colorbuddy.nvim"
+  },
   ["editorconfig-vim"] = {
     loaded = true,
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/editorconfig-vim",
@@ -152,6 +157,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/lualine.nvim",
     url = "https://github.com/nvim-lualine/lualine.nvim"
+  },
+  ["neosolarized.nvim"] = {
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/neosolarized.nvim",
+    url = "https://github.com/svrana/neosolarized.nvim"
   },
   ["nvim-autopairs"] = {
     loaded = true,
@@ -228,11 +238,6 @@ _G.packer_plugins = {
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/retrail.nvim",
     url = "https://github.com/kaplanz/retrail.nvim"
   },
-  ["solarized.nvim"] = {
-    loaded = true,
-    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/solarized.nvim",
-    url = "https://github.com/shaunsingh/solarized.nvim"
-  },
   ["splitjoin.vim"] = {
     loaded = true,
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/splitjoin.vim",
@@ -277,16 +282,16 @@ vim.cmd [[augroup packer_load_aucmds]]
 vim.cmd [[au!]]
   -- Filetype lazy-loads
 time([[Defining lazy-load filetype autocommands]], true)
-vim.cmd [[au FileType go ++once lua require("packer.load")({'vim-go', 'goimpl.nvim', 'go.nvim'}, { ft = "go" }, _G.packer_plugins)]]
+vim.cmd [[au FileType go ++once lua require("packer.load")({'go.nvim', 'vim-go', 'goimpl.nvim'}, { ft = "go" }, _G.packer_plugins)]]
 time([[Defining lazy-load filetype autocommands]], false)
 vim.cmd("augroup END")
 vim.cmd [[augroup filetypedetect]]
-time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]], true)
-vim.cmd [[source /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]]
-time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]], false)
 time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]], true)
 vim.cmd [[source /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]]
 time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/go.nvim/ftdetect/filetype.vim]], false)
+time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]], true)
+vim.cmd [[source /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]]
+time([[Sourcing ftdetect script at: /Users/feniix/.local/share/nvim/site/pack/packer/opt/vim-go/ftdetect/gofiletype.vim]], false)
 vim.cmd("augroup END")
 
 _G._packer.inside_compile = false

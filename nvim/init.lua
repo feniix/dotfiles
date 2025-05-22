@@ -44,9 +44,21 @@ vim.g.go_metalinter_enabled = 0       -- LSP handles linting
 -- Load plugins via Packer
 require('user.plugins')
 
--- Set colorscheme (fallback to default if not available)
+-- Set colorscheme using NeoSolarized
 vim.cmd('set background=dark')
-pcall(function() vim.cmd('colorscheme solarized') end)
+-- Setup NeoSolarized through our colorbuddy setup
+local colorbuddy_ok, colorbuddy_setup = pcall(require, 'user.colorbuddy_setup')
+if colorbuddy_ok then
+  -- Initialize NeoSolarized theme
+  colorbuddy_setup.setup()
+  
+  -- Create a command to toggle between light and dark modes
+  vim.api.nvim_create_user_command('ToggleTheme', function()
+    colorbuddy_setup.toggle_theme()
+  end, { desc = 'Toggle between light and dark Solarized themes' })
+else
+  vim.notify("NeoSolarized setup failed. Run :PackerSync to install required plugins.", vim.log.levels.WARN)
+end
 
 -- Initialize plugins
 
@@ -230,7 +242,7 @@ end
 if safe_require('lualine') then
   require('lualine').setup({
     options = {
-      theme = 'solarized_dark',
+      theme = 'auto', -- Set to 'auto' to match current colorscheme
       icons_enabled = true,
       component_separators = { left = '', right = ''},
       section_separators = { left = '', right = ''},
@@ -264,20 +276,6 @@ if safe_require('rainbow-delimiters') then
       },
     }
   end
-end
-
--- Setup solarized colorscheme
-local solarized_ok, solarized = pcall(require, 'solarized')
-if solarized_ok and solarized.setup then
-  pcall(function()
-    solarized.setup({
-      theme = 'neo', -- or 'default'
-      transparent = false,
-      colors = {},  -- Override specific color values
-      highlights = {}, -- Override specific highlight groups
-      enable_italics = true,
-    })
-  end)
 end
 
 -- Create Packer commands

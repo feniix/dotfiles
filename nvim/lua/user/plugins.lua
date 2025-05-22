@@ -42,8 +42,12 @@ return packer.startup(function(use)
   use 'editorconfig/editorconfig-vim'       -- Support for .editorconfig
 
   -- ---- UI ----
-  use 'shaunsingh/solarized.nvim'          -- Modern Solarized colorscheme in Lua
-
+  -- NeoSolarized theme
+  use {
+    'svrana/neosolarized.nvim',             -- Solarized theme using ColorBuddy
+    requires = 'tjdevries/colorbuddy.nvim'  -- ColorBuddy framework
+  }
+  
   -- ---- Language Support ----
   -- Terraform
   use 'hashivim/vim-terraform'              -- Terraform syntax & formatting
