@@ -366,6 +366,8 @@ rollback() {
       "$HOME/.tmux.conf"
       "$HOME/.gitconfig"
       "$HOME/.ssh/config"
+      "$HOME/.vimrc"
+      "$XDG_CONFIG_HOME/vim/vimrc"
     )
     
     for file in "${restore_files[@]}"; do
@@ -415,6 +417,8 @@ install_dotfiles() {
   backup_file "$HOME/.ssh/config"
   backup_file "$HOME/.p10k.zsh"
   backup_file "$HOME/.tool-versions"
+  backup_file "$HOME/.vimrc"
+  backup_file "$XDG_CONFIG_HOME/vim/vimrc"
 
   # ZSH configuration
   if [ -f "$DOTFILES_DIR/zshrc" ]; then

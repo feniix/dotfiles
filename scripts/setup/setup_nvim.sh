@@ -18,6 +18,9 @@ mkdir -p "$XDG_CONFIG_HOME/nvim/lua/user"
 mkdir -p "$XDG_DATA_HOME/nvim/site/autoload"
 mkdir -p "$XDG_STATE_HOME/nvim/undo"
 
+# Also create directories for regular Vim
+mkdir -p "$XDG_CONFIG_HOME/vim"
+
 # Install vim-plug if not already installed
 if [ ! -f "$XDG_DATA_HOME/nvim/site/autoload/plug.vim" ]; then
   echo "Installing vim-plug for Neovim..."
@@ -60,4 +63,18 @@ else
   echo "Skipping Neovim configuration."
 fi
 
-echo "Neovim setup complete!" 
+# Set up .vimrc for Vim compatibility
+if [ -f "$DOTFILES_DIR/.vimrc" ]; then
+  # Link .vimrc to home directory
+  ln -sf "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
+  echo "Linked .vimrc → $HOME/.vimrc"
+  
+  # Link .vimrc to XDG config directory for Vim
+  ln -sf "$DOTFILES_DIR/.vimrc" "$XDG_CONFIG_HOME/vim/vimrc"
+  echo "Linked .vimrc → $XDG_CONFIG_HOME/vim/vimrc"
+else
+  echo "Vim configuration file not found at $DOTFILES_DIR/.vimrc"
+  echo "Skipping Vim configuration."
+fi
+
+echo "Neovim and Vim setup complete!" 
