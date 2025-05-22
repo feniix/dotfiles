@@ -6,7 +6,7 @@ if &compatible
 endif
 
 " Python provider settings - use XDG paths
-let g:python3_host_prog = '/opt/homebrew/opt/python@3.10/bin/python3.10'
+let g:python3_host_prog = '$HOME/.asdf/shims/python3'
 let g:loaded_python_provider = 0  " Disable Python 2
 
 " Leader key
@@ -94,25 +94,31 @@ Plug 'edolphin-ydf/goimpl.nvim', { 'for': 'go' }  " Generate interface implement
 if has('nvim')
   Plug 'nvim-lua/plenary.nvim'             " Lua functions
   Plug 'neovim/nvim-lspconfig'             " LSP configuration
-  
+
+  " Debugging
+  Plug 'mfussenegger/nvim-dap'             " Debug Adapter Protocol client
+  Plug 'nvim-neotest/nvim-nio'             " Required dependency for nvim-dap-ui
+  Plug 'rcarriga/nvim-dap-ui'              " UI for nvim-dap
+  Plug 'theHamsta/nvim-dap-virtual-text'   " Show variable values as virtual text
+
   " TypeScript Tools - modern alternative to tsserver
   Plug 'pmizio/typescript-tools.nvim'      " Enhanced TypeScript experience
-  
+
   " Modern completion system
   Plug 'hrsh7th/nvim-cmp'                 " Completion plugin
   Plug 'hrsh7th/cmp-nvim-lsp'             " LSP source for nvim-cmp
   Plug 'hrsh7th/cmp-buffer'               " Buffer source for nvim-cmp
   Plug 'hrsh7th/cmp-path'                 " Path source for nvim-cmp
   Plug 'hrsh7th/cmp-cmdline'              " Cmdline source for nvim-cmp
-  
+
   " Snippets
   Plug 'L3MON4D3/LuaSnip'                 " Snippet engine
   Plug 'saadparwaiz1/cmp_luasnip'         " Luasnip source for nvim-cmp
   Plug 'rafamadriz/friendly-snippets'     " Common snippets
-  
+
   " Treesitter for better syntax highlighting
   Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-  
+
   " Modern replacements
   Plug 'lewis6991/gitsigns.nvim'          " Git integration (replaces vim-gitgutter)
   Plug 'RRethy/nvim-treesitter-endwise'   " Auto-add end (replaces vim-endwise)
@@ -121,10 +127,10 @@ if has('nvim')
   Plug 'nvim-tree/nvim-web-devicons'      " File icons (replaces vim-devicons)
   Plug 'nvim-lualine/lualine.nvim'        " Status line (replaces vim-airline)
   Plug 'HiPhish/rainbow-delimiters.nvim'  " Rainbow parentheses (replaces rainbow)
-  
+
   " JSON Support
   Plug 'b0o/SchemaStore.nvim'             " JSON Schema store
-  
+
   " Extra niceties
   Plug 'folke/todo-comments.nvim'         " TODO comments
   Plug 'numToStr/Comment.nvim'            " Commenting plugin
@@ -176,7 +182,7 @@ let g:go_metalinter_enabled = 0       " LSP handles linting
 if has('nvim')
   " Load init.lua which contains utility functions
   lua require('init')
-  
+
   " Set up global_safe_require function
   lua << EOF
   -- Make safe_require globally available
@@ -204,11 +210,11 @@ EOF
   lua << EOF
   local cmp_ok, cmp = pcall(require, 'cmp')
   local luasnip_ok, luasnip = pcall(require, 'luasnip')
-  
+
   if cmp_ok and luasnip_ok then
     -- Load friendly-snippets if available
     pcall(function() require("luasnip.loaders.from_vscode").lazy_load() end)
-    
+
     cmp.setup({
       snippet = {
         expand = function(args)
@@ -247,7 +253,7 @@ EOF
         { name = 'path' },
       })
     })
-    
+
     -- Use buffer source for `/` search
     cmp.setup.cmdline('/', {
       mapping = cmp.mapping.preset.cmdline(),
@@ -255,7 +261,7 @@ EOF
         { name = 'buffer' }
       }
     })
-    
+
     -- Use cmdline & path source for ':'
     cmp.setup.cmdline(':', {
       mapping = cmp.mapping.preset.cmdline(),
@@ -276,23 +282,23 @@ EOF
   lua << EOF
   -- Setup LSP if available
   safe_require('user.lsp').setup()
-  
+
   -- Load common LSP functions
   local lsp_common = safe_require('user.lsp_common')
   if not lsp_common then
     vim.notify("Could not load LSP common module. Check your configuration.", vim.log.levels.ERROR)
   end
-  
+
   -- Setup Treesitter if available
   local treesitter = safe_require('user.treesitter')
   if treesitter then treesitter.setup() end
-  
+
   -- Setup TypeScript if available
   if not vim.g.skip_ts_tools then
     local typescript = safe_require('user.typescript')
     if typescript then typescript.setup() end
   end
-  
+
   -- Setup TreeSitter troubleshooting helpers
   if not vim.g.skip_treesitter_setup then
     local ts_setup = safe_require('user.setup_treesitter')
@@ -301,14 +307,14 @@ EOF
       vim.api.nvim_create_user_command('InstallTSParsers', function()
         ts_setup.install_parsers()
       end, { desc = 'Install TreeSitter parsers that might fail with the standard process' })
-      
+
       -- Create command to specifically fix the vim parser
       vim.api.nvim_create_user_command('FixVimParser', function()
         ts_setup.install_vim_parser()
       end, { desc = 'Manually install the Vim TreeSitter parser' })
     end
   end
-  
+
   -- Setup plugin installer
   if not vim.g.skip_plugin_installer then
     local plugin_installer = safe_require('user.plugin_installer')
@@ -316,13 +322,13 @@ EOF
       plugin_installer.create_commands()
     end
   end
-  
+
   -- Setup configuration tester
   local config_test = safe_require('user.config_test')
   if config_test then
     config_test.create_commands()
   end
-  
+
   -- Setup Go development
   local ok, go_module = pcall(require, 'user.go')
   if ok then
@@ -332,16 +338,24 @@ EOF
   else
     vim.notify("Could not load Go module: " .. (go_module or "unknown error"), vim.log.levels.WARN)
   end
-  
+
+  -- Setup DAP (Debugging)
+  local dap_ok, dap_module = pcall(require, 'user.dap')
+  if dap_ok then
+    dap_module.setup()
+  else
+    vim.notify("Could not load DAP module: " .. (dap_module or "unknown error"), vim.log.levels.WARN)
+  end
+
   -- Setup additional modules with fallback options
   local autopairs_ok, autopairs = pcall(require, 'nvim-autopairs')
   if autopairs_ok then autopairs.setup{} end
-  
+
   -- Setup new plugins
-  
+
   -- Setup gitsigns (replacement for vim-gitgutter)
   local gitsigns_ok, gitsigns = pcall(require, 'gitsigns')
-  if gitsigns_ok then 
+  if gitsigns_ok then
     gitsigns.setup({
       signs = {
         add          = { text = '┃' },
@@ -359,14 +373,14 @@ EOF
       },
     })
   end
-  
+
   -- Setup nvim-surround (replacement for vim-surround)
   local surround_ok, surround = pcall(require, 'nvim-surround')
   if surround_ok then surround.setup{} end
-  
+
   -- Setup retrail (replacement for vim-better-whitespace)
   local retrail_ok, retrail = pcall(require, 'retrail')
-  if retrail_ok then 
+  if retrail_ok then
     retrail.setup({
       trim = {
         auto = true,
@@ -375,11 +389,11 @@ EOF
       }
     })
   end
-  
+
   -- Setup Comment.nvim
   local comment_ok, comment = pcall(require, 'Comment')
   if comment_ok then comment.setup() end
-  
+
   -- Setup lualine (replacement for vim-airline)
   local lualine_ok, lualine = pcall(require, 'lualine')
   if lualine_ok then
@@ -405,7 +419,7 @@ EOF
       extensions = {'fugitive'}
     })
   end
-  
+
   -- Setup rainbow-delimiters (replacement for rainbow)
   local rainbow_delimiters_ok, rainbow_delimiters = pcall(require, 'rainbow-delimiters')
   if rainbow_delimiters_ok then
@@ -418,7 +432,7 @@ EOF
       },
     }
   end
-  
+
   -- Setup solarized colorscheme
   local solarized_ok, solarized = pcall(require, 'solarized')
   if solarized_ok then
@@ -543,7 +557,7 @@ if has("mac") || has("macunix")
   inoremap <silent> ˚ <Esc>:m .-2<CR>==gi
   vnoremap <silent> ∆ :m '>+1<CR>gv=gv
   vnoremap <silent> ˚ :m '<-2<CR>gv=gv
-  
+
   " Map Option+h/l to jump words
   nnoremap <silent> ˙ b
   nnoremap <silent> ¬ w
@@ -645,4 +659,4 @@ function! s:build_go_files()
   elseif l:file =~# '^\f\+\.go$'
     call go#cmd#Build(0)
   endif
-endfunction 
+endfunction

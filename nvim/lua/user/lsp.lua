@@ -55,14 +55,48 @@ M.setup = function()
   local servers_available = true
   
   -- Go
-  if nvim_lsp.gopls then
+  -- Only set up gopls if go.nvim's lsp_cfg is disabled
+  -- We check if go.nvim is loaded and has lsp_cfg enabled first
+  local setup_gopls = true
+  local go_ok, go_nvim = pcall(require, "go")
+  if go_ok then
+    -- Check if go.nvim has lsp_cfg enabled (it manages gopls)
+    if go_nvim.lsp_cfg == true then
+      setup_gopls = false
+      vim.notify("gopls configuration handled by go.nvim", vim.log.levels.INFO)
+    end
+  end
+  
+  if setup_gopls and nvim_lsp.gopls then
+    -- Get the Go binary path
+    local go_bin_path = ""
+    local function get_go_bin_path()
+      local gopath = vim.fn.trim(vim.fn.system("go env GOPATH"))
+      if gopath == "" then
+        gopath = vim.fn.expand("$HOME/.local/share/go")
+      end
+      return gopath .. "/bin"
+    end
+    go_bin_path = get_go_bin_path()
+    
+    -- Define gopls path
+    local gopls_path = go_bin_path .. "/gopls"
+    if vim.fn.executable(gopls_path) ~= 1 then
+      -- Try with just the command name (using PATH)
+      if vim.fn.executable("gopls") == 1 then
+        gopls_path = "gopls"
+      else
+        vim.notify("gopls executable not found. Go LSP will not work. Please install gopls.", vim.log.levels.ERROR)
+      end
+    end
+    
     setup_server("gopls", {
+      cmd = {gopls_path, "serve"},
       settings = {
         gopls = {
           analyses = {
             unusedparams = true,
             shadow = true,
-            fieldalignment = true,
             nilness = true,
             unusedwrite = true,
             useany = true,
@@ -91,8 +125,15 @@ M.setup = function()
             parameterNames = true,
             rangeVariableTypes = true,
           },
+          hoverKind = "FullDocumentation",
+          vulncheck = "Imports",
         },
       },
+      filetypes = {"go", "gomod", "gowork", "gotmpl"},
+      root_dir = function(fname)
+        local util = require('lspconfig.util')
+        return util.root_pattern("go.work", "go.mod", ".git")(fname)
+      end,
       on_attach = function(client, bufnr)
         -- Call the base on_attach function
         on_attach(client, bufnr)
@@ -110,6 +151,9 @@ M.setup = function()
             vim.lsp.buf.format({ async = false })
           end,
         })
+        
+        -- Notify that gopls is properly attached
+        vim.notify("gopls attached to buffer", vim.log.levels.INFO)
       end,
     })
   end

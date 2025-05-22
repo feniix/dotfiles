@@ -65,6 +65,12 @@ function setup_typescript()
   return true
 end
 
+-- Set up health check module
+pcall(function() 
+  local health = require("user.health")
+  health.setup()
+end)
+
 -- Clear cache directory on startup
 vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()

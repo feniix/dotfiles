@@ -61,20 +61,36 @@ end
 
 -- Configure diagnostics (shared settings)
 function M.setup_diagnostics()
+  -- Change diagnostic symbols in the sign column
+  local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
+  
+  -- Use the modern approach for diagnostic signs
   vim.diagnostic.config({
     virtual_text = true,
-    signs = true,
+    signs = {
+      text = {
+        [vim.diagnostic.severity.ERROR] = signs.Error,
+        [vim.diagnostic.severity.WARN] = signs.Warn,
+        [vim.diagnostic.severity.INFO] = signs.Info,
+        [vim.diagnostic.severity.HINT] = signs.Hint,
+      },
+      numhl = {
+        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+      },
+      texthl = {
+        [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
+        [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
+        [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
+        [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
+      },
+    },
     underline = true,
     update_in_insert = false,
     severity_sort = true,
   })
-
-  -- Change diagnostic symbols in the sign column
-  local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
-  for type, icon in pairs(signs) do
-    local hl = "DiagnosticSign" .. type
-    vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-  end
 end
 
 return M 

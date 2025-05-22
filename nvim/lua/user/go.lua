@@ -10,8 +10,8 @@ local config = {
 local function get_go_bin_path()
   local gopath = vim.fn.trim(vim.fn.system("go env GOPATH"))
   if gopath == "" then
-    -- If GOPATH is not set, use default
-    gopath = vim.fn.expand("$HOME/go")
+    -- If GOPATH is not set, use XDG default
+    gopath = vim.fn.expand("$HOME/.local/share/go")
   end
   return gopath .. "/bin"
 end
@@ -45,8 +45,11 @@ local function ensure_go_tool(tool, package, version)
   
   vim.notify(tool .. " not found, installing...", vim.log.levels.INFO)
   
+  -- Set GOBIN to our target directory and install the tool
+  local cmd = string.format("GOBIN=%s go install %s", go_bin_path, install_path)
+  
   -- Use vim's system function to install the tool
-  local install_result = vim.fn.system("go install " .. install_path)
+  local install_result = vim.fn.system(cmd)
   
   if vim.v.shell_error ~= 0 then
     vim.notify("Failed to install " .. tool .. ": " .. install_result, vim.log.levels.ERROR)
@@ -59,12 +62,42 @@ end
 local function ensure_go_tools()
   -- Essential tools
   ensure_go_tool("gopls", "golang.org/x/tools/gopls", "latest")
+  
+  -- Try direct installation if the first method failed
+  if vim.fn.executable("gopls") ~= 1 and vim.fn.filereadable(go_bin_path .. "/gopls") ~= 1 then
+    vim.notify("Trying alternative method to install gopls...", vim.log.levels.INFO)
+    local cmd = "go install golang.org/x/tools/gopls@latest"
+    local result = vim.fn.system(cmd)
+    if vim.v.shell_error ~= 0 then
+      vim.notify("Failed to install gopls: " .. result, vim.log.levels.ERROR)
+    else
+      vim.notify("gopls installed successfully", vim.log.levels.INFO)
+    end
+  end
+  
   ensure_go_tool("goimports", "golang.org/x/tools/cmd/goimports", "latest")
-  ensure_go_tool("golangci-lint", "github.com/golangci/golangci-lint/cmd/golangci-lint", "latest")
+  ensure_go_tool("golangci-lint", "github.com/golangci/golangci-lint/cmd/golangci-lint", "latest") -- Always use latest stable version
   ensure_go_tool("gomodifytags", "github.com/fatih/gomodifytags", "latest")
   ensure_go_tool("gotests", "github.com/cweill/gotests/...", "latest")
   ensure_go_tool("impl", "github.com/josharian/impl", "latest")
   ensure_go_tool("gofumpt", "mvdan.cc/gofumpt", "latest")
+  
+  -- Additional tools from checkhealth
+  ensure_go_tool("iferr", "github.com/koron/iferr", "latest")
+  ensure_go_tool("callgraph", "golang.org/x/tools/cmd/callgraph", "latest")
+  ensure_go_tool("golines", "github.com/segmentio/golines", "latest")
+  ensure_go_tool("mockgen", "go.uber.org/mock/mockgen", "latest")
+  ensure_go_tool("fillswitch", "github.com/davidrjenni/reftools/cmd/fillswitch", "latest")
+  ensure_go_tool("ginkgo", "github.com/onsi/ginkgo/v2/ginkgo", "latest")
+  ensure_go_tool("gotestsum", "gotest.tools/gotestsum", "latest")
+  ensure_go_tool("json-to-struct", "github.com/tmc/json-to-struct", "latest")
+  ensure_go_tool("gomvp", "github.com/abenz1267/gomvp", "latest")
+  ensure_go_tool("gojsonstruct", "github.com/twpayne/go-jsonstruct/cmd/gojsonstruct", "latest")
+  ensure_go_tool("govulncheck", "golang.org/x/vuln/cmd/govulncheck", "latest")
+  ensure_go_tool("go-enum", "github.com/abice/go-enum", "latest")
+  ensure_go_tool("gonew", "golang.org/x/tools/cmd/gonew", "latest")
+  ensure_go_tool("dlv", "github.com/go-delve/delve/cmd/dlv", "latest")
+  ensure_go_tool("richgo", "github.com/kyoh86/richgo", "latest")
 end
 
 -- Setup function with options
@@ -86,12 +119,45 @@ M.setup = function(opts)
       goimports = 'gopls', -- Use gopls for imports (fix for deprecated goimport)
       gofmt = 'gofumpt', -- Use gofumpt for formatting
       lsp_cfg = true, -- Enable LSP configuration in go.nvim
+      lsp_on_attach = function(client, bufnr)
+        -- Call our custom LSP on_attach function
+        local lsp_common_ok, lsp_common = pcall(require, 'user.lsp_common')
+        if lsp_common_ok then
+          local on_attach = lsp_common.create_on_attach()
+          on_attach(client, bufnr)
+        end
+        
+        -- Add specific Go keybindings
+        local opts = { noremap = true, silent = true, buffer = bufnr }
+        vim.keymap.set('n', '<leader>gtj', vim.lsp.buf.type_definition, opts)
+        vim.keymap.set('n', '<leader>gim', '<cmd>lua require("telescope").extensions.goimpl.goimpl()<CR>', opts)
+        
+        -- Auto-format on save
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          group = vim.api.nvim_create_augroup("GoFormat", { clear = true }),
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({ async = false })
+          end,
+        })
+      end,
       lsp_gofumpt = true,
-      lsp_on_attach = true,
-      dap_debug = false, -- Disable debugger for now
+      dap_debug = true, -- Enable debugging support
       test_runner = 'go', -- Use standard go test
       verbose_tests = true,
       run_in_floaterm = false, -- Use built-in terminal
+    })
+    
+    -- Ensure gopls is always set up correctly
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "go",
+      callback = function()
+        local lsp_ok, lsp = pcall(require, "user.lsp")
+        if lsp_ok then 
+          -- Ensure LSP module is properly loaded for Go files
+          pcall(function() lsp.setup() end)
+        end
+      end,
     })
   else
     vim.notify("go.nvim not found", vim.log.levels.WARN)
@@ -105,6 +171,21 @@ M.setup = function(opts)
       require("telescope").load_extension("goimpl")
     end)
   end
+  
+  -- Create a command to manually reinstall gopls
+  vim.api.nvim_create_user_command('GoplsInstall', function()
+    vim.notify("Reinstalling gopls...", vim.log.levels.INFO)
+    -- Clear any existing gopls
+    vim.fn.system("rm -f " .. go_bin_path .. "/gopls")
+    -- Install gopls directly
+    local cmd = "go install golang.org/x/tools/gopls@latest"
+    local result = vim.fn.system(cmd)
+    if vim.v.shell_error ~= 0 then
+      vim.notify("Failed to install gopls: " .. result, vim.log.levels.ERROR)
+    else
+      vim.notify("gopls installed successfully. Please restart Neovim.", vim.log.levels.INFO)
+    end
+  end, { desc = 'Manually reinstall gopls' })
 end
 
 return M 
