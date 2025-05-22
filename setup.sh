@@ -249,6 +249,20 @@ setup_linux() {
   fi
 }
 
+# Setup asdf version manager
+setup_asdf() {
+  log_info "Setting up asdf version manager..."
+  
+  if [ ! -f "$SCRIPTS_DIR/setup/setup_asdf.sh" ]; then
+    log_error "asdf setup script not found at $SCRIPTS_DIR/setup/setup_asdf.sh"
+    log_warning "Skipping asdf setup."
+    return 1
+  fi
+  
+  # Run the dedicated asdf setup script
+  bash "$SCRIPTS_DIR/setup/setup_asdf.sh"
+}
+
 # Setup Neovim configuration
 setup_nvim() {
   log_info "Setting up Neovim configuration..."
@@ -400,6 +414,7 @@ install_dotfiles() {
   backup_file "$XDG_CONFIG_HOME/ssh/config"
   backup_file "$HOME/.ssh/config"
   backup_file "$HOME/.p10k.zsh"
+  backup_file "$HOME/.tool-versions"
 
   # ZSH configuration
   if [ -f "$DOTFILES_DIR/zshrc" ]; then
@@ -479,6 +494,12 @@ install_dotfiles() {
     fi
   done
   
+  # Setup asdf tools symlink
+  if [ -f "$DOTFILES_DIR/asdf-tool-versions" ]; then
+    ln -sf "$DOTFILES_DIR/asdf-tool-versions" "$HOME/.tool-versions"
+    log_success "Linked asdf-tool-versions → $HOME/.tool-versions"
+  fi
+  
   # Setup Neovim
   setup_nvim
   
@@ -542,6 +563,13 @@ install_dotfiles() {
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     setup_ssh_keys
+  fi
+  
+  # Set up asdf version manager
+  read -p "Would you like to set up asdf version manager and plugins? [y/N] " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    setup_asdf
   fi
   
   # Remove the error trap
@@ -616,9 +644,10 @@ if [ -d "$DOTFILES_DIR" ]; then
     echo "7. Set up GitHub integration"
     echo "8. Clean up legacy files"
     echo "9. Set up SSH keys"
-    echo "10. Exit"
+    echo "10. Set up asdf version manager"
+    echo "11. Exit"
     
-    read -p "Enter your choice (1-10): " choice
+    read -p "Enter your choice (1-11): " choice
     
     case $choice in
       1)
@@ -673,6 +702,11 @@ fi
         log_success "SSH keys setup complete."
         ;;
       10)
+        validate_repo_structure
+        setup_asdf
+        log_success "asdf version manager setup complete."
+        ;;
+      11)
         log_info "Exiting without changes."
         exit 0
         ;;
