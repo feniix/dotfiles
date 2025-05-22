@@ -17,3 +17,4 @@ terraform-docs 0.20.0
 tflint 0.57.0
 tfsec 1.28.14
 nodejs 22.16.0
+lua-language-server 3.14.0
