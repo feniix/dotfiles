@@ -278,6 +278,24 @@ if safe_require('rainbow-delimiters') then
   end
 end
 
+-- Setup nvim-web-devicons
+if safe_require('nvim-web-devicons') then
+  require('nvim-web-devicons').setup({
+    -- Enable folder icons
+    override_folder_icon = true,
+    -- Enable default icons
+    default = true,
+    -- Enable strict mode (only use specified icon patterns)
+    strict = true,
+    -- Override specific file icons
+    override = {
+      -- Custom file icon overrides can be added here if needed
+    },
+    -- Same color for all identical icons
+    color_icons = true,
+  })
+end
+
 -- Create Packer commands
 vim.api.nvim_create_user_command('PackerInstall', function()
   vim.cmd('PackerInstall')
