@@ -4,16 +4,16 @@ function M.setup()
   local opts = { noremap = true, silent = true }
   local keymap = vim.keymap.set
 
-  -- Toggle list
-  keymap("n", "<leader>l", ":set list!<CR>", opts)
+  -- Toggle operations - now using <leader>t prefix
+  keymap("n", "<leader>tn", ":set relativenumber!<CR>", opts)
 
-  -- Toggle line numbers
-  keymap("n", "<leader>n", ":set relativenumber!<CR>", opts)
-
-  -- Clear search highlight
+  -- Clear search highlight - keeping as single key
   keymap("n", "<leader>q", ":nohlsearch<CR>", opts)
 
-  -- Buffer navigation
+  -- LSP operations - toggle list moved to <leader>ll in which-key setup
+  keymap("n", "<leader>ll", ":set list!<CR>", opts)
+
+  -- Buffer navigation - these match the which-key +Buffer group
   keymap("n", "<leader>bn", ":bnext<CR>", opts)
   keymap("n", "<leader>bp", ":bprevious<CR>", opts)
   keymap("n", "<leader>bd", ":bdelete<CR>", opts)
@@ -119,32 +119,33 @@ function M.setup_go_keymaps()
   local keymap = vim.keymap.set
   local opts = { noremap = true, silent = true, buffer = true }
 
+  -- Go commands using <leader>G prefix to avoid conflicts
   -- :GoBuild and :GoTestCompile
-  keymap("n", "<leader>b", "<cmd>lua require('user.go').build_go_files()<CR>", opts)
+  keymap("n", "<leader>Gb", "<cmd>lua require('user.go').build_go_files()<CR>", opts)
 
   -- :GoTest
-  keymap("n", "<leader>t", "<Plug>(go-test)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gt", "<Plug>(go-test)", { silent = true, buffer = true })
 
   -- :GoRun
-  keymap("n", "<leader>r", "<Plug>(go-run)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gr", "<Plug>(go-run)", { silent = true, buffer = true })
 
   -- :GoDoc
-  keymap("n", "<leader>d", "<Plug>(go-doc)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gd", "<Plug>(go-doc)", { silent = true, buffer = true })
 
   -- :GoCoverageToggle
-  keymap("n", "<leader>c", "<Plug>(go-coverage-toggle)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gc", "<Plug>(go-coverage-toggle)", { silent = true, buffer = true })
 
   -- :GoInfo
-  keymap("n", "<leader>i", "<Plug>(go-info)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gi", "<Plug>(go-info)", { silent = true, buffer = true })
 
   -- :GoMetaLinter
-  keymap("n", "<leader>gl", "<Plug>(go-metalinter)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gl", "<Plug>(go-metalinter)", { silent = true, buffer = true })
 
   -- :GoDef but opens in a vertical split
-  keymap("n", "<leader>v", "<Plug>(go-def-vertical)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gv", "<Plug>(go-def-vertical)", { silent = true, buffer = true })
   
   -- :GoDef but opens in a horizontal split
-  keymap("n", "<leader>s", "<Plug>(go-def-split)", { silent = true, buffer = true })
+  keymap("n", "<leader>Gs", "<Plug>(go-def-split)", { silent = true, buffer = true })
 end
 
 return M 

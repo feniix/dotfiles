@@ -170,6 +170,12 @@ function M.setup()
         keymaps.setup_go_keymaps()
       end
       
+      -- Setup Go-specific which-key mappings
+      local which_key_setup = safe_require("user.which-key")
+      if which_key_setup then
+        which_key_setup.setup_go_mappings()
+      end
+      
       -- Setup Go commands (renamed to avoid conflicts with standard :A command)
       vim.api.nvim_buf_create_user_command(0, "GoAlternate", "lua require('user.go').go_alternate_edit()", { desc = "Go to alternate Go file" })
       vim.api.nvim_buf_create_user_command(0, "GoAlternateV", "lua require('user.go').go_alternate_vertical()", { desc = "Go to alternate Go file in vertical split" })

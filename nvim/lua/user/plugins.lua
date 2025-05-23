@@ -147,6 +147,16 @@ return packer.startup(function(use)
   use 'numToStr/Comment.nvim'            -- Commenting plugin
   use 'windwp/nvim-autopairs'            -- Auto pairs
 
+  -- Which Key - Keymap discovery and organization
+  use {
+    'folke/which-key.nvim',
+    config = function()
+      if safe_require('user.which-key') then
+        require('user.which-key').setup()
+      end
+    end
+  }
+
   -- Automatically set up your configuration after cloning packer.nvim
   if PACKER_BOOTSTRAP then
     packer.sync()
