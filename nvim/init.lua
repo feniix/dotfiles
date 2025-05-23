@@ -21,25 +21,24 @@ vim.g.terraform_fmt_on_save = 0
 vim.g.go_fmt_command = 'goimports'
 vim.g.go_list_type = 'quickfix'
 vim.g.go_test_timeout = '10s'
-vim.g.go_highlight_types = 0  -- Let tree-sitter handle highlighting
-vim.g.go_highlight_fields = 0
-vim.g.go_highlight_functions = 0
-vim.g.go_highlight_methods = 0
-vim.g.go_highlight_operators = 0
-vim.g.go_highlight_build_constraints = 0
-vim.g.go_highlight_function_calls = 0
-vim.g.go_highlight_extra_types = 0
-vim.g.go_highlight_generate_tags = 0
-vim.g.go_def_mode = 'gopls'
-vim.g.go_info_mode = 'gopls'
-vim.g.go_gopls_enabled = 0  -- Disable gopls in vim-go as we use LSP
-vim.g.go_code_completion_enabled = 0  -- Disable vim-go completion as we use LSP
-vim.g.go_doc_keywordprg_enabled = 0   -- Disable K mapping as we use LSP
-vim.g.go_mod_fmt_autosave = 0         -- LSP handles formatting
-vim.g.go_fmt_autosave = 0             -- LSP handles formatting
-vim.g.go_imports_autosave = 0         -- LSP handles formatting
-vim.g.go_diagnostics_enabled = 0      -- LSP handles diagnostics
-vim.g.go_metalinter_enabled = 0       -- LSP handles linting
+vim.g.go_highlight_types = 1
+vim.g.go_highlight_fields = 1
+vim.g.go_highlight_functions = 1
+vim.g.go_highlight_methods = 1
+vim.g.go_highlight_operators = 1
+vim.g.go_highlight_build_constraints = 1
+vim.g.go_highlight_function_calls = 1
+vim.g.go_highlight_extra_types = 1
+vim.g.go_highlight_generate_tags = 1
+-- Re-enable vim-go features since we're not using LSP anymore
+vim.g.go_gopls_enabled = 1
+vim.g.go_code_completion_enabled = 1
+vim.g.go_doc_keywordprg_enabled = 1
+vim.g.go_mod_fmt_autosave = 1
+vim.g.go_fmt_autosave = 1
+vim.g.go_imports_autosave = 1
+vim.g.go_diagnostics_enabled = 1
+vim.g.go_metalinter_enabled = 1
 
 -- Load plugins via Packer
 require('user.plugins')
@@ -77,17 +76,13 @@ if safe_require('todo-comments') then
 end
 
 -- Setup nvim-cmp
-if safe_require('cmp') and safe_require('luasnip') then
+if safe_require('cmp') then
   local cmp = require('cmp')
-  local luasnip = require('luasnip')
   
-  -- Load friendly-snippets if available
-  pcall(function() require("luasnip.loaders.from_vscode").lazy_load() end)
-
   cmp.setup({
     snippet = {
       expand = function(args)
-        luasnip.lsp_expand(args.body)
+        -- No snippet engine
       end,
     },
     mapping = cmp.mapping.preset.insert({
@@ -98,8 +93,6 @@ if safe_require('cmp') and safe_require('luasnip') then
       ['<Tab>'] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_next_item()
-        elseif luasnip.expand_or_jumpable() then
-          luasnip.expand_or_jump()
         else
           fallback()
         end
@@ -107,17 +100,12 @@ if safe_require('cmp') and safe_require('luasnip') then
       ['<S-Tab>'] = cmp.mapping(function(fallback)
         if cmp.visible() then
           cmp.select_prev_item()
-        elseif luasnip.jumpable(-1) then
-          luasnip.jump(-1)
         else
           fallback()
         end
       end, { 'i', 's' }),
     }),
     sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'luasnip' },
-    }, {
       { name = 'buffer' },
       { name = 'path' },
     })
@@ -142,22 +130,9 @@ if safe_require('cmp') and safe_require('luasnip') then
   })
 end
 
--- Setup Mason (do this before LSP)
-if safe_require('user.mason') then
-  require('user.mason').setup()
-end
-
--- Setup LSP if available
-safe_require('user.lsp').setup()
-
 -- Setup Treesitter if available
 if safe_require('user.treesitter') then
   require('user.treesitter').setup()
-end
-
--- Setup TypeScript if available
-if not vim.g.skip_ts_tools and safe_require('user.typescript') then
-  require('user.typescript').setup()
 end
 
 -- Setup TreeSitter troubleshooting helpers
@@ -183,14 +158,6 @@ end
 -- Setup configuration tester
 if safe_require('user.config_test') then
   require('user.config_test').create_commands()
-end
-
--- Setup Go development
-if safe_require('user.go') then
-  require('user.go').setup({
-    auto_install_tools = true, -- Set to false to disable automatic installation
-    suppress_mason_notifications = true -- Suppress repetitive notifications about Mason tools
-  })
 end
 
 -- Setup DAP (Debugging)
@@ -258,7 +225,7 @@ if safe_require('lualine') then
     },
     sections = {
       lualine_a = {'mode'},
-      lualine_b = {'branch', 'diff', 'diagnostics'},
+      lualine_b = {'branch', 'diff'},
       lualine_c = {'filename'},
       lualine_x = {'encoding', 'fileformat', 'filetype'},
       lualine_y = {'progress'},
@@ -305,43 +272,15 @@ if safe_require('nvim-web-devicons') then
   })
 end
 
--- Setup custom popup menu for mouse right-click (VSCode-style)
-vim.cmd([[
-  " Clear existing PopUp menu
-  aunmenu PopUp
-  
-  " Define VSCode-like popup menu items
-  menu PopUp.Cut                      "+d
-  menu PopUp.Copy                     "+y
-  menu PopUp.Paste                    "+p
-  menu PopUp.-sep1-                   :
-  menu PopUp.Go\ To\ Definition       :lua vim.lsp.buf.definition()<CR>
-  menu PopUp.Peek\ Definition         :lua require('telescope.builtin').lsp_definitions()<CR>
-  menu PopUp.Go\ To\ References       :lua vim.lsp.buf.references()<CR>
-  menu PopUp.Go\ To\ Implementations  :lua vim.lsp.buf.implementation()<CR>
-  menu PopUp.Find\ Symbol             :lua require('telescope.builtin').lsp_document_symbols()<CR>
-  menu PopUp.-sep2-                   :
-  menu PopUp.Rename\ Symbol           :lua vim.lsp.buf.rename()<CR>
-  menu PopUp.Format\ Document         :lua vim.lsp.buf.format({ async = true })<CR>
-  menu PopUp.Code\ Actions            :lua vim.lsp.buf.code_action()<CR>
-  menu PopUp.-sep3-                   :
-  menu PopUp.Toggle\ Breakpoint       :lua require('dap').toggle_breakpoint()<CR>
-  menu PopUp.-sep4-                   :
-  menu PopUp.Select\ All              ggVG
-  
-  " Include editor context menus
-  menu PopUp.Command\ Palette         :Telescope commands<CR>
-]])
-
--- Set up auto-hover documentation (VSCode-like)
-vim.cmd([[
-  " Show documentation on hover (K) automatically
-  autocmd CursorHold * lua vim.lsp.buf.hover()
-  
-  " Set updatetime for CursorHold
-  " 300ms of no cursor movement to trigger CursorHold
-  set updatetime=300
-]])
+-- Setup mouse right-click menu for terminal Neovim
+if vim.fn.has('nvim') == 1 then
+  vim.cmd([[
+    aunmenu PopUp
+    menu PopUp.Copy                      "+y
+    menu PopUp.Paste                     "+gP
+    menu PopUp.Select\ All               ggVG
+  ]])
+end
 
 -- Setup ts_context_commentstring
 if safe_require('ts_context_commentstring') then
@@ -378,6 +317,9 @@ end, { desc = 'Reload plugins configuration and run PackerSync' })
 vim.api.nvim_create_user_command('PackerClean', function()
   vim.cmd('PackerClean')
 end, { desc = 'Remove unused plugins' })
+
+-- Standard K keymap behavior (no LSP)
+vim.api.nvim_set_keymap('n', 'K', 'K', { noremap = true, silent = true })
 
 -- Helper function for Go files - must be defined at global scope
 function _G.build_go_files()

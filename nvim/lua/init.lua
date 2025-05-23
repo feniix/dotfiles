@@ -7,8 +7,8 @@ if vim.fn.has('nvim') == 0 then
 end
 
 -- Permanently disable components that were causing issues
-vim.g.skip_telescope = false  -- Enable Telescope
-vim.g.skip_ts_tools = false   -- Enable TypeScript
+vim.g.skip_telescope = true  -- Disable Telescope
+vim.g.skip_ts_tools = true   -- Disable TypeScript
 vim.g.skip_treesitter_setup = false
 vim.g.skip_plugin_installer = false  -- Enable the plugin installer
 

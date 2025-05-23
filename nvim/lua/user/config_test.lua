@@ -17,9 +17,6 @@ end
 -- Test all core modules to ensure they load properly
 function M.test_all_core_modules()
   local modules = {
-    "user.lsp",
-    "user.lsp_common",
-    "user.typescript",
     "user.treesitter"
   }
   
@@ -44,28 +41,14 @@ end
 -- Check for plugin availability
 function M.test_plugins()
   local plugins = {
-    {"nvim-lspconfig", "LSP Configuration"}, 
-    {"typescript-tools", "TypeScript Tools"},
     {"nvim-treesitter", "TreeSitter"},
-    {"nvim-cmp", "Completion engine"},
-    {"vim-plug", "Plugin manager", function() return vim.fn.exists('*plug#begin') == 1 end},
-    {"terraformls", "Terraform Language Server", function() return vim.fn.executable('terraform-ls') == 1 end},
-    {"ruby_ls", "Ruby Language Server", function() return vim.fn.executable('ruby-lsp') == 1 end},
-    {"yamlls", "YAML Language Server", function() return vim.fn.executable('yaml-language-server') == 1 end},
+    {"nvim-cmp", "Completion engine"}
   }
   
   local results = {}
   for _, plugin in ipairs(plugins) do
-    local name, desc, test_fn = unpack(plugin)
-    local success
-    
-    if test_fn then
-      -- Custom test function provided
-      success = test_fn()
-    else
-      -- Default test: try to require the module
-      success = pcall(require, name)
-    end
+    local name, desc = unpack(plugin)
+    local success = pcall(require, name)
     
     results[desc] = success
   end
@@ -87,7 +70,6 @@ end
 function M.test_globals()
   local globals = {
     {"skip_telescope", "Telescope disabled"},
-    {"skip_ts_tools", "TypeScript tools disabled"},
     {"skip_treesitter_setup", "TreeSitter setup disabled"},
     {"skip_plugin_installer", "Plugin installer disabled"}
   }
@@ -140,19 +122,6 @@ function M.test_plugin_setting_consistency()
          vim.fn.finddir("*" .. plugin .. "*", vim.o.runtimepath) ~= "" then
         plugin_exists = true
         break
-      end
-      
-      -- Check in the vim-plug list if we can
-      if vim.fn.exists('*plug#begin') == 1 then
-        local plugs = vim.fn.get(vim.g, 'plugs', {})
-        if next(plugs) ~= nil then
-          for plug_name, _ in pairs(plugs) do
-            if plug_name:find(plugin) then
-              plugin_exists = true
-              break
-            end
-          end
-        end
       end
     end
     
@@ -219,7 +188,7 @@ function M.create_commands()
       vim.notify("Please specify a module name", vim.log.levels.ERROR)
     end
   end, { nargs = 1, desc = "Test a specific Neovim module", complete = function()
-    return {"user.lsp", "user.typescript", "user.treesitter", "user.lsp_common"}
+    return {"user.treesitter"}
   end})
 end
 

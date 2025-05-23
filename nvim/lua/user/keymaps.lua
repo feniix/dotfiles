@@ -19,12 +19,6 @@ function M.setup()
   keymap("n", "<leader>bd", ":bdelete<CR>", opts)
   keymap("n", "<leader>bl", ":buffers<CR>", opts)
 
-  -- Mason keybindings
-  keymap("n", "<leader>mm", ":Mason<CR>", opts)
-  keymap("n", "<leader>mi", ":MasonInstallAll<CR>", opts)
-  keymap("n", "<leader>mu", ":MasonUpdate<CR>", opts)
-  keymap("n", "<leader>ml", ":Mason<CR>", opts) -- Alias for Mason
-
   -- Window navigation
   keymap("n", "<C-h>", "<C-w>h", opts)
   keymap("n", "<C-j>", "<C-w>j", opts)
@@ -82,14 +76,8 @@ function M.setup()
       is_iterm = true
     end
     
-    -- Ctrl+Left Click to go to definition (like VSCode)
-    keymap("n", "<C-LeftMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.definition()<CR>", opts)
-    
     -- Ctrl+Right Click to go back (like VSCode/browser back)
     keymap("n", "<C-RightMouse>", "<LeftMouse><C-o>", opts)
-    
-    -- Alt+Left Click for references (like VSCode)
-    keymap("n", "<A-LeftMouse>", "<LeftMouse><cmd>lua vim.lsp.buf.references()<CR>", opts)
     
     -- VSCode-like dragging behaviors
     keymap("v", "<LeftDrag>", "<LeftDrag>", opts)  -- Continue selection with drag

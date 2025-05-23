@@ -43,19 +43,11 @@ function M.setup()
     group = setup_group,
     pattern = { "*.tf", "*.tfvars" },
     callback = function()
-      vim.lsp.buf.format({ async = false })
+      -- Using vim-terraform's formatting instead of LSP
+      vim.cmd("TerraformFmt")
     end,
   })
   
-  -- Mason Installation Check
-  autocmd("User", {
-    group = setup_group,
-    pattern = "MasonToolsUpdateCompleted",
-    callback = function()
-      vim.notify("Mason tools installation/update complete!", vim.log.levels.INFO)
-    end,
-  })
-
   -- iTerm2 specific integrations
   if vim.env.TERM_PROGRAM == "iTerm.app" or string.match(vim.env.TERM or "", "^iterm") or vim.env.LC_TERMINAL == "iTerm2" then
     -- Enable focus events
