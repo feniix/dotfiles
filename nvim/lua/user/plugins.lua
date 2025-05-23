@@ -90,6 +90,9 @@ return packer.startup(function(use)
   use {
     'nvim-treesitter/nvim-treesitter',
     run = ':TSUpdate',
+    requires = {
+      'nvim-treesitter/nvim-treesitter-textobjects', -- Smart text objects
+    },
     config = function()
       if safe_require('user.treesitter') then
         require('user.treesitter').setup()

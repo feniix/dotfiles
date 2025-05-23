@@ -83,30 +83,76 @@ M.setup = function()
         lookahead = true,
         
         keymaps = {
-          -- You can use the capture groups defined in textobjects.scm
+          -- Functions
           ["af"] = "@function.outer",
           ["if"] = "@function.inner",
+          
+          -- Classes
           ["ac"] = "@class.outer",
           ["ic"] = "@class.inner",
+          
+          -- Blocks
           ["ab"] = "@block.outer",
           ["ib"] = "@block.inner",
+          
+          -- Parameters/Arguments
+          ["aa"] = "@parameter.outer",
+          ["ia"] = "@parameter.inner",
+          
+          -- Conditionals
+          ["ai"] = "@conditional.outer",
+          ["ii"] = "@conditional.inner",
+          
+          -- Loops
+          ["al"] = "@loop.outer",
+          ["il"] = "@loop.inner",
+          
+          -- Calls
+          ["aC"] = "@call.outer",
+          ["iC"] = "@call.inner",
+          
+          -- Comments
+          ["aM"] = "@comment.outer",
+          ["iM"] = "@comment.inner",
+          
+          -- Assignments
+          ["a="] = "@assignment.outer",
+          ["i="] = "@assignment.inner",
+          
+          -- Numbers
+          ["aN"] = "@number.inner",
+          ["iN"] = "@number.inner",
+          
+          -- Returns
+          ["aR"] = "@return.outer",
+          ["iR"] = "@return.inner",
         },
+        
         -- You can choose the select mode (default is charwise 'v')
         selection_modes = {
           ['@parameter.outer'] = 'v', -- charwise
           ['@function.outer'] = 'V', -- linewise
-          ['@class.outer'] = '<c-v>', -- blockwise
+          ['@class.outer'] = 'V', -- linewise
+          ['@block.outer'] = 'V', -- linewise
+          ['@conditional.outer'] = 'V', -- linewise
+          ['@loop.outer'] = 'V', -- linewise
         },
+        
+        -- If you set this to `true` (default is `false`) then any textobject is
+        -- extended to include preceding xor succeeding whitespace.
+        include_surrounding_whitespace = false,
       },
       
       -- Allow swapping text objects
       swap = {
         enable = true,
         swap_next = {
-          ["<leader>a"] = "@parameter.inner",
+          ["<leader>na"] = "@parameter.inner", -- swap next argument
+          ["<leader>nm"] = "@function.outer", -- swap next method/function
         },
         swap_previous = {
-          ["<leader>A"] = "@parameter.inner",
+          ["<leader>pa"] = "@parameter.inner", -- swap previous argument
+          ["<leader>pm"] = "@function.outer", -- swap previous method/function
         },
       },
       
@@ -117,18 +163,46 @@ M.setup = function()
         goto_next_start = {
           ["]m"] = "@function.outer",
           ["]]"] = "@class.outer",
+          ["]o"] = "@loop.*",
+          ["]s"] = { query = "@scope", query_group = "locals", desc = "Next scope" },
+          ["]z"] = { query = "@fold", query_group = "folds", desc = "Next fold" },
         },
         goto_next_end = {
           ["]M"] = "@function.outer",
           ["]["] = "@class.outer",
+          ["]O"] = "@loop.*",
         },
         goto_previous_start = {
           ["[m"] = "@function.outer",
           ["[["] = "@class.outer",
+          ["[o"] = "@loop.*",
+          ["[s"] = { query = "@scope", query_group = "locals", desc = "Previous scope" },
+          ["[z"] = { query = "@fold", query_group = "folds", desc = "Previous fold" },
         },
         goto_previous_end = {
           ["[M"] = "@function.outer",
           ["[]"] = "@class.outer",
+          ["[O"] = "@loop.*",
+        },
+        -- Below will go to either the start or the end, whichever is closer.
+        -- Use if you want more granular movements
+        -- Make it even more gradual by adding multiple queries and regex.
+        goto_next = {
+          ["]d"] = "@conditional.outer",
+        },
+        goto_previous = {
+          ["[d"] = "@conditional.outer",
+        }
+      },
+      
+      -- LSP interop for better integration
+      lsp_interop = {
+        enable = true,
+        border = 'rounded',
+        floating_preview_opts = {},
+        peek_definition_code = {
+          ["<leader>df"] = "@function.outer",
+          ["<leader>dF"] = "@class.outer",
         },
       },
     },
