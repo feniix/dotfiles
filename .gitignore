@@ -14,4 +14,3 @@ id_*
 *.key
 known_hosts
 authorized_keys
-main.go

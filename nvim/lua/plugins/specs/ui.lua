@@ -2,13 +2,17 @@
 -- Contains colorschemes, statuslines, and visual enhancements
 
 return {
-  -- NeoSolarized theme
+  -- NeoSolarized colorscheme with ColorBuddy
   {
-    "svrana/neosolarized.nvim",
-    dependencies = { "tjdevries/colorbuddy.nvim" },
+    "Tsuzat/NeoSolarized.nvim",
+    dependencies = {
+      "tjdevries/colorbuddy.nvim",
+    },
     lazy = false,
     priority = 1000,
     config = function()
+      require("plugins.config.colorbuddy").setup()
+      require("plugins.config.colorbuddy").setup_commands()
       require("plugins.config.colorscheme").setup()
     end,
   },
@@ -16,7 +20,7 @@ return {
   -- Indent guides
   {
     "lukas-reineke/indent-blankline.nvim",
-    event = { "BufReadPost", "BufNewFile" },
+    event = { "BufReadPre", "BufNewFile" },
     main = "ibl",
     config = function()
       require("plugins.config.indent-blankline").setup()
@@ -55,6 +59,15 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require("plugins.config.todo-comments").setup()
+    end,
+  },
+
+  -- Which-key for keymap hints
+  {
+    "folke/which-key.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("plugins.config.which-key").setup()
     end,
   },
 } 

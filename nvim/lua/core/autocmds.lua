@@ -27,16 +27,6 @@ function M.setup()
     end,
   })
   
-  -- Terraform file formatting
-  autocmd("BufWritePre", {
-    group = setup_group,
-    pattern = { "*.tf", "*.tfvars" },
-    callback = function()
-      -- Using vim-terraform's formatting instead of LSP
-      vim.cmd("TerraformFmt")
-    end,
-  })
-  
   -- Terminal-specific integrations
   local platform = _G.platform or safe_require('user.platform')
   if platform and platform.get_terminal_config then

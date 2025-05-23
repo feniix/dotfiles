@@ -31,6 +31,8 @@ function M.setup()
   vim.list_extend(plugin_specs, require("plugins.specs.lang.go"))
   vim.list_extend(plugin_specs, require("plugins.specs.lang.terraform"))
   vim.list_extend(plugin_specs, require("plugins.specs.lang.puppet"))
+  vim.list_extend(plugin_specs, require("plugins.specs.lang.python"))
+  vim.list_extend(plugin_specs, require("plugins.specs.lang.rust"))
   
   -- Development tools
   vim.list_extend(plugin_specs, require("plugins.specs.tools"))

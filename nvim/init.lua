@@ -13,10 +13,6 @@ require('core').setup()
 require('plugins').setup()
 
 -- Additional post-plugin setup
--- Configure Terraform globals
-vim.g.terraform_align = 0
-vim.g.terraform_fmt_on_save = 0
-
 -- Configure Go globals
 vim.g.go_fmt_command = 'goimports'
 vim.g.go_list_type = 'quickfix'

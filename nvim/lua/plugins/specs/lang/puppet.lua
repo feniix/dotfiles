@@ -6,5 +6,8 @@ return {
   {
     "rodjek/vim-puppet",
     ft = "puppet",
+    config = function()
+      require("plugins.config.lang.puppet").setup()
+    end,
   },
 }
