@@ -273,12 +273,45 @@ setup_nvim() {
     fix_repo_structure
   fi
   
+  # Check if user wants to install plugins
+  local install_plugins="$1"
+  if [ -z "$install_plugins" ]; then
+    read -p "Would you like to install Neovim plugins? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      install_plugins="--install-plugins"
+    fi
+  fi
+  
   # Run the dedicated Neovim setup script
-  # Pass the --install-plugins flag if requested
-  if [ "$1" = "--install-plugins" ]; then
+  if [ "$install_plugins" = "--install-plugins" ]; then
     bash "$SCRIPTS_DIR/setup/setup_nvim.sh" --install-plugins
   else
     bash "$SCRIPTS_DIR/setup/setup_nvim.sh"
+  fi
+  
+  # Run health check if nvim is available
+  if command -v nvim >/dev/null 2>&1; then
+    read -p "Would you like to run Neovim health check? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      if [ -f "$SCRIPTS_DIR/nvim/health_check.sh" ]; then
+        log_info "Running Neovim health check..."
+        bash "$SCRIPTS_DIR/nvim/health_check.sh"
+      else
+        log_info "Running basic health check..."
+        nvim --headless -c 'checkhealth user' -c 'quitall' 2>/dev/null || log_warning "Some health checks failed"
+      fi
+    fi
+  fi
+  
+  # Show available nvim management scripts
+  if [ -d "$SCRIPTS_DIR/nvim" ]; then
+    log_info "Neovim management scripts are available at:"
+    log_info "  • Complete setup: $SCRIPTS_DIR/nvim/setup_and_check.sh"
+    log_info "  • Health check: $SCRIPTS_DIR/nvim/health_check.sh"
+    log_info "  • Plugin status: $SCRIPTS_DIR/nvim/check_plugins.sh"
+    log_info "  • Quick help: $SCRIPTS_DIR/nvim/nvim_help.sh"
   fi
 }
 
@@ -643,15 +676,16 @@ if [ -d "$DOTFILES_DIR" ]; then
     echo "2. Run XDG setup only (for migrating existing configs)"
     echo "3. Run platform-specific setup only (macOS or Linux)"
     echo "4. Run Neovim setup only"
-    echo "5. Run Homebrew setup only"
-    echo "6. Set up fonts"
-    echo "7. Set up GitHub integration"
-    echo "8. Clean up legacy files"
-    echo "9. Set up SSH keys"
-    echo "10. Set up asdf version manager"
-    echo "11. Exit"
+    echo "5. Run comprehensive Neovim setup & health check"
+    echo "6. Run Homebrew setup only"
+    echo "7. Set up fonts"
+    echo "8. Set up GitHub integration"
+    echo "9. Clean up legacy files"
+    echo "10. Set up SSH keys"
+    echo "11. Set up asdf version manager"
+    echo "12. Exit"
     
-    read -p "Enter your choice (1-11): " choice
+    read -p "Enter your choice (1-12): " choice
     
     case $choice in
       1)
@@ -682,35 +716,49 @@ fi
         ;;
       5)
         validate_repo_structure
+        if [ -f "$SCRIPTS_DIR/setup/setup_nvim_complete.sh" ]; then
+          log_info "Running complete Neovim setup..."
+          bash "$SCRIPTS_DIR/setup/setup_nvim_complete.sh"
+        elif [ -f "$SCRIPTS_DIR/nvim/setup_and_check.sh" ]; then
+          log_info "Running comprehensive Neovim setup..."
+          bash "$SCRIPTS_DIR/nvim/setup_and_check.sh"
+        else
+          log_warning "Complete setup script not found, running basic setup..."
+          setup_nvim --install-plugins
+        fi
+        log_success "Complete Neovim setup finished."
+        ;;
+      6)
+        validate_repo_structure
         setup_homebrew
         log_success "Homebrew setup complete."
         ;;
-      6)
+      7)
         validate_repo_structure
         setup_fonts
         log_success "Fonts setup complete."
         ;;
-      7)
+      8)
         validate_repo_structure
         setup_github
         log_success "GitHub integration setup complete."
         ;;
-      8)
+      9)
         validate_repo_structure
         cleanup_dotfiles
         log_success "Legacy files cleanup complete."
         ;;
-      9)
+      10)
         validate_repo_structure
         setup_ssh_keys
         log_success "SSH keys setup complete."
         ;;
-      10)
+      11)
         validate_repo_structure
         setup_asdf
         log_success "asdf version manager setup complete."
         ;;
-      11)
+      12)
         log_info "Exiting without changes."
         exit 0
         ;;

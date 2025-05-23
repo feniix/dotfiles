@@ -24,7 +24,7 @@ sleep 5
 echo -e "\n${BLUE}NeoSolarized Usage:${RESET}"
 echo -e "1. Open Neovim:${RESET} ${GREEN}nvim${RESET}"
 echo -e "2. Toggle between light and dark Solarized:${RESET} ${GREEN}:ToggleTheme${RESET}"
-echo -e "3. To customize the Solarized theme, edit:${RESET} ${GREEN}~/dotfiles/nvim/lua/user/colorbuddy_setup.lua${RESET}"
+echo -e "3. To customize the Solarized theme, edit:${RESET} ${GREEN}~/dotfiles/nvim/lua/plugins/config/colorbuddy.lua${RESET}"
 
 echo -e "\n${YELLOW}If you see 'NeoSolarized not found' warning, exit nvim and try again after installation completes.${RESET}"
 
