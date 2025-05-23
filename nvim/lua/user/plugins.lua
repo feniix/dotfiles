@@ -106,6 +106,28 @@ return packer.startup(function(use)
   use 'hrsh7th/cmp-path'      -- Complete file paths  
   use 'hrsh7th/cmp-cmdline'   -- Complete Vim commands
 
+  -- Telescope - Fuzzy finder over lists
+  use {
+    'nvim-telescope/telescope.nvim',
+    tag = '0.1.8',
+    requires = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons', -- Icons (already included above)
+      {
+        'nvim-telescope/telescope-fzf-native.nvim',
+        run = 'make',
+        cond = function()
+          return vim.fn.executable 'make' == 1
+        end
+      }
+    },
+    config = function()
+      if safe_require('user.telescope') then
+        require('user.telescope').setup()
+      end
+    end
+  }
+
   -- Modern replacements
   use 'lewis6991/gitsigns.nvim'          -- Git integration (replaces vim-gitgutter)
   use 'kylechui/nvim-surround'           -- Surround text objects (replaces vim-surround)

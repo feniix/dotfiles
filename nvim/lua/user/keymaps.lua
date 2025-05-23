@@ -65,9 +65,8 @@ function M.setup()
   keymap("n", "<C-y>", "<C-r>", opts)
   keymap("i", "<C-y>", "<C-o><C-r>", opts)
   
-  -- Find with Ctrl+F
-  keymap("n", "<C-f>", "/", opts)
-  keymap("i", "<C-f>", "<Esc>/", opts)
+  -- Note: Ctrl+F is handled by telescope for live grep
+  -- Use / for local search in current buffer
   
   -- Comment line/block with Ctrl+/
   -- Note: this might not work in all terminals, depends on how Ctrl+/ is sent

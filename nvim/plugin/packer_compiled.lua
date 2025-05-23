@@ -201,6 +201,20 @@ _G.packer_plugins = {
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/splitjoin.vim",
     url = "https://github.com/AndrewRadev/splitjoin.vim"
   },
+  ["telescope-fzf-native.nvim"] = {
+    cond = { "\27LJ\2\nK\0\0\3\0\4\1\v6\0\0\0009\0\1\0009\0\2\0'\2\3\0B\0\2\2\b\0\0\0X\0\2€+\0\1\0X\1\1€+\0\2\0L\0\2\0\tmake\15executable\afn\bvim\2\0" },
+    loaded = false,
+    needs_bufread = false,
+    only_cond = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/opt/telescope-fzf-native.nvim",
+    url = "https://github.com/nvim-telescope/telescope-fzf-native.nvim"
+  },
+  ["telescope.nvim"] = {
+    config = { "\27LJ\2\n]\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\19user.telescope\17safe_require\0" },
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/telescope.nvim",
+    url = "https://github.com/nvim-telescope/telescope.nvim"
+  },
   ["todo-comments.nvim"] = {
     loaded = true,
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/todo-comments.nvim",
@@ -226,14 +240,22 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: nvim-dap-ui
-time([[Config for nvim-dap-ui]], true)
-try_loadstring("\27LJ\2\n\v\0\0\1\0\0\0\1K\0\1\0\0", "config", "nvim-dap-ui")
-time([[Config for nvim-dap-ui]], false)
+-- Config for: telescope.nvim
+time([[Config for telescope.nvim]], true)
+try_loadstring("\27LJ\2\n]\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\19user.telescope\17safe_require\0", "config", "telescope.nvim")
+time([[Config for telescope.nvim]], false)
 -- Config for: nvim-treesitter
 time([[Config for nvim-treesitter]], true)
 try_loadstring("\27LJ\2\n^\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\20user.treesitter\17safe_require\0", "config", "nvim-treesitter")
 time([[Config for nvim-treesitter]], false)
+-- Config for: nvim-dap-ui
+time([[Config for nvim-dap-ui]], true)
+try_loadstring("\27LJ\2\n\v\0\0\1\0\0\0\1K\0\1\0\0", "config", "nvim-dap-ui")
+time([[Config for nvim-dap-ui]], false)
+-- Conditional loads
+time([[Conditional loading of telescope-fzf-native.nvim]], true)
+  require("packer.load")({"telescope-fzf-native.nvim"}, {}, _G.packer_plugins)
+time([[Conditional loading of telescope-fzf-native.nvim]], false)
 
 -- Command lazy-loads
 time([[Defining lazy-load commands]], true)
@@ -255,8 +277,8 @@ time([[Defining lazy-load commands]], false)
 
 -- Keymap lazy-loads
 time([[Defining lazy-load keymaps]], true)
-vim.cmd [[noremap <silent> <F5> <cmd>lua require("packer.load")({'nvim-dap'}, { keys = "<lt>F5>", prefix = "" }, _G.packer_plugins)<cr>]]
 vim.cmd [[noremap <silent> <leader>db <cmd>lua require("packer.load")({'nvim-dap'}, { keys = "<lt>leader>db", prefix = "" }, _G.packer_plugins)<cr>]]
+vim.cmd [[noremap <silent> <F5> <cmd>lua require("packer.load")({'nvim-dap'}, { keys = "<lt>F5>", prefix = "" }, _G.packer_plugins)<cr>]]
 time([[Defining lazy-load keymaps]], false)
 
 vim.cmd [[augroup packer_load_aucmds]]
