@@ -164,12 +164,12 @@ local function check_go()
   end
 end
 
--- Check platform configuration
+-- Check platform detection module
 local function check_platform()
-  start("Cross-Platform Configuration")
+  start("Platform Detection")
   
   -- Check if platform module is available
-  local platform = _G.platform or safe_require('user.platform')
+  local platform = _G.platform
   if platform then
     ok("Platform detection module is loaded")
     
@@ -276,7 +276,7 @@ local function check_treesitter()
   end
   
   -- Check TreeSitter module
-  local user_ts_ok, _ = pcall(require, "user.treesitter")
+  local user_ts_ok, _ = pcall(require, "plugins.config.treesitter")
   if user_ts_ok then
     ok("Treesitter module is loaded correctly")
   else

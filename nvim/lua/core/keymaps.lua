@@ -33,7 +33,7 @@ function M.setup()
   keymap("n", "<C-l>", "<C-w>l", opts)
 
   -- Platform-specific key mappings
-  local platform = _G.platform or safe_require('user.platform')
+  local platform = _G.platform
   if platform and platform.get_platform_keymaps then
     local platform_keymaps = platform.get_platform_keymaps()
     for _, mapping in ipairs(platform_keymaps) do
@@ -119,7 +119,7 @@ function M.setup_go_keymaps()
   local opts = { noremap = true, silent = true, buffer = true }
 
   -- Go commands using <leader>G prefix to avoid conflicts
-  keymap("n", "<leader>Gb", "<cmd>lua require('user.go').build_go_files()<CR>", opts)
+  keymap("n", "<leader>Gb", "<cmd>lua require('plugins.config.lang.go').build_go_files()<CR>", opts)
   keymap("n", "<leader>Gt", "<Plug>(go-test)", { silent = true, buffer = true })
   keymap("n", "<leader>Gr", "<Plug>(go-run)", { silent = true, buffer = true })
   keymap("n", "<leader>Gd", "<Plug>(go-doc)", { silent = true, buffer = true })

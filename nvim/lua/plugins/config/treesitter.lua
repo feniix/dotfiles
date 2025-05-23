@@ -290,13 +290,10 @@ function M.setup()
     end
   end, { nargs = 1, desc = "Install TreeSitter parser from git" })
   
-  -- Try to manually install the vim parser if it's not already installed
-  local setup_ts = safe_require('user.setup_treesitter')
-  if setup_ts and setup_ts.install_vim_parser then
-    vim.defer_fn(function()
-      setup_ts.install_vim_parser()
-    end, 1000)  -- Defer by 1 second to let Neovim finish startup
-  end
+  -- Note: Setup utilities are now integrated into this configuration
+  -- The old user.setup_treesitter functionality has been migrated here
+  
+  -- Apply any user overrides if available
 end
 
 return M 

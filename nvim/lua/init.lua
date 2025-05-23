@@ -52,11 +52,10 @@ function safe_require(module)
   return result
 end
 
--- Load and initialize cross-platform detection
-local platform = safe_require('user.platform')
+-- Platform detection and utilities (load early for optimal experience)
+local platform = safe_require('core.utils')
 if platform then
-  -- Apply platform-specific configurations early
-  platform.apply_config()
+  platform.setup()  -- This sets up global platform variables for backward compatibility
 end
 
 -- Set up health check module

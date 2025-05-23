@@ -37,8 +37,19 @@ function M.setup()
   -- Development tools
   vim.list_extend(plugin_specs, require("plugins.specs.tools"))
 
-  -- Setup lazy.nvim with all specifications
-  require("lazy").setup(plugin_specs, {
+  -- Add user plugin specifications
+  local ok, user = pcall(require, 'user')
+  if ok then
+    local user_overrides = user.get_plugin_overrides()
+    for category, specs in pairs(user_overrides) do
+      if type(specs) == 'table' then
+        vim.list_extend(plugin_specs, specs)
+      end
+    end
+  end
+
+  -- Get user lazy config overrides
+  local lazy_config = {
     -- Lazy.nvim configuration
     defaults = {
       lazy = true, -- Make plugins lazy by default
@@ -64,7 +75,25 @@ function M.setup()
         },
       },
     },
-  })
+  }
+  
+  -- Apply user lazy config overrides
+  if ok then
+    local user_lazy_config = user.get_lazy_config_overrides()
+    lazy_config = vim.tbl_deep_extend('force', lazy_config, user_lazy_config)
+  end
+
+  -- Setup lazy.nvim with all specifications
+  require("lazy").setup(plugin_specs, lazy_config)
+  
+  -- Apply user plugin configuration overrides after plugins are loaded
+  if ok then
+    -- Use a timer to apply overrides after plugins are setup
+    vim.defer_fn(function()
+      user.setup_plugin_overrides()
+      user.run_post_setup_hooks()
+    end, 100)
+  end
 end
 
 return M 

@@ -224,11 +224,14 @@ function M.setup()
     pattern = "*"
   })
   
-  -- Load platform-specific configurations if available
-  local platform_config = M.safe_require('user.platform')
-  if platform_config and platform_config.apply_config then
-    platform_config.apply_config()
-  end
+  -- Load platform-specific configurations if available (for future extensibility)
+  -- Note: This is for future platform-specific modules, not the old user.platform
+  -- pcall(function() 
+  --   local platform_config = M.safe_require('user.platform_extensions')
+  --   if platform_config and platform_config.apply_config then
+  --     platform_config.apply_config()
+  --   end
+  -- end)
   
   -- Set up health check module
   pcall(function() 

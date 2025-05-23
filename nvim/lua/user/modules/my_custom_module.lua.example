@@ -1,0 +1,225 @@
+-- Example custom user module
+-- Copy this file to `user/modules/my_custom_module.lua` and customize as needed
+
+local M = {}
+
+-- Setup function that will be called by the user override system
+function M.setup()
+  -- Example: Create custom user commands
+  M.create_commands()
+  
+  -- Example: Set up custom keymaps
+  M.setup_keymaps()
+  
+  -- Example: Create custom highlights
+  M.setup_highlights()
+  
+  -- Example: Set up custom autocommands
+  M.setup_autocommands()
+  
+  vim.notify('Custom user module loaded successfully!', vim.log.levels.INFO)
+end
+
+-- Create custom user commands
+function M.create_commands()
+  -- Example: Command to quickly edit user config
+  vim.api.nvim_create_user_command('EditUserConfig', function()
+    vim.cmd('edit ~/.config/nvim/lua/user/config.lua')
+  end, {
+    desc = 'Edit user configuration file'
+  })
+  
+  -- Example: Command to reload user config
+  vim.api.nvim_create_user_command('ReloadUserConfig', function()
+    -- Clear the user config from package.loaded
+    package.loaded['user.config'] = nil
+    package.loaded['user.init'] = nil
+    
+    -- Reload user overrides
+    local user = require('user')
+    user.setup_core_overrides()
+    user.setup_plugin_overrides()
+    user.run_post_setup_hooks()
+    
+    vim.notify('User configuration reloaded!', vim.log.levels.INFO)
+  end, {
+    desc = 'Reload user configuration'
+  })
+  
+  -- Example: Command to show current git branch in status line
+  vim.api.nvim_create_user_command('ToggleGitBranch', function()
+    vim.g.show_git_branch = not vim.g.show_git_branch
+    vim.cmd('redrawstatus')
+  end, {
+    desc = 'Toggle git branch display in status line'
+  })
+end
+
+-- Set up custom keymaps
+function M.setup_keymaps()
+  -- Example: Quick config editing
+  vim.keymap.set('n', '<leader>ce', '<cmd>EditUserConfig<CR>', {
+    desc = 'Edit user config',
+    silent = true,
+  })
+  
+  vim.keymap.set('n', '<leader>cr', '<cmd>ReloadUserConfig<CR>', {
+    desc = 'Reload user config',
+    silent = true,
+  })
+  
+  -- Example: Quick buffer management
+  vim.keymap.set('n', '<leader>ba', '<cmd>bufdo bd<CR>', {
+    desc = 'Close all buffers',
+    silent = true,
+  })
+  
+  vim.keymap.set('n', '<leader>bo', '<cmd>%bd|e#<CR>', {
+    desc = 'Close other buffers',
+    silent = true,
+  })
+  
+  -- Example: Window management
+  vim.keymap.set('n', '<leader>wv', '<cmd>vsplit<CR>', {
+    desc = 'Split window vertically',
+    silent = true,
+  })
+  
+  vim.keymap.set('n', '<leader>wh', '<cmd>split<CR>', {
+    desc = 'Split window horizontally',
+    silent = true,
+  })
+end
+
+-- Set up custom highlights
+function M.setup_highlights()
+  -- Example: Custom highlight for TODO comments
+  vim.api.nvim_set_hl(0, 'TodoComment', {
+    fg = '#ff6b6b',
+    bg = '#2d2d2d',
+    bold = true,
+  })
+  
+  -- Example: Custom highlight for FIXME comments
+  vim.api.nvim_set_hl(0, 'FixmeComment', {
+    fg = '#ffd93d',
+    bg = '#2d2d2d',
+    bold = true,
+  })
+  
+  -- Example: Custom highlight for NOTE comments
+  vim.api.nvim_set_hl(0, 'NoteComment', {
+    fg = '#6bcf7f',
+    bg = '#2d2d2d',
+    bold = true,
+  })
+end
+
+-- Set up custom autocommands
+function M.setup_autocommands()
+  local group = vim.api.nvim_create_augroup('CustomUserModule', { clear = true })
+  
+  -- Example: Highlight TODO/FIXME/NOTE comments
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWinEnter' }, {
+    group = group,
+    pattern = '*',
+    callback = function()
+      vim.fn.matchadd('TodoComment', '\\<TODO\\>')
+      vim.fn.matchadd('FixmeComment', '\\<FIXME\\>')
+      vim.fn.matchadd('NoteComment', '\\<NOTE\\>')
+    end,
+  })
+  
+  -- Example: Auto-save on focus lost (optional)
+  vim.api.nvim_create_autocmd('FocusLost', {
+    group = group,
+    pattern = '*',
+    callback = function()
+      if vim.g.auto_save_on_focus_lost then
+        vim.cmd('silent! wa')
+      end
+    end,
+  })
+  
+  -- Example: Restore cursor position
+  vim.api.nvim_create_autocmd('BufReadPost', {
+    group = group,
+    pattern = '*',
+    callback = function()
+      local mark = vim.api.nvim_buf_get_mark(0, '"')
+      local lcount = vim.api.nvim_buf_line_count(0)
+      if mark[1] > 0 and mark[1] <= lcount then
+        pcall(vim.api.nvim_win_set_cursor, 0, mark)
+      end
+    end,
+  })
+  
+  -- Example: Show relative numbers only in normal mode
+  vim.api.nvim_create_autocmd({ 'InsertEnter' }, {
+    group = group,
+    pattern = '*',
+    callback = function()
+      if vim.g.dynamic_relative_numbers then
+        vim.opt_local.relativenumber = false
+      end
+    end,
+  })
+  
+  vim.api.nvim_create_autocmd({ 'InsertLeave' }, {
+    group = group,
+    pattern = '*',
+    callback = function()
+      if vim.g.dynamic_relative_numbers then
+        vim.opt_local.relativenumber = true
+      end
+    end,
+  })
+end
+
+-- Example: Custom function to get git branch
+function M.get_git_branch()
+  if not vim.g.show_git_branch then
+    return ''
+  end
+  
+  local branch = vim.fn.system('git branch --show-current 2>/dev/null')
+  if vim.v.shell_error == 0 then
+    return ' ' .. vim.trim(branch)
+  end
+  return ''
+end
+
+-- Example: Custom statusline component
+function M.custom_statusline()
+  local mode = vim.fn.mode()
+  local file = vim.fn.expand('%:t')
+  local branch = M.get_git_branch()
+  local pos = string.format('%d:%d', vim.fn.line('.'), vim.fn.col('.'))
+  
+  return string.format(' %s | %s%s | %s ', mode:upper(), file, branch, pos)
+end
+
+-- Example: Project-specific settings
+function M.setup_project_settings()
+  local cwd = vim.fn.getcwd()
+  
+  -- Example: Different settings for different project types
+  if string.find(cwd, 'go') or vim.fn.glob(cwd .. '/go.mod') ~= '' then
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = false
+    vim.notify('Applied Go project settings', vim.log.levels.INFO)
+  elseif string.find(cwd, 'node') or vim.fn.glob(cwd .. '/package.json') ~= '' then
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.expandtab = true
+    vim.notify('Applied Node.js project settings', vim.log.levels.INFO)
+  elseif string.find(cwd, 'python') or vim.fn.glob(cwd .. '/requirements.txt') ~= '' then
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.expandtab = true
+    vim.notify('Applied Python project settings', vim.log.levels.INFO)
+  end
+end
+
+return M 
