@@ -119,6 +119,13 @@ function M.setup_leader_mappings()
     { "<leader>gb", desc = "Git branches" },
     { "<leader>gs", desc = "Git status" },
     { "<leader>gl", desc = "Go metalinter" }, -- Go-specific, but grouped here
+    { "<leader>gd", desc = "Git diff view" },
+    { "<leader>gh", desc = "Git file history" },
+    { "<leader>gH", desc = "Current file history" },
+    { "<leader>gq", desc = "Close Git diff view" },
+    { "<leader>gm", desc = "Diff against origin/main" },
+    { "<leader>gM", desc = "Diff against origin/master" },
+    { "<leader>gS", desc = "View staged changes" },
     
     -- LSP operations (when LSP is set up)
     { "<leader>l", group = "LSP/Language" },

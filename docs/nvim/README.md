@@ -8,6 +8,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 - [**Colorscheme Guide**](colorscheme_guide.md) - NeoSolarized theme usage, customization, and switching
 - [**Which-Key Guide**](WHICH_KEY_GUIDE.md) - Keymap discovery and organization system
 - [**TextObjects Guide**](TEXTOBJECTS.md) - TreeSitter-powered smart text objects
+- [**Diffview Guide**](DIFFVIEW_GUIDE.md) - Comprehensive Git diff and history visualization
 - [**Health Check**](HEALTH_CHECK.md) - Configuration diagnostics and troubleshooting
 - [**Cross-Platform Support**](CROSS_PLATFORM.md) - Platform-specific optimizations
 
@@ -28,6 +29,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 - **🎨 Theme**: NeoSolarized with light/dark switching
 - **🔧 LSP Ready**: Prepared for Language Server integration
 - **🐛 Debugging**: nvim-dap with UI support
+- **📊 Git Diff**: diffview.nvim for comprehensive diff visualization
 
 ### **Language Support**
 - **Go**: Enhanced with vim-go + nvim-dap integration
@@ -42,7 +44,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 - **Code Navigation**: Jump between functions, classes, loops (`]m`, `[m`, `]c`, `[c`)
 - **Code Swapping**: Reorganize parameters and methods (`<leader>na`, `<leader>pa`)
 - **Auto-completion**: nvim-cmp with multiple sources
-- **Git Integration**: Gitsigns with hunk navigation
+- **Git Integration**: Gitsigns with hunk navigation + diffview.nvim for comprehensive diffs
 
 ### **UI/UX Enhancements**
 - **Status Line**: Modern lualine with git status
@@ -126,6 +128,13 @@ nvim/
 - `:GoRun` - Run current file
 - `:GoCoverage` - Show test coverage
 
+### **Git & Diff Viewing**
+- `:DiffviewOpen` - Open diff view for current changes
+- `:DiffviewFileHistory` - Show file history with diffs
+- `:DiffviewClose` - Close diff view
+- `:DiffviewOpenMain` - Compare current branch to origin/main
+- `:DiffviewOpenStaged` - View staged changes
+
 ## 🔧 **Customization**
 
 ### **Adding New Plugins**
@@ -161,6 +170,7 @@ For detailed information about specific features:
 
 - [**Which-Key Guide**](WHICH_KEY_GUIDE.md) - Master your keybindings
 - [**TextObjects Guide**](TEXTOBJECTS.md) - Advanced text manipulation
+- [**Diffview Guide**](DIFFVIEW_GUIDE.md) - Git diff and history visualization
 - [**Colorscheme Guide**](colorscheme_guide.md) - Theme customization
 - [**Health Check**](HEALTH_CHECK.md) - Troubleshooting guide
 

@@ -40,6 +40,13 @@ When you press `<leader>` (space), you'll see organized groups:
 - `<leader>gb` - Git branches
 - `<leader>gs` - Git status
 - `<leader>gl` - Go metalinter (when in Go files)
+- `<leader>gd` - Git diff view
+- `<leader>gh` - Git file history
+- `<leader>gH` - Current file history
+- `<leader>gq` - Close Git diff view
+- `<leader>gm` - Diff against origin/main
+- `<leader>gM` - Diff against origin/master
+- `<leader>gS` - View staged changes
 
 ### 🔧 **LSP/Language** (`<leader>l`)
 - `<leader>lr` - LSP references

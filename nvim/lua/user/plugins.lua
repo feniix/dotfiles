@@ -168,6 +168,18 @@ return packer.startup(function(use)
     end
   }
 
+  -- Git diff viewer
+  use {
+    'sindrets/diffview.nvim',
+    requires = 'nvim-lua/plenary.nvim',
+    cmd = { 'DiffviewOpen', 'DiffviewFileHistory', 'DiffviewClose' },
+    config = function()
+      if safe_require('user.diffview') then
+        require('user.diffview').setup()
+      end
+    end
+  }
+
   -- Automatically set up your configuration after cloning packer.nvim
   if PACKER_BOOTSTRAP then
     packer.sync()
