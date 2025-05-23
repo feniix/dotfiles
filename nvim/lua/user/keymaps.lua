@@ -25,19 +25,28 @@ function M.setup()
   keymap("n", "<C-k>", "<C-w>k", opts)
   keymap("n", "<C-l>", "<C-w>l", opts)
 
-  -- macOS specific key remappings
-  if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
-    -- Map Option+j/k to move lines up and down
-    keymap("n", "∆", ":m .+1<CR>==", opts)
-    keymap("n", "˚", ":m .-2<CR>==", opts)
-    keymap("i", "∆", "<Esc>:m .+1<CR>==gi", opts)
-    keymap("i", "˚", "<Esc>:m .-2<CR>==gi", opts)
-    keymap("v", "∆", ":m '>+1<CR>gv=gv", opts)
-    keymap("v", "˚", ":m '<-2<CR>gv=gv", opts)
+  -- Platform-specific key mappings
+  local platform = _G.platform or safe_require('user.platform')
+  if platform then
+    local platform_keymaps = platform.get_platform_keymaps()
+    for _, mapping in ipairs(platform_keymaps) do
+      keymap(mapping.mode, mapping.lhs, mapping.rhs, { noremap = true, silent = true, desc = mapping.desc })
+    end
+  else
+    -- Fallback to macOS keymaps if platform detection fails
+    if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
+      -- Map Option+j/k to move lines up and down
+      keymap("n", "∆", ":m .+1<CR>==", opts)
+      keymap("n", "˚", ":m .-2<CR>==", opts)
+      keymap("i", "∆", "<Esc>:m .+1<CR>==gi", opts)
+      keymap("i", "˚", "<Esc>:m .-2<CR>==gi", opts)
+      keymap("v", "∆", ":m '>+1<CR>gv=gv", opts)
+      keymap("v", "˚", ":m '<-2<CR>gv=gv", opts)
 
-    -- Map Option+h/l to jump words
-    keymap("n", "˙", "b", opts)
-    keymap("n", "¬", "w", opts)
+      -- Map Option+h/l to jump words
+      keymap("n", "˙", "b", opts)
+      keymap("n", "¬", "w", opts)
+    end
   end
 
   -- VSCode-like keyboard shortcuts
@@ -70,8 +79,8 @@ function M.setup()
   
   -- Mouse shortcuts - Make Ctrl+Left/Right click simulate common GUI browser behavior
   if vim.fn.has("mouse") == 1 then
-    -- Detect iTerm2
-    local is_iterm = is_iterm2()
+    -- Get terminal configuration for terminal-specific optimizations
+    local terminal_config = platform and platform.get_terminal_config() or {}
     
     -- Ctrl+Right Click to go back (like VSCode/browser back)
     keymap("n", "<C-RightMouse>", "<LeftMouse><C-o>", opts)
@@ -90,10 +99,8 @@ function M.setup()
     
     -- Triple click to select line (already works in Neovim)
     
-    -- Mouse wheel scroll speed adjustments handled in options.lua
-    
-    -- iTerm2-specific: Enable smooth scrolling
-    if is_iterm then
+    -- Terminal-specific mouse optimizations
+    if terminal_config.enable_smooth_scrolling and platform and platform.get_terminal() == "iterm2" then
       -- Better mouse wheel handling in iTerm2
       vim.cmd([[
         " Smoother mouse wheel scrolling for iTerm2

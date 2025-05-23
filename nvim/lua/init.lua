@@ -54,11 +54,11 @@ function safe_require(module)
   return result
 end
 
--- Helper function to detect iTerm2 consistently
-function is_iterm2()
-  return vim.env.TERM_PROGRAM == "iTerm.app" or 
-         (vim.env.TERM and string.match(vim.env.TERM, "^iterm")) or 
-         vim.env.LC_TERMINAL == "iTerm2"
+-- Load and initialize cross-platform detection
+local platform = safe_require('user.platform')
+if platform then
+  -- Apply platform-specific configurations early
+  platform.apply_config()
 end
 
 -- Set up health check module
@@ -87,8 +87,25 @@ vim.api.nvim_create_autocmd("VimEnter", {
 -- Make safe_require globally available
 _G.safe_require = safe_require
 
--- Make iTerm2 detection globally available
-_G.is_iterm2 = is_iterm2
+-- Make platform detection globally available for backward compatibility
+if platform then
+  _G.is_iterm2 = platform.is_iterm2
+  _G.is_mac = platform.is_mac
+  _G.is_windows = platform.is_windows
+  _G.is_linux = platform.is_linux
+  -- Also make the platform module globally available
+  _G.platform = platform
+else
+  -- Fallback functions if platform module fails to load
+  _G.is_iterm2 = function()
+    return vim.env.TERM_PROGRAM == "iTerm.app" or 
+           (vim.env.TERM and string.match(vim.env.TERM, "^iterm")) or 
+           vim.env.LC_TERMINAL == "iTerm2"
+  end
+  _G.is_mac = function() return vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 end
+  _G.is_windows = function() return vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 end
+  _G.is_linux = function() return vim.fn.has("unix") == 1 and not is_mac() end
+end
 
 -- We're keeping most configuration in individual Lua modules for better organization
 -- The entry point is now init.lua in the nvim directory root

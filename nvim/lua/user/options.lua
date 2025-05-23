@@ -93,38 +93,16 @@ function M.setup()
   vim.opt.selection = "exclusive"      -- More VSCode-like selection behavior
   vim.opt.selectmode = "mouse,key"     -- Enable visual selection with mouse
   
-  -- Detect iTerm2 for better mouse support
-  local is_iterm = is_iterm2()
-  if is_iterm then
-    -- Enable extended mouse mode in iTerm2
-    -- Note: ttymouse is not needed in Neovim as it handles mouse support differently than Vim
-    
-    -- Enable clipboard with iTerm2
-    if vim.fn.has('clipboard') == 1 then
-      vim.g.clipboard = {
-        name = 'iterm2',
-        copy = {
-          ['+'] = 'pbcopy',
-          ['*'] = 'pbcopy',
-        },
-        paste = {
-          ['+'] = 'pbpaste',
-          ['*'] = 'pbpaste',
-        },
-        cache_enabled = 1, -- Enable caching for better performance
-      }
-    end
-  end
-
+  -- Platform-specific configurations (clipboard, terminal support, etc.)
+  -- Note: These are now handled by the platform module in init.lua
+  -- but we keep the universal clipboard settings here
+  
   -- Make Neovim behave more like VSCode when selecting text
   -- Enable visual block mode when selecting with mouse + shift  
   vim.keymap.set('n', '<S-LeftMouse>', '<LeftMouse><Cmd>set mouse=a<CR><Cmd>normal! V<CR>', {silent = true})
   vim.keymap.set('n', '<S-RightMouse>', '<LeftMouse><Cmd>set mouse=a<CR><Cmd>normal! v<CR>', {silent = true})
   
-  -- Wheel scroll speed adjustment (more like VSCode)
-  vim.opt.mousescroll = "ver:3,hor:6"  -- Smooth scrolling like VSCode
-
-  -- Set clipboard
+  -- Set clipboard - the platform module handles the provider configuration
   vim.opt.clipboard:append("unnamed")
   vim.opt.clipboard:append("unnamedplus")
 

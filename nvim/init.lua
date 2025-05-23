@@ -71,7 +71,7 @@ if safe_require('todo-comments') then
   })
 end
 
--- Note: nvim-cmp is now lazy-loaded in plugins.lua
+-- Note: nvim-cmp is now configured in plugins.lua to avoid loading order issues
 
 -- Note: Treesitter is now lazy-loaded in plugins.lua
 
@@ -150,8 +150,9 @@ if safe_require('Comment') then
   }
   
   -- Add ts-context-commentstring integration if available
-  local ts_context_ok, ts_context = pcall(require, 'ts_context_commentstring.integrations.comment_nvim')
-  if ts_context_ok then
+  -- Updated to handle the new API and avoid deprecated warnings
+  if safe_require('ts_context_commentstring.integrations.comment_nvim') then
+    local ts_context = require('ts_context_commentstring.integrations.comment_nvim')
     comment_config.pre_hook = ts_context.create_pre_hook()
   end
   
@@ -226,6 +227,11 @@ if vim.fn.has('nvim') == 1 then
   ]])
 end
 
+-- Setup CMP completion system immediately
+if safe_require('user.cmp_setup') then
+  require('user.cmp_setup').setup()
+end
+
 -- Setup ts_context_commentstring
 if safe_require('ts_context_commentstring') then
   -- Skip the deprecated module to speed up loading
@@ -233,12 +239,18 @@ if safe_require('ts_context_commentstring') then
   
   require('ts_context_commentstring').setup({
     enable_autocmd = false, -- Let Comment.nvim handle this
+    -- Avoid deprecated vim.tbl_islist usage
+    use_treesitter_parser = true,
   })
 end
 
--- iTerm2 specific integrations
-if is_iterm2() then
-  vim.cmd('set termguicolors')
+-- Terminal-specific integrations
+local platform = _G.platform or safe_require('user.platform')
+if platform then
+  local terminal_config = platform.get_terminal_config()
+  if terminal_config.supports_true_color then
+    vim.cmd('set termguicolors')
+  end
 end
 
 -- Standard K keymap behavior (no LSP)

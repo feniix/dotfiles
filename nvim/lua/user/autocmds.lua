@@ -44,29 +44,61 @@ function M.setup()
     end,
   })
   
-  -- iTerm2 specific integrations
-  if is_iterm2() then
-    -- Enable focus events
-    autocmd({"FocusGained", "FocusLost"}, {
-      group = augroup("iTerm2Focus", { clear = true }),
-      callback = function(ev)
-        if ev.event == "FocusGained" then
-          -- Refresh file when Neovim gets focus
-          vim.cmd("checktime")
-        end
-      end,
-    })
+  -- Terminal-specific integrations
+  local platform = _G.platform or safe_require('user.platform')
+  if platform then
+    local terminal_config = platform.get_terminal_config()
     
-    -- Fix mouse paste in iTerm2
-    autocmd("TextYankPost", {
-      group = augroup("iTerm2MousePaste", { clear = true }),
-      callback = function()
-        -- Delay the clipboard update slightly to ensure it's ready for paste
-        vim.defer_fn(function()
-          -- This is empty on purpose, just triggering the event loop
-        end, 10)
-      end,
-    })
+    -- Enable focus events for terminals that support them
+    if terminal_config.support_focus_events then
+      autocmd({"FocusGained", "FocusLost"}, {
+        group = augroup("TerminalFocus", { clear = true }),
+        callback = function(ev)
+          if ev.event == "FocusGained" then
+            -- Refresh file when Neovim gets focus
+            vim.cmd("checktime")
+          end
+        end,
+      })
+    end
+    
+    -- Enhanced clipboard handling for supported terminals
+    if platform.get_terminal() == "iterm2" or terminal_config.support_focus_events then
+      autocmd("TextYankPost", {
+        group = augroup("TerminalClipboard", { clear = true }),
+        callback = function()
+          -- Delay the clipboard update slightly to ensure it's ready for paste
+          vim.defer_fn(function()
+            -- This is empty on purpose, just triggering the event loop
+          end, 10)
+        end,
+      })
+    end
+  else
+    -- Fallback for iTerm2 if platform detection fails
+    if _G.is_iterm2 and _G.is_iterm2() then
+      -- Enable focus events
+      autocmd({"FocusGained", "FocusLost"}, {
+        group = augroup("iTerm2Focus", { clear = true }),
+        callback = function(ev)
+          if ev.event == "FocusGained" then
+            -- Refresh file when Neovim gets focus
+            vim.cmd("checktime")
+          end
+        end,
+      })
+      
+      -- Fix mouse paste in iTerm2
+      autocmd("TextYankPost", {
+        group = augroup("iTerm2MousePaste", { clear = true }),
+        callback = function()
+          -- Delay the clipboard update slightly to ensure it's ready for paste
+          vim.defer_fn(function()
+            -- This is empty on purpose, just triggering the event loop
+          end, 10)
+        end,
+      })
+    end
   end
 
   -- Return to last edit position when opening files (except git commit messages)

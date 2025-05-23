@@ -96,29 +96,169 @@ local function check_go()
     error("vim-go is missing. Install with :PackerSync")
   end
   
-  -- Check Go tools
-  if has_executable("go") then
-    ok("Go is installed and in PATH")
-    
-    -- Check Go version
-    local go_version = vim.fn.trim(vim.fn.system("go version"))
-    info("Go version: " .. go_version)
-    
-    -- Check essential Go tools
-    local go_tools = {
-      "goimports", "gofumpt", "golangci-lint", "gomodifytags",
-      "gotests", "impl", "dlv", "gorename"
-    }
-    
-    for _, tool in ipairs(go_tools) do
-      if has_executable(tool) then
-        ok(tool .. " is installed")
+  -- Check Go tools using platform module if available
+  local platform = _G.platform or safe_require('user.platform')
+  if platform then
+    local tools = platform.get_language_tools()
+    if tools.go then
+      if has_executable("go") then
+        ok("Go is installed and in PATH")
+        
+        -- Check Go version
+        local go_version = vim.fn.trim(vim.fn.system("go version"))
+        info("Go version: " .. go_version)
+        
+        -- Check essential Go tools using platform detection
+        local go_tools = {
+          { name = "goimports", available = tools.go.goimports },
+          { name = "gofumpt", available = tools.go.gofumpt },
+          { name = "golangci-lint", available = tools.go.golangci_lint },
+          { name = "gomodifytags", available = tools.go.gomodifytags },
+          { name = "gotests", available = tools.go.gotests },
+          { name = "dlv", available = tools.go.dlv },
+        }
+        
+        for _, tool in ipairs(go_tools) do
+          if tool.available then
+            ok(tool.name .. " is installed")
+          else
+            warn(tool.name .. " is not found in PATH")
+          end
+        end
+        
+        -- Additional tools that aren't in platform module yet
+        local extra_tools = { "impl", "gorename" }
+        for _, tool in ipairs(extra_tools) do
+          if has_executable(tool) then
+            ok(tool .. " is installed")
+          else
+            warn(tool .. " is not found in PATH")
+          end
+        end
       else
-        warn(tool .. " is not found in PATH")
+        error("Go is not installed or not in PATH")
       end
     end
   else
-    error("Go is not installed or not in PATH")
+    -- Fallback to original behavior if platform module isn't available
+    if has_executable("go") then
+      ok("Go is installed and in PATH")
+      
+      -- Check Go version
+      local go_version = vim.fn.trim(vim.fn.system("go version"))
+      info("Go version: " .. go_version)
+      
+      -- Check essential Go tools
+      local go_tools = {
+        "goimports", "gofumpt", "golangci-lint", "gomodifytags",
+        "gotests", "impl", "dlv", "gorename"
+      }
+      
+      for _, tool in ipairs(go_tools) do
+        if has_executable(tool) then
+          ok(tool .. " is installed")
+        else
+          warn(tool .. " is not found in PATH")
+        end
+      end
+    else
+      error("Go is not installed or not in PATH")
+    end
+  end
+end
+
+-- Check platform configuration
+local function check_platform()
+  start("Cross-Platform Configuration")
+  
+  -- Check if platform module is available
+  local platform = _G.platform or safe_require('user.platform')
+  if platform then
+    ok("Platform detection module is loaded")
+    
+    -- Show platform information
+    local os_name = platform.get_os()
+    local terminal = platform.get_terminal()
+    local is_gui = platform.is_gui()
+    
+    info("Operating System: " .. os_name)
+    info("Terminal: " .. terminal)
+    info("GUI Environment: " .. (is_gui and "Yes" or "No"))
+    
+    -- Check clipboard configuration
+    local clipboard_config = platform.get_clipboard_config()
+    if clipboard_config and next(clipboard_config) ~= nil then
+      ok("Clipboard is configured for " .. clipboard_config.name)
+      
+      -- Check if clipboard utilities are available
+      if os_name == "linux" or os_name == "freebsd" or os_name == "openbsd" then
+        if vim.fn.executable('wl-copy') == 1 and vim.fn.executable('wl-paste') == 1 then
+          ok("Wayland clipboard utilities (wl-copy/wl-paste) are available")
+        elseif vim.fn.executable('xclip') == 1 then
+          ok("X11 clipboard utility (xclip) is available")
+        elseif vim.fn.executable('xsel') == 1 then
+          ok("X11 clipboard utility (xsel) is available")
+        else
+          warn("No clipboard utilities found. Install wl-clipboard (Wayland) or xclip/xsel (X11)")
+        end
+      elseif os_name == "windows" then
+        if vim.fn.executable('win32yank.exe') == 1 then
+          ok("Windows clipboard utility (win32yank) is available")
+        else
+          warn("win32yank.exe not found. Install for better clipboard support")
+        end
+      elseif os_name == "macos" then
+        if vim.fn.executable('pbcopy') == 1 and vim.fn.executable('pbpaste') == 1 then
+          ok("macOS clipboard utilities (pbcopy/pbpaste) are available")
+        else
+          error("macOS clipboard utilities are missing")
+        end
+      end
+    else
+      warn("No clipboard configuration detected")
+    end
+    
+    -- Check terminal capabilities
+    local terminal_config = platform.get_terminal_config()
+    if terminal_config.supports_true_color then
+      ok("Terminal supports true color")
+    else
+      warn("Terminal may not support true color")
+    end
+    
+    if terminal_config.supports_mouse then
+      ok("Terminal supports mouse")
+    else
+      warn("Terminal may not support mouse")
+    end
+    
+    if terminal_config.supports_undercurl then
+      ok("Terminal supports undercurl")
+    else
+      info("Terminal does not support undercurl (cosmetic only)")
+    end
+    
+    -- Check platform-specific keymaps
+    local keymaps = platform.get_platform_keymaps()
+    if #keymaps > 0 then
+      ok(#keymaps .. " platform-specific keymaps are configured")
+    else
+      info("No platform-specific keymaps configured")
+    end
+    
+  else
+    error("Platform detection module could not be loaded")
+    
+    -- Show basic fallback information
+    if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
+      info("Operating System: macOS (fallback detection)")
+    elseif vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 then
+      info("Operating System: Windows (fallback detection)")
+    elseif vim.fn.has("unix") == 1 then
+      info("Operating System: Unix/Linux (fallback detection)")
+    else
+      info("Operating System: Unknown")
+    end
   end
 end
 
@@ -214,6 +354,7 @@ end
 
 -- Register the health check with Neovim's built-in health check system
 function M.check()
+  check_platform()
   check_dap()
   check_go()
   check_treesitter()

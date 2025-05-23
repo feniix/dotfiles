@@ -86,75 +86,9 @@ return packer.startup(function(use)
     end
   }
 
-  -- Modern completion system (event-based loading)
-  use {
-    'hrsh7th/nvim-cmp',
-    event = 'InsertEnter',
-    requires = {
-      'hrsh7th/cmp-buffer',
-      'hrsh7th/cmp-path',
-      'hrsh7th/cmp-cmdline',
-    },
-    config = function()
-      -- CMP setup moved to avoid startup delay
-      vim.defer_fn(function()
-        if safe_require('cmp') then
-          local cmp = require('cmp')
-          cmp.setup({
-            snippet = {
-              expand = function(args)
-                -- No snippet engine
-              end,
-            },
-            mapping = cmp.mapping.preset.insert({
-              ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-              ['<C-f>'] = cmp.mapping.scroll_docs(4),
-              ['<C-Space>'] = cmp.mapping.complete(),
-              ['<CR>'] = cmp.mapping.confirm({ select = true }),
-              ['<Tab>'] = cmp.mapping(function(fallback)
-                if cmp.visible() then
-                  cmp.select_next_item()
-                else
-                  fallback()
-                end
-              end, { 'i', 's' }),
-              ['<S-Tab>'] = cmp.mapping(function(fallback)
-                if cmp.visible() then
-                  cmp.select_prev_item()
-                else
-                  fallback()
-                end
-              end, { 'i', 's' }),
-            }),
-            sources = cmp.config.sources({
-              { name = 'buffer' },
-              { name = 'path' },
-            })
-          })
-
-          -- Cmdline completion
-          cmp.setup.cmdline('/', {
-            mapping = cmp.mapping.preset.cmdline(),
-            sources = { { name = 'buffer' } }
-          })
-
-          cmp.setup.cmdline(':', {
-            mapping = cmp.mapping.preset.cmdline(),
-            sources = cmp.config.sources({
-              { name = 'path' }
-            }, {
-              { name = 'cmdline' }
-            })
-          })
-        end
-      end, 100)
-    end
-  }
-
-  -- Treesitter (optimized loading)
+  -- Treesitter (core only for now - extensions to be added after base is working)
   use {
     'nvim-treesitter/nvim-treesitter',
-    event = 'BufRead',
     run = ':TSUpdate',
     config = function()
       if safe_require('user.treesitter') then
@@ -162,16 +96,18 @@ return packer.startup(function(use)
       end
     end
   }
-  
-  -- Treesitter extensions
-  use 'nvim-treesitter/nvim-treesitter-context'  -- Show code context at top of screen
-  use 'nvim-treesitter/nvim-treesitter-textobjects' -- Enhanced textobjects
-  use 'JoosepAlviste/nvim-ts-context-commentstring' -- Context-aware commenting
-  use 'windwp/nvim-ts-autotag' -- Auto close/rename HTML/JSX tags
+
+  -- TreeSitter context-aware commenting
+  use 'JoosepAlviste/nvim-ts-context-commentstring'
+
+  -- Modern completion system (adding back sources now that core is stable)
+  use 'hrsh7th/nvim-cmp'
+  use 'hrsh7th/cmp-buffer'    -- Complete from current file
+  use 'hrsh7th/cmp-path'      -- Complete file paths  
+  use 'hrsh7th/cmp-cmdline'   -- Complete Vim commands
 
   -- Modern replacements
   use 'lewis6991/gitsigns.nvim'          -- Git integration (replaces vim-gitgutter)
-  use 'RRethy/nvim-treesitter-endwise'   -- Auto-add end (replaces vim-endwise)
   use 'kylechui/nvim-surround'           -- Surround text objects (replaces vim-surround)
   use 'kaplanz/retrail.nvim'             -- Whitespace management (replaces vim-better-whitespace)
   use 'nvim-tree/nvim-web-devicons'      -- File icons (replaces vim-devicons)
