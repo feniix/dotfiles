@@ -48,6 +48,17 @@ return packer.startup(function(use)
     requires = 'tjdevries/colorbuddy.nvim'  -- ColorBuddy framework
   }
   
+  -- Indent guides
+  use {
+    'lukas-reineke/indent-blankline.nvim',
+    main = 'ibl',
+    config = function()
+      if safe_require('user.indent-blankline') then
+        require('user.indent-blankline').setup()
+      end
+    end
+  }
+
   -- ---- Language Support ----
   -- Terraform
   use 'hashivim/vim-terraform'              -- Terraform syntax & formatting

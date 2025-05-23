@@ -50,6 +50,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 - **Auto-pairs**: Smart bracket/quote completion
 - **Whitespace**: Automatic trailing whitespace management
 - **Icons**: Beautiful file and folder icons
+- **Indent Guides**: Visual indentation guides with scope highlighting
 
 ## 📁 **File Structure**
 

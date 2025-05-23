@@ -109,6 +109,12 @@ _G.packer_plugins = {
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/gitsigns.nvim",
     url = "https://github.com/lewis6991/gitsigns.nvim"
   },
+  ["indent-blankline.nvim"] = {
+    config = { "\27LJ\2\nd\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\26user.indent-blankline\17safe_require\0" },
+    loaded = true,
+    path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/indent-blankline.nvim",
+    url = "https://github.com/lukas-reineke/indent-blankline.nvim"
+  },
   ["lualine.nvim"] = {
     loaded = true,
     path = "/Users/feniix/.local/share/nvim/site/pack/packer/start/lualine.nvim",
@@ -251,14 +257,6 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: nvim-dap-ui
-time([[Config for nvim-dap-ui]], true)
-try_loadstring("\27LJ\2\n\v\0\0\1\0\0\0\1K\0\1\0\0", "config", "nvim-dap-ui")
-time([[Config for nvim-dap-ui]], false)
--- Config for: telescope.nvim
-time([[Config for telescope.nvim]], true)
-try_loadstring("\27LJ\2\n]\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\19user.telescope\17safe_require\0", "config", "telescope.nvim")
-time([[Config for telescope.nvim]], false)
 -- Config for: nvim-treesitter
 time([[Config for nvim-treesitter]], true)
 try_loadstring("\27LJ\2\n^\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\20user.treesitter\17safe_require\0", "config", "nvim-treesitter")
@@ -267,6 +265,18 @@ time([[Config for nvim-treesitter]], false)
 time([[Config for which-key.nvim]], true)
 try_loadstring("\27LJ\2\n]\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\19user.which-key\17safe_require\0", "config", "which-key.nvim")
 time([[Config for which-key.nvim]], false)
+-- Config for: telescope.nvim
+time([[Config for telescope.nvim]], true)
+try_loadstring("\27LJ\2\n]\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\19user.telescope\17safe_require\0", "config", "telescope.nvim")
+time([[Config for telescope.nvim]], false)
+-- Config for: indent-blankline.nvim
+time([[Config for indent-blankline.nvim]], true)
+try_loadstring("\27LJ\2\nd\0\0\3\0\4\0\v6\0\0\0'\2\1\0B\0\2\2\15\0\0\0X\1\5€6\0\2\0'\2\1\0B\0\2\0029\0\3\0B\0\1\1K\0\1\0\nsetup\frequire\26user.indent-blankline\17safe_require\0", "config", "indent-blankline.nvim")
+time([[Config for indent-blankline.nvim]], false)
+-- Config for: nvim-dap-ui
+time([[Config for nvim-dap-ui]], true)
+try_loadstring("\27LJ\2\n\v\0\0\1\0\0\0\1K\0\1\0\0", "config", "nvim-dap-ui")
+time([[Config for nvim-dap-ui]], false)
 -- Conditional loads
 time([[Conditional loading of telescope-fzf-native.nvim]], true)
   require("packer.load")({"telescope-fzf-native.nvim"}, {}, _G.packer_plugins)
@@ -274,19 +284,19 @@ time([[Conditional loading of telescope-fzf-native.nvim]], false)
 
 -- Command lazy-loads
 time([[Defining lazy-load commands]], true)
-pcall(vim.api.nvim_create_user_command, 'DapToggleBreakpoint', function(cmdargs)
-          require('packer.load')({'nvim-dap'}, { cmd = 'DapToggleBreakpoint', l1 = cmdargs.line1, l2 = cmdargs.line2, bang = cmdargs.bang, args = cmdargs.args, mods = cmdargs.mods }, _G.packer_plugins)
-        end,
-        {nargs = '*', range = true, bang = true, complete = function()
-          require('packer.load')({'nvim-dap'}, {}, _G.packer_plugins)
-          return vim.fn.getcompletion('DapToggleBreakpoint ', 'cmdline')
-      end})
 pcall(vim.api.nvim_create_user_command, 'DapContinue', function(cmdargs)
           require('packer.load')({'nvim-dap'}, { cmd = 'DapContinue', l1 = cmdargs.line1, l2 = cmdargs.line2, bang = cmdargs.bang, args = cmdargs.args, mods = cmdargs.mods }, _G.packer_plugins)
         end,
         {nargs = '*', range = true, bang = true, complete = function()
           require('packer.load')({'nvim-dap'}, {}, _G.packer_plugins)
           return vim.fn.getcompletion('DapContinue ', 'cmdline')
+      end})
+pcall(vim.api.nvim_create_user_command, 'DapToggleBreakpoint', function(cmdargs)
+          require('packer.load')({'nvim-dap'}, { cmd = 'DapToggleBreakpoint', l1 = cmdargs.line1, l2 = cmdargs.line2, bang = cmdargs.bang, args = cmdargs.args, mods = cmdargs.mods }, _G.packer_plugins)
+        end,
+        {nargs = '*', range = true, bang = true, complete = function()
+          require('packer.load')({'nvim-dap'}, {}, _G.packer_plugins)
+          return vim.fn.getcompletion('DapToggleBreakpoint ', 'cmdline')
       end})
 time([[Defining lazy-load commands]], false)
 

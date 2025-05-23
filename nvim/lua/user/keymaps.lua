@@ -13,6 +13,10 @@ function M.setup()
   -- LSP operations - toggle list moved to <leader>ll in which-key setup
   keymap("n", "<leader>ll", ":set list!<CR>", opts)
 
+  -- Indent guides toggle
+  keymap("n", "<leader>ti", ":IndentBlanklineToggle<CR>", opts)
+  keymap("n", "<leader>tI", ":IndentBlanklineScopeToggle<CR>", opts)
+
   -- Buffer navigation - these match the which-key +Buffer group
   keymap("n", "<leader>bn", ":bnext<CR>", opts)
   keymap("n", "<leader>bp", ":bprevious<CR>", opts)

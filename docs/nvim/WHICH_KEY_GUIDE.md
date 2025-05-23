@@ -66,6 +66,8 @@ When you press `<leader>` (space), you'll see organized groups:
 - `<leader>tn` - Toggle relative line numbers
 - `<leader>tw` - Toggle wrap
 - `<leader>ts` - Toggle spell check
+- `<leader>ti` - Toggle indent guides
+- `<leader>tI` - Toggle indent scope highlighting
 
 ### ⚡ **Quick Actions**
 - `<leader>q` - Clear search highlight

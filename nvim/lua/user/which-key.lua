@@ -149,6 +149,8 @@ function M.setup_leader_mappings()
     { "<leader>tn", desc = "Toggle relative line numbers" },
     { "<leader>tw", desc = "Toggle wrap" },
     { "<leader>ts", desc = "Toggle spell check" },
+    { "<leader>ti", desc = "Toggle indent guides" },
+    { "<leader>tI", desc = "Toggle indent scope" },
     
     -- Other single-key leader mappings
     { "<leader>q", desc = "Clear search highlight" },
