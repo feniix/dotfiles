@@ -51,13 +51,7 @@ If you want to add your own health checks:
 
 ### Automatic Health Check
 
-To run the health check automatically when Neovim starts, add this to your `init.vim`:
-
-```vim
-autocmd VimEnter * lua vim.cmd('checkhealth user')
-```
-
-Or in your `init.lua`:
+To run the health check automatically when Neovim starts, add this to your `init.lua`:
 
 ```lua
 vim.api.nvim_create_autocmd("VimEnter", {

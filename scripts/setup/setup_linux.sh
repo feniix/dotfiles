@@ -339,20 +339,17 @@ fix_neovim_linux() {
     log_success "Installed pynvim Python package."
   fi
   
-  # Make sure init.vim has the correct Python paths
-  nvim_config="$XDG_CONFIG_HOME/nvim/init.vim"
-  if [ -f "$nvim_config" ]; then
-    # Check if Python3 path is set and update it if not
-    if ! grep -q "let g:python3_host_prog" "$nvim_config"; then
-      python3_path=$(which python3)
-      echo "" >> "$nvim_config"
-      echo "\" Linux-specific Python configuration" >> "$nvim_config"
-      echo "let g:python3_host_prog = '$python3_path'" >> "$nvim_config"
-      log_success "Added Python3 path to Neovim configuration."
-    fi
+  # Check if Python3 is available and will be properly detected by Neovim
+  # The Python path is now automatically handled in lua/user/options.lua
+  python3_path=$(which python3)
+  if [ -n "$python3_path" ]; then
+    log_success "Python3 found at: $python3_path"
+    log_info "Python provider will be configured automatically by Neovim."
+  else
+    log_warning "Python3 not found in PATH. Neovim may have issues with Python plugins."
   fi
   
-  log_success "Neovim Linux compatibility fixes applied."
+  log_success "Neovim Linux compatibility checks completed."
 }
 
 # Main function

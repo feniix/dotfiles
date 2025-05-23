@@ -11,14 +11,11 @@ local info = health.info or health.report_info
 
 -- Check if plugin exists in any of the possible locations
 local function has_plugin(plugin_name)
-  -- Check in Packer paths
-  local packer_start = vim.fn.stdpath("data") .. "/site/pack/packer/start/" .. plugin_name
-  local packer_opt = vim.fn.stdpath("data") .. "/site/pack/packer/opt/" .. plugin_name
+  -- Check in lazy.nvim paths
+  local lazy_path = vim.fn.stdpath("data") .. "/lazy/" .. plugin_name
   
-  if vim.fn.isdirectory(packer_start) == 1 then
-    return true, "Packer/start"
-  elseif vim.fn.isdirectory(packer_opt) == 1 then
-    return true, "Packer/opt"
+  if vim.fn.isdirectory(lazy_path) == 1 then
+    return true, "lazy.nvim"
   end
   
   return false, nil
@@ -51,7 +48,7 @@ local function check_dap()
       warn("nvim-dap-ui is installed but cannot be loaded")
     end
   else
-    warn("nvim-dap-ui is missing, install with :PackerSync")
+    warn("nvim-dap-ui is missing, install with :Lazy sync")
   end
   
   -- Check nvim-nio dependency
@@ -59,7 +56,7 @@ local function check_dap()
   if has_nio then
     ok("nvim-nio is installed via " .. nio_location .. " (required by nvim-dap-ui)")
   else
-    error("nvim-nio is missing, but is required by nvim-dap-ui. Install with :PackerSync")
+    error("nvim-nio is missing, but is required by nvim-dap-ui. Install with :Lazy sync")
   end
   
   -- Check virtual text 
@@ -93,7 +90,7 @@ local function check_go()
   if has_vimgo then
     ok("vim-go is installed via " .. vimgo_location)
   else
-    error("vim-go is missing. Install with :PackerSync")
+    error("vim-go is missing. Install with :Lazy sync")
   end
   
   -- Check Go tools using platform module if available
@@ -275,7 +272,7 @@ local function check_treesitter()
       error("nvim-treesitter is installed but cannot be loaded")
     end
   else
-    error("nvim-treesitter is missing, install with :PackerSync")
+    error("nvim-treesitter is missing, install with :Lazy sync")
   end
   
   -- Check TreeSitter module
@@ -305,7 +302,7 @@ local function check_treesitter()
       if not ok2 then return false end
       
       return vim.fn.executable(
-        vim.fn.stdpath("data") .. "/site/pack/packer/start/nvim-treesitter/parser/" .. 
+        vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/parser/" .. 
         lang .. ".so"
       ) == 1
     end
@@ -334,7 +331,7 @@ local function check_completion()
       error("nvim-cmp is installed but cannot be loaded")
     end
   else
-    error("nvim-cmp is missing, install with :PackerSync")
+    error("nvim-cmp is missing, install with :Lazy sync")
   end
   
   -- Check common sources
@@ -347,7 +344,7 @@ local function check_completion()
     if has_source then
       ok(source .. " is installed via " .. source_location)
     else
-      warn(source .. " is missing, install with :PackerSync for better completion")
+      warn(source .. " is missing, install with :Lazy sync for better completion")
     end
   end
 end

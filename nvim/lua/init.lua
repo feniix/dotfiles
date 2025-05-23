@@ -17,7 +17,6 @@ local runtime_path = vim.fn.stdpath('data')
 package.path = config_path .. "/lua/?.lua;" .. 
                config_path .. "/lua/?/init.lua;" ..
                config_path .. "/lua/user/?.lua;" ..
-               runtime_path .. "/site/pack/packer/start/*/lua/?.lua;" ..
                package.path
 
 -- Helper function to safely require modules with better error reporting

@@ -6,13 +6,16 @@ function M.setup()
   -- Check if colorbuddy is available
   local colorbuddy_ok, colorbuddy = pcall(require, "colorbuddy")
   if not colorbuddy_ok then
-    vim.notify("colorbuddy.nvim not found. Install with :PackerSync", vim.log.levels.WARN)
+    vim.notify("colorbuddy.nvim not found. Install with :Lazy sync", vim.log.levels.WARN)
     return
   end
   
-  -- Try to load neosolarized
-  local neosolarized_ok, neosolarized = pcall(require, "neosolarized")
-  if neosolarized_ok then
+  -- Load colorbuddy
+  local Color, colors, Group, groups, styles = colorbuddy.setup()
+  
+  -- Load NeoSolarized theme
+  local ok, neosolarized = pcall(require, "neosolarized")
+  if ok then
     -- Setup neosolarized with options
     neosolarized.setup({
       comment_italics = true,
@@ -21,7 +24,7 @@ function M.setup()
     })
     return
   else
-    vim.notify("NeoSolarized not found. Install with :PackerSync", vim.log.levels.WARN)
+    vim.notify("NeoSolarized not found. Install with :Lazy sync", vim.log.levels.WARN)
   end
 end
 

@@ -13,49 +13,33 @@ XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 echo "Setting up Neovim with XDG compliance..."
 
-# Create necessary directories
-mkdir -p "$XDG_CONFIG_HOME/nvim/lua/user"
-mkdir -p "$XDG_DATA_HOME/nvim/site/autoload"
-mkdir -p "$XDG_STATE_HOME/nvim/undo"
+# Create necessary runtime directories (separate from config)
+# Note: ~/.config/nvim will be a symlink to ~/dotfiles/nvim
+# These directories are for Neovim's runtime data, not configuration files
+mkdir -p "$XDG_DATA_HOME/nvim"        # Plugin data, site packages
+mkdir -p "$XDG_STATE_HOME/nvim/undo"  # Persistent undo files  
+mkdir -p "$XDG_CACHE_HOME/nvim"       # Cache files, compiled plugins
 
 # Also create directories for regular Vim
 mkdir -p "$XDG_CONFIG_HOME/vim"
 
-# Install vim-plug if not already installed
-if [ ! -f "$XDG_DATA_HOME/nvim/site/autoload/plug.vim" ]; then
-  echo "Installing vim-plug for Neovim..."
-  curl -fLo "$XDG_DATA_HOME/nvim/site/autoload/plug.vim" --create-dirs \
-    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-  echo "vim-plug installed successfully."
-fi
-
-# Link Neovim configuration files
+# Link Neovim configuration
 if [ -d "$DOTFILES_DIR/nvim" ]; then
-  # Link the main init.vim file
-  ln -sf "$DOTFILES_DIR/nvim/init.vim" "$XDG_CONFIG_HOME/nvim/init.vim"
-  echo "Linked nvim/init.vim → $XDG_CONFIG_HOME/nvim/init.vim"
-  
-  # Link Lua configurations
-  if [ -f "$DOTFILES_DIR/nvim/lua/init.lua" ]; then
-    ln -sf "$DOTFILES_DIR/nvim/lua/init.lua" "$XDG_CONFIG_HOME/nvim/lua/init.lua"
-    echo "Linked nvim/lua/init.lua → $XDG_CONFIG_HOME/nvim/lua/init.lua"
+  # Remove existing nvim config directory if it exists and is not a symlink
+  if [ -d "$XDG_CONFIG_HOME/nvim" ] && [ ! -L "$XDG_CONFIG_HOME/nvim" ]; then
+    echo "Backing up existing Neovim configuration..."
+    mv "$XDG_CONFIG_HOME/nvim" "$XDG_CONFIG_HOME/nvim.backup.$(date +%Y%m%d_%H%M%S)"
   fi
   
-  # Link the user directory files if they exist
-  if [ -d "$DOTFILES_DIR/nvim/lua/user" ]; then
-    for file in "$DOTFILES_DIR/nvim/lua/user"/*.lua; do
-      if [ -f "$file" ]; then
-        filename=$(basename "$file")
-        ln -sf "$file" "$XDG_CONFIG_HOME/nvim/lua/user/$filename"
-        echo "Linked nvim/lua/user/$filename → $XDG_CONFIG_HOME/nvim/lua/user/$filename"
-      fi
-    done
-  fi
+  # Create the symlink to the entire nvim directory
+  ln -sf "$DOTFILES_DIR/nvim" "$XDG_CONFIG_HOME/nvim"
+  echo "Linked nvim/ → $XDG_CONFIG_HOME/nvim"
   
   # Install plugins if nvim is available and --install-plugins flag is passed
   if [ "$1" = "--install-plugins" ] && command -v nvim >/dev/null 2>&1; then
     echo "Installing Neovim plugins..."
-    nvim --headless +PlugInstall +qall
+    # Use Lazy sync for plugin installation
+    nvim --headless -c 'Lazy sync' -c 'sleep 3000m' -c 'quitall'
     echo "Neovim plugins installed successfully."
   fi
 else
@@ -77,4 +61,11 @@ else
   echo "Skipping Vim configuration."
 fi
 
-echo "Neovim and Vim setup complete!" 
+echo "Neovim and Vim setup complete!"
+echo ""
+echo "Neovim configuration is now available at:"
+echo "  Config directory: $XDG_CONFIG_HOME/nvim -> $DOTFILES_DIR/nvim"
+echo "  Main config: $XDG_CONFIG_HOME/nvim/init.lua"
+echo "  Lua modules: $XDG_CONFIG_HOME/nvim/lua/"
+echo ""
+echo "To install plugins, run: nvim and execute :Lazy sync" 

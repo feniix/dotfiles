@@ -1,4 +1,4 @@
--- Neovim Configuration with Packer
+-- Neovim Configuration with lazy.nvim
 -- This is the entry point for all Neovim configuration
 
 -- Load the core init file that defines basic utilities
@@ -38,7 +38,7 @@ vim.g.go_imports_autosave = 1
 vim.g.go_diagnostics_enabled = 1
 vim.g.go_metalinter_enabled = 1
 
--- Load plugins via Packer
+-- Load plugins via lazy.nvim
 require('user.plugins')
 
 -- Setup NeoSolarized through our colorbuddy setup
@@ -52,7 +52,7 @@ if colorbuddy_setup then
     colorbuddy_setup.toggle_theme()
   end, { desc = 'Toggle between light and dark Solarized themes' })
 else
-  vim.notify("NeoSolarized setup failed. Run :PackerSync to install required plugins.", vim.log.levels.WARN)
+  vim.notify("NeoSolarized setup failed. Run :Lazy sync to install required plugins.", vim.log.levels.WARN)
 end
 
 -- Initialize plugins

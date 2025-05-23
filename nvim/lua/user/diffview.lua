@@ -2,9 +2,9 @@
 local M = {}
 
 function M.setup()
-  local diffview_ok, diffview = pcall(require, 'diffview')
-  if not diffview_ok then
-    vim.notify("diffview.nvim not available. Run :PackerSync to install.", vim.log.levels.WARN)
+  local ok, diffview = pcall(require, 'diffview')
+  if not ok then
+    vim.notify("diffview.nvim not available. Run :Lazy sync to install.", vim.log.levels.WARN)
     return
   end
 

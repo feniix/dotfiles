@@ -22,51 +22,40 @@ fi
 nvim_version=$(nvim --version | head -n 1)
 echo -e "${GREEN}$nvim_version${RESET}"
 
-# Check Packer installation
-echo -e "\n${BLUE}Checking Packer installation...${RESET}"
-packer_path="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/packer/start/packer.nvim"
-if [ -d "$packer_path" ]; then
-  echo -e "${GREEN}✓ Packer is installed at $packer_path${RESET}"
+# Check lazy.nvim installation
+echo -e "\n${BLUE}Checking lazy.nvim installation...${RESET}"
+lazy_path="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy/lazy.nvim"
+if [ -d "$lazy_path" ]; then
+  echo -e "${GREEN}✓ lazy.nvim is installed at $lazy_path${RESET}"
 else
-  echo -e "${YELLOW}! Packer not found. It will be installed on first Neovim start.${RESET}"
+  echo -e "${YELLOW}! lazy.nvim not found. It will be installed on first Neovim start.${RESET}"
 fi
 
 # List installed plugins
 echo -e "\n${BLUE}Listing installed plugins:${RESET}"
-plugin_dir="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/packer"
+plugin_dir="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy"
 found_plugins=0
 total_plugins=0
 
-# Check start directory
-start_dir="$plugin_dir/start"
-if [ -d "$start_dir" ]; then
-  for plugin in "$start_dir"/*; do
+# Check lazy directory
+if [ -d "$plugin_dir" ]; then
+  for plugin in "$plugin_dir"/*; do
     if [ -d "$plugin" ]; then
       name=$(basename "$plugin")
-      echo -e "${GREEN}✓ $name${RESET} (start)"
-      ((found_plugins++))
-      ((total_plugins++))
-    fi
-  done
-fi
-
-# Check opt directory
-opt_dir="$plugin_dir/opt"
-if [ -d "$opt_dir" ]; then
-  for plugin in "$opt_dir"/*; do
-    if [ -d "$plugin" ]; then
-      name=$(basename "$plugin")
-      echo -e "${GREEN}✓ $name${RESET} (opt)"
-      ((found_plugins++))
-      ((total_plugins++))
+      # Skip the . and .. entries
+      if [ "$name" != "." ] && [ "$name" != ".." ]; then
+        echo -e "${GREEN}✓ $name${RESET}"
+        ((found_plugins++))
+        ((total_plugins++))
+      fi
     fi
   done
 fi
 
 if [ "$found_plugins" -eq 0 ]; then
-  echo -e "${YELLOW}! No Packer plugins found. They may need to be installed.${RESET}"
+  echo -e "${YELLOW}! No lazy.nvim plugins found. They may need to be installed.${RESET}"
 else
-  echo -e "\n${GREEN}✓ Found $total_plugins plugins managed by Packer${RESET}"
+  echo -e "\n${GREEN}✓ Found $total_plugins plugins managed by lazy.nvim${RESET}"
 fi
 
 # Check for vim-plug remnants
@@ -88,9 +77,20 @@ else
   echo -e "${GREEN}✓ vim-plug plugins directory not found${RESET}"
 fi
 
+# Check for Packer remnants
+echo -e "\n${BLUE}Checking for Packer remnants...${RESET}"
+packer_path="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/site/pack/packer"
+
+if [ -d "$packer_path" ]; then
+  echo -e "${YELLOW}! Packer directory still exists at $packer_path${RESET}"
+  echo -e "${YELLOW}  To remove it, run: rm -rf $packer_path${RESET}"
+else
+  echo -e "${GREEN}✓ Packer directory not found${RESET}"
+fi
+
 # Final verification
-if [ "$found_plugins" -gt 0 ] && [ ! -f "$vimplug_path" ] && [ ! -d "$vimplug_plugins" ]; then
-  echo -e "\n${GREEN}✓ Migration from vim-plug to Packer is complete!${RESET}"
+if [ "$found_plugins" -gt 0 ] && [ ! -f "$vimplug_path" ] && [ ! -d "$vimplug_plugins" ] && [ ! -d "$packer_path" ]; then
+  echo -e "\n${GREEN}✓ Migration to lazy.nvim is complete!${RESET}"
 fi
 
 # Show basic instructions to run health checks

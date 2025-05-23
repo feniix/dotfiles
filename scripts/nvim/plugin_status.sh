@@ -1,5 +1,5 @@
 #!/bin/bash
-# Simple check for Neovim plugins installed with Packer
+# Simple check for Neovim plugins installed with lazy.nvim
 
 # Colors for output
 RED='\033[0;31m'
@@ -9,7 +9,7 @@ BLUE='\033[0;34m'
 RESET='\033[0m'
 
 echo -e "${BLUE}=========================================${RESET}"
-echo -e "${BLUE}Checking Neovim Packer Plugins${RESET}"
+echo -e "${BLUE}Checking Neovim lazy.nvim Plugins${RESET}"
 echo -e "${BLUE}=========================================${RESET}"
 
 # Create temporary Lua script for checking plugins
@@ -18,16 +18,10 @@ TEMP_SCRIPT="/tmp/check_plugins.lua"
 # Create the Lua script
 cat > "$TEMP_SCRIPT" << 'EOF'
 local function check_plugin_exists(plugin_name)
-  -- Check in Packer start directory
-  local packer_start = vim.fn.stdpath("data") .. "/site/pack/packer/start/" .. plugin_name
-  if vim.fn.isdirectory(packer_start) == 1 then
-    return true, "start"
-  end
-  
-  -- Check in Packer opt directory
-  local packer_opt = vim.fn.stdpath("data") .. "/site/pack/packer/opt/" .. plugin_name
-  if vim.fn.isdirectory(packer_opt) == 1 then
-    return true, "opt"
+  -- Check in lazy.nvim directory
+  local lazy_path = vim.fn.stdpath("data") .. "/lazy/" .. plugin_name
+  if vim.fn.isdirectory(lazy_path) == 1 then
+    return true, "lazy.nvim"
   end
   
   -- Check vim-plug directory (legacy)
@@ -41,23 +35,24 @@ end
 
 -- List of essential plugins to check
 local plugins = {
-  "packer.nvim", 
-  "nvim-lspconfig",
+  "lazy.nvim", 
   "nvim-cmp",
-  "LuaSnip",
   "nvim-treesitter",
   "nvim-dap",
   "nvim-dap-ui",
   "nvim-nio",
-  "go.nvim",
-  "vim-go", -- Optional
+  "vim-go",
   "plenary.nvim",
   "telescope.nvim",
-  "cmp-nvim-lsp",
   "cmp-buffer",
   "cmp-path",
-  "cmp_luasnip",
-  "solarized.nvim"
+  "cmp-cmdline",
+  "neosolarized.nvim",
+  "colorbuddy.nvim",
+  "gitsigns.nvim",
+  "which-key.nvim",
+  "lualine.nvim",
+  "diffview.nvim"
 }
 
 -- Check and report results
@@ -76,7 +71,7 @@ for _, plugin in ipairs(plugins) do
       print("⚠️  " .. plugin .. " is installed (via vim-plug)")
       legacy = legacy + 1
     else
-      print("✅ " .. plugin .. " is installed (via Packer/" .. location .. ")")
+      print("✅ " .. plugin .. " is installed (via " .. location .. ")")
       installed = installed + 1
     end
   else
@@ -87,18 +82,18 @@ end
 
 print("")
 print("Summary:")
-print("- " .. installed .. " plugins installed via Packer")
+print("- " .. installed .. " plugins installed via lazy.nvim")
 print("- " .. legacy .. " plugins using legacy vim-plug")
 print("- " .. missing .. " plugins missing")
 
 if missing > 0 then
   print("")
-  print("Run :PackerSync to install missing plugins")
+  print("Run :Lazy sync to install missing plugins")
 end
 
 if legacy > 0 then
   print("")
-  print("Some plugins are still using vim-plug. Complete the migration to Packer.")
+  print("Some plugins are still using vim-plug. Complete the migration to lazy.nvim.")
 end
 EOF
 

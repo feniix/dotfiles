@@ -1,65 +1,65 @@
--- Plugin installer module for Packer integration
+-- Plugin installer module for lazy.nvim integration
 local M = {}
 
--- Check if packer is available
-local function is_packer_available()
-  return pcall(require, 'packer')
+-- Check if lazy is available
+local function is_lazy_available()
+  return pcall(require, 'lazy')
 end
 
--- Install plugins using Packer
+-- Install plugins using lazy.nvim
 local function install_plugins()
-  local packer_ok, packer = pcall(require, 'packer')
-  if not packer_ok then
-    vim.notify("Packer is not available", vim.log.levels.ERROR)
+  local lazy_ok, lazy = pcall(require, 'lazy')
+  if not lazy_ok then
+    vim.notify("lazy.nvim is not available", vim.log.levels.ERROR)
     return
   end
 
-  -- Run PackerInstall
-  vim.cmd('PackerInstall')
+  -- Run Lazy install
+  vim.cmd('Lazy install')
 end
 
--- Update plugins using Packer
+-- Update plugins using lazy.nvim
 local function update_plugins()
-  local packer_ok, packer = pcall(require, 'packer')
-  if not packer_ok then
-    vim.notify("Packer is not available", vim.log.levels.ERROR)
+  local lazy_ok, lazy = pcall(require, 'lazy')
+  if not lazy_ok then
+    vim.notify("lazy.nvim is not available", vim.log.levels.ERROR)
     return
   end
 
-  -- Reload plugins module then run PackerSync
+  -- Reload plugins module then run Lazy sync
   package.loaded['user.plugins'] = nil
   require('user.plugins')
-  vim.cmd('PackerSync')
+  vim.cmd('Lazy sync')
 end
 
 -- Clean plugins (remove unused)
 local function clean_plugins()
-  local packer_ok, packer = pcall(require, 'packer')
-  if not packer_ok then
-    vim.notify("Packer is not available", vim.log.levels.ERROR)
+  local lazy_ok, lazy = pcall(require, 'lazy')
+  if not lazy_ok then
+    vim.notify("lazy.nvim is not available", vim.log.levels.ERROR)
     return
   end
   
-  -- Run PackerClean
-  vim.cmd('PackerClean')
+  -- Run Lazy clean
+  vim.cmd('Lazy clean')
 end
 
 -- Status of plugins 
 local function status_plugins()
-  local packer_ok, packer = pcall(require, 'packer')
-  if not packer_ok then
-    vim.notify("Packer is not available", vim.log.levels.ERROR)
+  local lazy_ok, lazy = pcall(require, 'lazy')
+  if not lazy_ok then
+    vim.notify("lazy.nvim is not available", vim.log.levels.ERROR)
     return
   end
   
-  -- Run PackerStatus
-  vim.cmd('PackerStatus')
+  -- Run Lazy show (status)
+  vim.cmd('Lazy')
 end
 
 -- Create user commands for plugin management
 function M.create_commands()
-  -- Create user commands regardless of Packer availability
-  -- They will check for Packer when executed
+  -- Create user commands regardless of lazy.nvim availability
+  -- They will check for lazy.nvim when executed
   
   -- Create user commands
   vim.api.nvim_create_user_command('InstallPlugins', install_plugins, {

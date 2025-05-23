@@ -4,7 +4,9 @@ diffview.nvim provides a comprehensive Git diff and history viewer directly in N
 
 ## Installation
 
-1. Run `:PackerSync` in Neovim to install diffview.nvim
+diffview.nvim is included in the default plugin configuration.
+
+1. Run `:Lazy sync` in Neovim to install diffview.nvim
 2. Restart Neovim
 3. Start using the commands below! 🚀
 

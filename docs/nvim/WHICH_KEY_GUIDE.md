@@ -6,7 +6,9 @@ Which-key provides helpful popup menus showing available keybindings when you st
 
 ## Installation
 
-1. Run `:PackerSync` in Neovim to install which-key
+which-key.nvim is included in the default plugin configuration.
+
+1. Run `:Lazy sync` in Neovim to install which-key
 2. Restart Neovim
 3. Start typing any leader key sequence and see the magic! ✨
 4. Run `:checkhealth which-key` to verify everything is working properly

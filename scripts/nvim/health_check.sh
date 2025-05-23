@@ -12,8 +12,8 @@ echo -e "${BLUE}=========================================${RESET}"
 echo -e "${BLUE}Neovim Health Check${RESET}"
 echo -e "${BLUE}=========================================${RESET}"
 
-echo -e "\n${GREEN}Your Neovim configuration is using Packer.${RESET}"
-echo -e "${GREEN}All plugins are being managed by Packer.${RESET}"
+echo -e "\n${GREEN}Your Neovim configuration is using lazy.nvim.${RESET}"
+echo -e "${GREEN}All plugins are being managed by lazy.nvim.${RESET}"
 
 echo -e "\n${YELLOW}To get a complete health report of your Neovim configuration:${RESET}"
 echo -e "1. Open Neovim:${RESET} ${GREEN}nvim${RESET}"
@@ -30,7 +30,7 @@ if [ -x "$PLUGIN_CHECK_SCRIPT" ]; then
   "$PLUGIN_CHECK_SCRIPT"
 else
   echo -e "${RED}Plugin check script not found at $PLUGIN_CHECK_SCRIPT${RESET}"
-  echo -e "${YELLOW}You can manually check your plugins with:${RESET} nvim --headless -c 'lua require(\"packer\").list()' -c q"
+  echo -e "${YELLOW}You can manually check your plugins with:${RESET} nvim -c 'Lazy' -c q"
 fi
 
 echo -e "\n${BLUE}=========================================${RESET}"

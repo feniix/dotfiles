@@ -13,7 +13,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 - [**Cross-Platform Support**](CROSS_PLATFORM.md) - Platform-specific optimizations
 
 ### Quick Start
-1. **Install plugins**: `:PackerSync`
+1. **Install plugins**: `:Lazy sync`
 2. **Check health**: `:checkhealth user`
 3. **Discover keybindings**: Press `<leader>` (space) and wait for which-key popup
 4. **Find files**: `<C-p>` or `<leader>ff`
@@ -22,7 +22,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 ## 🚀 **Features Overview**
 
 ### **Modern Plugin Stack**
-- **📦 Plugin Management**: Packer.nvim with lazy loading
+- **📦 Plugin Management**: lazy.nvim with lazy loading and performance optimizations
 - **🔍 Fuzzy Finding**: Telescope.nvim with FZF integration
 - **🗝️ Keymap Discovery**: which-key.nvim with organized groups
 - **🌳 Syntax**: TreeSitter with smart text objects
@@ -58,8 +58,7 @@ This directory contains comprehensive documentation for the modern Neovim config
 
 ```
 nvim/
-├── init.lua                    # Main entry point
-├── init.vim                    # Legacy Vim compatibility
+├── init.lua                    # Main entry point (Lua configuration)
 ├── lua/
 │   ├── init.lua               # Core Lua initialization
 │   └── user/                  # User configuration modules
@@ -104,9 +103,10 @@ nvim/
 ## 🛠️ **Useful Commands**
 
 ### **Plugin Management**
-- `:PackerSync` - Install/update all plugins
-- `:PackerCompile` - Compile plugin configurations
-- `:PackerStatus` - Show plugin status
+- `:Lazy sync` - Install/update all plugins
+- `:Lazy` - Open lazy.nvim UI for plugin management
+- `:Lazy check` - Check for plugin updates
+- `:Lazy log` - Show plugin update log
 
 ### **Theme & Appearance**
 - `:ToggleTheme` - Switch between light/dark Solarized
@@ -140,7 +140,7 @@ nvim/
 ### **Adding New Plugins**
 1. Add to `lua/user/plugins.lua`
 2. Create configuration in `lua/user/<plugin-name>.lua`
-3. Run `:PackerSync`
+3. Run `:Lazy sync`
 
 ### **Custom Keymaps**
 - Add to `lua/user/keymaps.lua`
@@ -153,8 +153,8 @@ nvim/
 ## 🚨 **Troubleshooting**
 
 ### **Common Issues**
-1. **Plugins not working**: Run `:PackerSync` and restart
-2. **Slow startup**: Check `:startuptime` for bottlenecks
+1. **Plugins not working**: Run `:Lazy sync` and restart
+2. **Slow startup**: Check `:startuptime` for bottlenecks - lazy.nvim optimizes startup automatically
 3. **Keymaps not showing**: Ensure which-key is installed
 4. **Text objects not working**: Verify TreeSitter parsers with `:TSModuleInfo`
 

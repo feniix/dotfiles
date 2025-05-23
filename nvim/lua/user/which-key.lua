@@ -2,14 +2,14 @@
 local M = {}
 
 function M.setup()
-  local which_key_ok, which_key = pcall(require, 'which-key')
-  if not which_key_ok then
-    vim.notify("which-key not available. Run :PackerSync to install.", vim.log.levels.WARN)
+  local ok, wk = pcall(require, 'which-key')
+  if not ok then
+    vim.notify("which-key not available. Run :Lazy sync to install.", vim.log.levels.WARN)
     return
   end
 
   -- Configure which-key with new v3 API
-  which_key.setup({
+  wk.setup({
     preset = "classic",
     -- Delay before showing the popup
     delay = function(ctx)
@@ -84,13 +84,13 @@ function M.setup()
 end
 
 function M.setup_leader_mappings()
-  local which_key_ok, which_key = pcall(require, 'which-key')
-  if not which_key_ok then
+  local ok, wk = pcall(require, 'which-key')
+  if not ok then
     return
   end
   
   -- Define leader key groups and mappings using new v3 API
-  which_key.add({
+  wk.add({
     -- Buffer operations
     { "<leader>b", group = "Buffer" },
     { "<leader>bn", desc = "Next buffer" },
@@ -165,13 +165,13 @@ function M.setup_leader_mappings()
 end
 
 function M.setup_other_mappings()
-  local which_key_ok, which_key = pcall(require, 'which-key')
-  if not which_key_ok then
+  local ok, wk = pcall(require, 'which-key')
+  if not ok then
     return
   end
   
   -- Window navigation
-  which_key.add({
+  wk.add({
     { "<C-h>", desc = "Window left" },
     { "<C-j>", desc = "Window down" },
     { "<C-k>", desc = "Window up" },
@@ -179,7 +179,7 @@ function M.setup_other_mappings()
   })
   
   -- File operations
-  which_key.add({
+  wk.add({
     { "<C-s>", desc = "Save file" },
     { "<C-a>", desc = "Select all" },
     { "<C-z>", desc = "Undo" },
@@ -189,12 +189,12 @@ function M.setup_other_mappings()
   })
   
   -- Terminal mode
-  which_key.add({
+  wk.add({
     { "<Esc>", desc = "Exit terminal mode", mode = "t" },
   })
   
   -- TreeSitter text object movements
-  which_key.add({
+  wk.add({
     { "]", group = "Next" },
     { "]m", desc = "Next function start" },
     { "]M", desc = "Next function end" },
@@ -207,7 +207,7 @@ function M.setup_other_mappings()
     { "]z", desc = "Next fold" },
   })
   
-  which_key.add({
+  wk.add({
     { "[", group = "Previous" }, 
     { "[m", desc = "Previous function start" },
     { "[M", desc = "Previous function end" },
@@ -221,7 +221,7 @@ function M.setup_other_mappings()
   })
   
   -- Visual mode text objects help
-  which_key.add({
+  wk.add({
     { "a", group = "Around textobj", mode = "v" },
     { "af", desc = "Function", mode = "v" },
     { "ac", desc = "Class", mode = "v" },
@@ -250,7 +250,7 @@ function M.setup_other_mappings()
   })
   
   -- Also register for operator-pending mode
-  which_key.add({
+  wk.add({
     { "a", group = "Around textobj", mode = "o" },
     { "af", desc = "Function", mode = "o" },
     { "ac", desc = "Class", mode = "o" },
@@ -281,13 +281,13 @@ end
 
 -- Function to set up Go-specific which-key mappings
 function M.setup_go_mappings()
-  local which_key_ok, which_key = pcall(require, 'which-key')
-  if not which_key_ok then
+  local ok, wk = pcall(require, 'which-key')
+  if not ok then
     return
   end
   
   -- Go-specific leader mappings (buffer-local to avoid conflicts)
-  which_key.add({
+  wk.add({
     { "<leader>G", group = "Go", buffer = 0 },
     { "<leader>Gb", desc = "Build Go files", buffer = 0 },
     { "<leader>Gt", desc = "Go test", buffer = 0 },
@@ -303,14 +303,14 @@ end
 
 -- Function to document expected plugin overlaps (reduces health check warnings)
 function M.setup_plugin_overlaps()
-  local which_key_ok, which_key = pcall(require, 'which-key')
-  if not which_key_ok then
+  local ok, wk = pcall(require, 'which-key')
+  if not ok then
     return
   end
   
   -- Document vim-surround keymaps to avoid overlap warnings
   -- These are intentional hierarchical mappings where the shorter key waits for motion
-  which_key.add({
+  wk.add({
     { "ys", group = "Surround motion" },
     { "yss", desc = "Surround current line" },
     { "yS", group = "Surround motion (new lines)" },
@@ -319,7 +319,7 @@ function M.setup_plugin_overlaps()
   
   -- Document Comment.nvim keymaps to avoid overlap warnings  
   -- These are intentional hierarchical mappings for different comment operations
-  which_key.add({
+  wk.add({
     { "gc", group = "Comment linewise" },
     { "gcc", desc = "Comment current line" },
     { "gcA", desc = "Comment at end of line" },

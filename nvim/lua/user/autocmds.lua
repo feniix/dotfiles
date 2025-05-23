@@ -15,13 +15,6 @@ function M.setup()
     end,
   })
 
-  -- Auto compile plugins.lua after changes
-  autocmd("BufWritePost", {
-    group = setup_group,
-    pattern = "plugins.lua",
-    command = "source <afile> | PackerCompile",
-  })
-
   -- Trim trailing whitespace on save
   -- (Now handled by retrail.nvim)
 
@@ -119,14 +112,6 @@ function M.setup()
     group = json_settings,
     pattern = "json",
     command = "setlocal shiftwidth=2 tabstop=2",
-  })
-
-  -- Set Packerfile as JSON
-  local packerfile = augroup("Packerfile", { clear = true })
-  autocmd({"BufNewFile", "BufRead"}, {
-    group = packerfile,
-    pattern = "Packerfile",
-    command = "set filetype=json",
   })
 
   -- TOML filetype detection

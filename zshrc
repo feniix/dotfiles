@@ -326,7 +326,6 @@ export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 export TFENV_ARCH=arm64
 
 # Other dev tools
-export PACKER_CACHE_DIR=${HOME}/.packer
 export JMETER_HOME=/usr/local/opt/jmeter
 export VAGRANT_DEFAULT_PROVIDER=virtualbox
 

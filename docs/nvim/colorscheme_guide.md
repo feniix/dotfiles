@@ -118,19 +118,18 @@ To add a new colorscheme to your Neovim setup:
    nvim ~/dotfiles/nvim/lua/user/plugins.lua
    ```
 
-2. Add your desired colorscheme within the Packer setup function:
-   ```lua
-   -- Example: Add the TokyoNight colorscheme
-   use 'folke/tokyonight.nvim'
-   
-   -- Example: Add the Gruvbox colorscheme
-   use 'sainnhe/gruvbox-material'
-   ```
+2. Add your desired colorscheme within the lazy.nvim setup function:
 
-3. Save the file and run:
-   ```
-   :PackerSync
-   ```
+```lua
+{
+  "your-colorscheme/plugin",
+  config = function()
+    vim.cmd("colorscheme your-theme")
+  end,
+}
+```
+
+3. Run `:Lazy sync` to install
 
 4. To test the new colorscheme:
    ```
@@ -154,7 +153,7 @@ use 'folke/tokyonight.nvim'
 ### Common Issues
 
 1. **Colorscheme not found**
-   - Run `:PackerSync` to ensure all plugins are installed
+   - Run `:Lazy sync` to ensure all plugins are installed
    - Check if the theme is correctly specified in your plugins file
    - Verify the correct theme name with `:colorscheme` + TAB
 
@@ -166,7 +165,7 @@ use 'folke/tokyonight.nvim'
 3. **Theme not applying on startup**
    - Check init.lua for errors in the colorscheme section
    - Ensure the colorscheme name is spelled correctly
-   - Verify the plugin is installed via `:PackerStatus`
+   - Verify the plugin is installed via `:Lazy`
 
 ### Getting Help
 

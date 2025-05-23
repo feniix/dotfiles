@@ -49,7 +49,7 @@ curl -fsSL https://raw.githubusercontent.com/feniix/dotfiles/master/setup.sh | b
 After installation, configuration files will be located at:
 
 - **Zsh**: `~/.config/zsh/.zshrc`
-- **Neovim**: `~/.config/nvim/init.vim`
+- **Neovim**: `~/.config/nvim/init.lua`
 - **tmux**: `~/.config/tmux/tmux.conf`
 - **Git**: `~/.config/git/config`
 - **Homebrew**: `~/.config/homebrew/Brewfile`

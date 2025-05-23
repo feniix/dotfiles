@@ -13,8 +13,8 @@ echo -e "${BLUE}Setting Up NeoSolarized for Neovim${RESET}"
 echo -e "${BLUE}=========================================${RESET}"
 
 # First, make sure all plugins are installed
-echo -e "\n${YELLOW}Installing plugins with Packer...${RESET}"
-nvim --headless -c "PackerSync" -c "sleep 3000m" -c "q" > /dev/null 2>&1
+echo -e "\n${YELLOW}Installing plugins with lazy.nvim...${RESET}"
+nvim --headless -c "Lazy sync" -c "sleep 3000m" -c "q" > /dev/null 2>&1
 
 echo -e "\n${GREEN}✓ Plugins installation initiated${RESET}"
 echo -e "${YELLOW}Wait a few seconds for installation to complete...${RESET}"

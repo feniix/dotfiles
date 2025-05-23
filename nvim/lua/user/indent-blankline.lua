@@ -2,10 +2,11 @@
 local M = {}
 
 function M.setup()
-  local ibl_ok, ibl = pcall(require, 'ibl')
-  if not ibl_ok then
-    vim.notify("indent-blankline not available. Run :PackerSync to install.", vim.log.levels.WARN)
-    return
+  local ok, ibl = pcall(require, "ibl")
+  if not ok then
+    -- Fallback: still show the error
+    vim.notify("indent-blankline not available. Run :Lazy sync to install.", vim.log.levels.WARN)
+    return {}
   end
 
   -- Configure indent-blankline with modern v3 API
@@ -68,7 +69,6 @@ function M.setup()
         'notify',
         'toggleterm',
         'lazyterm',
-        'packer',
         'telescope',
         'TelescopePrompt',
         'TelescopeResults',
