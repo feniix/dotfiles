@@ -30,11 +30,7 @@ function M.setup()
     group = setup_group,
     pattern = "go",
     callback = function()
-      -- Load Go keymaps
-      local km_ok, keymaps = pcall(require, "user.keymaps")
-      if km_ok then
-        keymaps.setup_go_keymaps()
-      end
+      -- Go keymaps are set up in the GoSettings autocmd below
     end,
   })
   
@@ -49,7 +45,7 @@ function M.setup()
   })
   
   -- iTerm2 specific integrations
-  if vim.env.TERM_PROGRAM == "iTerm.app" or string.match(vim.env.TERM or "", "^iterm") or vim.env.LC_TERMINAL == "iTerm2" then
+  if is_iterm2() then
     -- Enable focus events
     autocmd({"FocusGained", "FocusLost"}, {
       group = augroup("iTerm2Focus", { clear = true }),
@@ -137,14 +133,16 @@ function M.setup()
       vim.bo.shiftwidth = 4
       
       -- Load Go-specific keymaps
-      local keymaps = require("user.keymaps")
-      keymaps.setup_go_keymaps()
+      local keymaps = safe_require("user.keymaps")
+      if keymaps then
+        keymaps.setup_go_keymaps()
+      end
       
-      -- Setup Go commands
-      vim.api.nvim_buf_create_user_command(0, "A", "lua require('user.go').go_alternate_edit()", {})
-      vim.api.nvim_buf_create_user_command(0, "AV", "lua require('user.go').go_alternate_vertical()", {})
-      vim.api.nvim_buf_create_user_command(0, "AS", "lua require('user.go').go_alternate_split()", {})
-      vim.api.nvim_buf_create_user_command(0, "AT", "lua require('user.go').go_alternate_tab()", {})
+      -- Setup Go commands (renamed to avoid conflicts with standard :A command)
+      vim.api.nvim_buf_create_user_command(0, "GoAlternate", "lua require('user.go').go_alternate_edit()", { desc = "Go to alternate Go file" })
+      vim.api.nvim_buf_create_user_command(0, "GoAlternateV", "lua require('user.go').go_alternate_vertical()", { desc = "Go to alternate Go file in vertical split" })
+      vim.api.nvim_buf_create_user_command(0, "GoAlternateS", "lua require('user.go').go_alternate_split()", { desc = "Go to alternate Go file in split" })
+      vim.api.nvim_buf_create_user_command(0, "GoAlternateT", "lua require('user.go').go_alternate_tab()", { desc = "Go to alternate Go file in new tab" })
     end,
   })
 

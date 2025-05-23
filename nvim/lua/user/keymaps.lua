@@ -71,10 +71,7 @@ function M.setup()
   -- Mouse shortcuts - Make Ctrl+Left/Right click simulate common GUI browser behavior
   if vim.fn.has("mouse") == 1 then
     -- Detect iTerm2
-    local is_iterm = false
-    if vim.env.TERM_PROGRAM == "iTerm.app" or string.match(vim.env.TERM, "^iterm") or vim.env.LC_TERMINAL == "iTerm2" then
-      is_iterm = true
-    end
+    local is_iterm = is_iterm2()
     
     -- Ctrl+Right Click to go back (like VSCode/browser back)
     keymap("n", "<C-RightMouse>", "<LeftMouse><C-o>", opts)
@@ -135,7 +132,7 @@ function M.setup_go_keymaps()
   keymap("n", "<leader>i", "<Plug>(go-info)", { silent = true, buffer = true })
 
   -- :GoMetaLinter
-  keymap("n", "<leader>l", "<Plug>(go-metalinter)", { silent = true, buffer = true })
+  keymap("n", "<leader>gl", "<Plug>(go-metalinter)", { silent = true, buffer = true })
 
   -- :GoDef but opens in a vertical split
   keymap("n", "<leader>v", "<Plug>(go-def-vertical)", { silent = true, buffer = true })

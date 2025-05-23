@@ -9,9 +9,7 @@ require('user.options').setup()
 require('user.keymaps').setup()
 require('user.autocmds').setup()
 
--- Filetype and syntax
-vim.cmd('filetype plugin indent on')
-vim.cmd('syntax on')
+-- Note: filetype and syntax are enabled by default in Neovim
 
 -- Configure Terraform
 vim.g.terraform_align = 0
@@ -30,7 +28,7 @@ vim.g.go_highlight_build_constraints = 1
 vim.g.go_highlight_function_calls = 1
 vim.g.go_highlight_extra_types = 1
 vim.g.go_highlight_generate_tags = 1
--- Re-enable vim-go features since we're not using LSP anymore
+-- Re-enable vim-go features (using gopls for basic completion, but not full LSP setup)
 vim.g.go_gopls_enabled = 1
 vim.g.go_code_completion_enabled = 1
 vim.g.go_doc_keywordprg_enabled = 1
@@ -43,11 +41,9 @@ vim.g.go_metalinter_enabled = 1
 -- Load plugins via Packer
 require('user.plugins')
 
--- Set colorscheme using NeoSolarized
-vim.cmd('set background=dark')
 -- Setup NeoSolarized through our colorbuddy setup
-local colorbuddy_ok, colorbuddy_setup = pcall(require, 'user.colorbuddy_setup')
-if colorbuddy_ok then
+local colorbuddy_setup = safe_require('user.colorbuddy_setup')
+if colorbuddy_setup then
   -- Initialize NeoSolarized theme
   colorbuddy_setup.setup()
   
@@ -75,65 +71,9 @@ if safe_require('todo-comments') then
   })
 end
 
--- Setup nvim-cmp
-if safe_require('cmp') then
-  local cmp = require('cmp')
-  
-  cmp.setup({
-    snippet = {
-      expand = function(args)
-        -- No snippet engine
-      end,
-    },
-    mapping = cmp.mapping.preset.insert({
-      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }),
-      ['<Tab>'] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_next_item()
-        else
-          fallback()
-        end
-      end, { 'i', 's' }),
-      ['<S-Tab>'] = cmp.mapping(function(fallback)
-        if cmp.visible() then
-          cmp.select_prev_item()
-        else
-          fallback()
-        end
-      end, { 'i', 's' }),
-    }),
-    sources = cmp.config.sources({
-      { name = 'buffer' },
-      { name = 'path' },
-    })
-  })
+-- Note: nvim-cmp is now lazy-loaded in plugins.lua
 
-  -- Use buffer source for `/` search
-  cmp.setup.cmdline('/', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
-      { name = 'buffer' }
-    }
-  })
-
-  -- Use cmdline & path source for ':'
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
-      { name = 'path' }
-    }, {
-      { name = 'cmdline' }
-    })
-  })
-end
-
--- Setup Treesitter if available
-if safe_require('user.treesitter') then
-  require('user.treesitter').setup()
-end
+-- Note: Treesitter is now lazy-loaded in plugins.lua
 
 -- Setup TreeSitter troubleshooting helpers
 if not vim.g.skip_treesitter_setup and safe_require('user.setup_treesitter') then
@@ -160,10 +100,7 @@ if safe_require('user.config_test') then
   require('user.config_test').create_commands()
 end
 
--- Setup DAP (Debugging)
-if safe_require('user.dap') then
-  require('user.dap').setup()
-end
+-- Note: DAP is now lazy-loaded in plugins.lua
 
 -- Setup additional modules
 if safe_require('nvim-autopairs') then
@@ -208,10 +145,17 @@ end
 
 -- Setup Comment.nvim
 if safe_require('Comment') then
-  require('Comment').setup({
-    -- Add ts-context-commentstring integration
-    pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
-  })
+  local comment_config = {
+    -- Basic Comment.nvim setup
+  }
+  
+  -- Add ts-context-commentstring integration if available
+  local ts_context_ok, ts_context = pcall(require, 'ts_context_commentstring.integrations.comment_nvim')
+  if ts_context_ok then
+    comment_config.pre_hook = ts_context.create_pre_hook()
+  end
+  
+  require('Comment').setup(comment_config)
 end
 
 -- Setup lualine (replacement for vim-airline)
@@ -293,40 +237,14 @@ if safe_require('ts_context_commentstring') then
 end
 
 -- iTerm2 specific integrations
-vim.cmd([[
-  " Check if we're in iTerm2
-  if $TERM_PROGRAM ==# "iTerm.app" || $TERM =~# "^iterm" || $LC_TERMINAL ==# "iTerm2"
-    " Enable true color support
-    set termguicolors
-  endif
-]])
-
--- Create Packer commands
-vim.api.nvim_create_user_command('PackerInstall', function()
-  vim.cmd('PackerInstall')
-end, { desc = 'Install missing plugins' })
-
-vim.api.nvim_create_user_command('PackerUpdate', function()
-  -- Reload the plugins module first
-  package.loaded['user.plugins'] = nil
-  require('user.plugins')
-  -- Then run PackerSync
-  vim.cmd('PackerSync')
-end, { desc = 'Reload plugins configuration and run PackerSync' })
-
-vim.api.nvim_create_user_command('PackerClean', function()
-  vim.cmd('PackerClean')
-end, { desc = 'Remove unused plugins' })
+if is_iterm2() then
+  vim.cmd('set termguicolors')
+end
 
 -- Standard K keymap behavior (no LSP)
 vim.api.nvim_set_keymap('n', 'K', 'K', { noremap = true, silent = true })
 
 -- Helper function for Go files - must be defined at global scope
 function _G.build_go_files()
-  local file = vim.fn.expand('%')
-  if file:match('_test%.go$') then
-    vim.cmd('GoTest')
-  elseif file:match('%.go$') then
-    vim.cmd('GoBuild')
-  end
+  require('user.go').build_go_files()
 end 

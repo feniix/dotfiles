@@ -23,7 +23,12 @@ function M.setup()
   end
 
   -- Python provider settings
-  vim.g.python3_host_prog = vim.fn.expand('$HOME/.asdf/shims/python3')
+  local python_path = vim.fn.expand('$HOME/.asdf/shims/python3')
+  if vim.fn.executable(python_path) == 1 then
+    vim.g.python3_host_prog = python_path
+  elseif vim.fn.executable('python3') == 1 then
+    vim.g.python3_host_prog = vim.fn.exepath('python3')
+  end
   vim.g.loaded_python_provider = 0  -- Disable Python 2
 
   -- Set leader key
@@ -89,9 +94,8 @@ function M.setup()
   vim.opt.selectmode = "mouse,key"     -- Enable visual selection with mouse
   
   -- Detect iTerm2 for better mouse support
-  local is_iterm = false
-  if vim.env.TERM_PROGRAM == "iTerm.app" or string.match(vim.env.TERM, "^iterm") or vim.env.LC_TERMINAL == "iTerm2" then
-    is_iterm = true
+  local is_iterm = is_iterm2()
+  if is_iterm then
     -- Enable extended mouse mode in iTerm2
     -- Note: ttymouse is not needed in Neovim as it handles mouse support differently than Vim
     
@@ -107,7 +111,7 @@ function M.setup()
           ['+'] = 'pbpaste',
           ['*'] = 'pbpaste',
         },
-        cache_enabled = 0,
+        cache_enabled = 1, -- Enable caching for better performance
       }
     end
   end
@@ -138,10 +142,8 @@ function M.setup()
   vim.opt.background = "dark"
 
   -- Highlight overlength
-  vim.cmd([[
-    highlight ColorColumn ctermbg=magenta
-    call matchadd('ColorColumn', '\%81v', 100)
-  ]])
+  vim.api.nvim_set_hl(0, 'ColorColumn', { ctermbg = 'magenta' })
+  vim.fn.matchadd('ColorColumn', '\\%81v', 100)
 end
 
 return M 

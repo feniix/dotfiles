@@ -64,30 +64,103 @@ return packer.startup(function(use)
   use 'AndrewRadev/splitjoin.vim'
 
   -- ---- Neovim Specific ----
-  -- Debugging
+  -- Debugging (lazy loaded)
   use {
-    'mfussenegger/nvim-dap',              -- Debug Adapter Protocol client
+    'mfussenegger/nvim-dap',
+    cmd = { 'DapContinue', 'DapToggleBreakpoint' },
+    keys = { '<F5>', '<leader>db' },
     requires = {
-      'nvim-neotest/nvim-nio',            -- Required dependency for nvim-dap-ui
-      'rcarriga/nvim-dap-ui',             -- UI for nvim-dap
-      'theHamsta/nvim-dap-virtual-text',  -- Show variable values as virtual text
-    }
+      'nvim-neotest/nvim-nio',
+      {
+        'rcarriga/nvim-dap-ui',
+        config = function()
+          -- DAP UI setup moved to after/ plugin
+        end
+      },
+      'theHamsta/nvim-dap-virtual-text',
+    },
+    config = function()
+      if safe_require('user.dap') then
+        require('user.dap').setup()
+      end
+    end
   }
 
-  -- Modern completion system (without LSP)
+  -- Modern completion system (event-based loading)
   use {
-    'hrsh7th/nvim-cmp',                 -- Completion plugin
+    'hrsh7th/nvim-cmp',
+    event = 'InsertEnter',
     requires = {
-      'hrsh7th/cmp-buffer',             -- Buffer source for nvim-cmp
-      'hrsh7th/cmp-path',               -- Path source for nvim-cmp
-      'hrsh7th/cmp-cmdline',            -- Cmdline source for nvim-cmp
-    }
+      'hrsh7th/cmp-buffer',
+      'hrsh7th/cmp-path',
+      'hrsh7th/cmp-cmdline',
+    },
+    config = function()
+      -- CMP setup moved to avoid startup delay
+      vim.defer_fn(function()
+        if safe_require('cmp') then
+          local cmp = require('cmp')
+          cmp.setup({
+            snippet = {
+              expand = function(args)
+                -- No snippet engine
+              end,
+            },
+            mapping = cmp.mapping.preset.insert({
+              ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+              ['<C-f>'] = cmp.mapping.scroll_docs(4),
+              ['<C-Space>'] = cmp.mapping.complete(),
+              ['<CR>'] = cmp.mapping.confirm({ select = true }),
+              ['<Tab>'] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  cmp.select_next_item()
+                else
+                  fallback()
+                end
+              end, { 'i', 's' }),
+              ['<S-Tab>'] = cmp.mapping(function(fallback)
+                if cmp.visible() then
+                  cmp.select_prev_item()
+                else
+                  fallback()
+                end
+              end, { 'i', 's' }),
+            }),
+            sources = cmp.config.sources({
+              { name = 'buffer' },
+              { name = 'path' },
+            })
+          })
+
+          -- Cmdline completion
+          cmp.setup.cmdline('/', {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = { { name = 'buffer' } }
+          })
+
+          cmp.setup.cmdline(':', {
+            mapping = cmp.mapping.preset.cmdline(),
+            sources = cmp.config.sources({
+              { name = 'path' }
+            }, {
+              { name = 'cmdline' }
+            })
+          })
+        end
+      end, 100)
+    end
   }
 
-  -- Treesitter for better syntax highlighting
+  -- Treesitter (optimized loading)
   use {
     'nvim-treesitter/nvim-treesitter',
-    run = ':TSUpdate'
+    event = 'BufRead',
+    run = ':TSUpdate',
+    config = function()
+      if safe_require('user.treesitter') then
+        require('user.treesitter').setup()
+      end
+    end
   }
   
   -- Treesitter extensions

@@ -54,6 +54,13 @@ function safe_require(module)
   return result
 end
 
+-- Helper function to detect iTerm2 consistently
+function is_iterm2()
+  return vim.env.TERM_PROGRAM == "iTerm.app" or 
+         (vim.env.TERM and string.match(vim.env.TERM, "^iterm")) or 
+         vim.env.LC_TERMINAL == "iTerm2"
+end
+
 -- Set up health check module
 pcall(function() 
   local health = require("user.health")
@@ -67,7 +74,10 @@ vim.api.nvim_create_autocmd("VimEnter", {
       -- Clean treesitter cache directory to prevent issues
       local treesitter_cache = vim.fn.stdpath('cache') .. '/treesitter-vim'
       if vim.fn.isdirectory(treesitter_cache) == 1 then
-        vim.fn.delete(treesitter_cache, 'rf')
+        local ok, err = pcall(vim.fn.delete, treesitter_cache, 'rf')
+        if not ok then
+          vim.notify("Failed to clean treesitter cache: " .. tostring(err), vim.log.levels.WARN)
+        end
       end
     end, 1000)
   end,
@@ -76,6 +86,9 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
 -- Make safe_require globally available
 _G.safe_require = safe_require
+
+-- Make iTerm2 detection globally available
+_G.is_iterm2 = is_iterm2
 
 -- We're keeping most configuration in individual Lua modules for better organization
 -- The entry point is now init.lua in the nvim directory root
