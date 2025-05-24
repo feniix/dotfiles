@@ -212,7 +212,8 @@ complete () {
 }
 
 # === HISTORY SETTINGS ===
-# History file configuration (HISTFILE set in zshenv for XDG compliance)
+# History file configuration 
+export HISTFILE="$XDG_STATE_HOME/zsh/history"
 HISTSIZE=1000000
 SAVEHIST=1000000
 

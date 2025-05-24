@@ -40,10 +40,7 @@ export CARGO_HOME="$XDG_DATA_HOME/cargo"
 # Cleanup home directory by redirecting tool configs to XDG locations
 export CURLOPT_COOKIEFILE="$XDG_DATA_HOME/curl/cookies"
 
-# Source the actual zshrc if it exists
-if [ -f "$ZDOTDIR/.zshrc" ]; then
-  source "$ZDOTDIR/.zshrc"
-fi
+
 
 # AWS CLI Configuration (additional settings)
 export AWS_CLI_HISTORY_FILE="$XDG_DATA_HOME/aws/history"
