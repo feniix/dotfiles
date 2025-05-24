@@ -1,10 +1,9 @@
 {
   "Comment.nvim": { "branch": "master", "commit": "e30b7f2008e52442154b66f7c519bfd2f1e32acb" },
-  "NeoSolarized.nvim": { "branch": "master", "commit": "3c55ad358c062aa4879950c4f83b4deeac6b72df" },
+  "catppuccin": { "branch": "main", "commit": "be1e5e6308bb9d016bf5c1565e0f1d5e46400d7a" },
   "cmp-buffer": { "branch": "main", "commit": "b74fab3656eea9de20a9b8116afa3cfc4ec09657" },
   "cmp-cmdline": { "branch": "main", "commit": "d126061b624e0af6c3a556428712dd4d4194ec6d" },
   "cmp-path": { "branch": "main", "commit": "c6635aae33a50d6010bf1aa756ac2398a2d54c32" },
-  "colorbuddy.nvim": { "branch": "master", "commit": "8b968581e5c19d22a861d5f3fe5dbd83394fa681" },
   "crates.nvim": { "branch": "main", "commit": "25f31372ab6f504d4fd7cfee836ad459caed8e68" },
   "diffview.nvim": { "branch": "main", "commit": "4516612fe98ff56ae0415a259ff6361a89419b0a" },
   "editorconfig-vim": { "branch": "master", "commit": "6a58b7c11f79c0e1d0f20533b3f42f2a11490cf8" },

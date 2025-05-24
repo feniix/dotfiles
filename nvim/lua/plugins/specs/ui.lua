@@ -2,18 +2,59 @@
 -- Contains colorschemes, statuslines, and visual enhancements
 
 return {
-  -- NeoSolarized colorscheme with ColorBuddy
+  -- Catppuccin colorscheme
   {
-    "Tsuzat/NeoSolarized.nvim",
-    dependencies = {
-      "tjdevries/colorbuddy.nvim",
-    },
+    "catppuccin/nvim",
+    name = "catppuccin",
     lazy = false,
     priority = 1000,
     config = function()
-      require("plugins.config.colorbuddy").setup()
-      require("plugins.config.colorbuddy").setup_commands()
-      require("plugins.config.colorscheme").setup()
+      require("catppuccin").setup({
+        flavour = "mocha", -- latte, frappe, macchiato, mocha
+        background = { -- :h background
+          light = "latte",
+          dark = "mocha",
+        },
+        transparent_background = false,
+        show_end_of_buffer = false,
+        term_colors = false,
+        dim_inactive = {
+          enabled = false,
+          shade = "dark",
+          percentage = 0.15,
+        },
+        no_italic = false,
+        no_bold = false,
+        no_underline = false,
+        styles = {
+          comments = { "italic" },
+          conditionals = { "italic" },
+          loops = {},
+          functions = {},
+          keywords = {},
+          strings = {},
+          variables = {},
+          numbers = {},
+          booleans = {},
+          properties = {},
+          types = {},
+          operators = {},
+        },
+        integrations = {
+          cmp = true,
+          gitsigns = true,
+          nvimtree = true,
+          treesitter = true,
+          notify = false,
+          diffview = true,
+          mini = {
+            enabled = true,
+            indentscope_color = "",
+          },
+        },
+      })
+      -- Set catppuccin as the default colorscheme
+      vim.cmd.colorscheme "catppuccin"
     end,
   },
   
