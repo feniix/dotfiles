@@ -1,7 +1,6 @@
 
 # tap repositories and their packages
 
-tap "homebrew/core"
 brew "abseil"
 brew "aom"
 brew "aribb24"
@@ -90,6 +89,7 @@ brew "jrsonnet"
 brew "json-c"
 brew "krb5"
 brew "lame"
+brew "lazygit"
 brew "leptonica"
 brew "less"
 brew "libaec"
@@ -267,7 +267,6 @@ brew "zplug"
 brew "zsh-completions"
 brew "zstd"
 
-tap "homebrew/cask"
 cask "1password"
 cask "appcleaner"
 cask "basictex"
@@ -307,18 +306,18 @@ brew "brew-file"
 tap "romkatv/powerlevel10k"
 
 # App Store applications
-mas "1Password for Safari", id: 1569813296
-mas "Amphetamine", id: 937984704
-mas "Fantastical", id: 975937182
-mas "GoPro Player", id: 1460836908
-mas "HP Smart", id: 1474276998
-mas "Keynote", id: 409183694
-mas "Numbers", id: 409203825
-mas "Okta Verify", id: 490179405
-mas "Patterns", id: 429449079
-mas "Prime Video", id: 545519333
-mas "Slack", id: 803453959
-mas "Telegram", id: 747648890
-mas "WhatsApp", id: 1147396723
-mas "Windows App", id: 1295203466
-mas "Xcode", id: 497799835
+mas "1Password for Safari (8.10.76)", id: 1569813296
+mas "Amphetamine (5.3.2)", id: 937984704
+mas "Fantastical (4.0.12)", id: 975937182
+mas "GoPro Player (3.1.0)", id: 1460836908
+mas "HP Smart (18.10.1)", id: 1474276998
+mas "Keynote (14.4)", id: 409183694
+mas "Numbers (14.4)", id: 409203825
+mas "Okta Verify (9.42.0)", id: 490179405
+mas "Patterns (1.3)", id: 429449079
+mas "Prime Video (10.75)", id: 545519333
+mas "Slack (4.44.59)", id: 803453959
+mas "Telegram (11.11)", id: 747648890
+mas "WhatsApp (2.2437.52)", id: 1147396723
+mas "Windows App (11.1.4)", id: 1295203466
+mas "Xcode (16.3)", id: 497799835
