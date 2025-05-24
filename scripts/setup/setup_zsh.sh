@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# ZSH and Oh-My-ZSH Setup Script
+# Sets up oh-my-zsh with custom themes and plugins
+
+set -e
+
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 # Colors for better output
 RED='\033[0;31m'
@@ -7,42 +15,43 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Helper functions
+log_info() {
+  if [[ "$CHECK_ONLY" == "true" ]]; then
+    echo -e "${BLUE}[INFO]${NC} $1" >&2
+  else
+    echo -e "${BLUE}[INFO]${NC} $1"
+  fi
+}
+
+log_success() {
+  if [[ "$CHECK_ONLY" == "true" ]]; then
+    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
+  else
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+  fi
+}
+
+log_warning() {
+  if [[ "$CHECK_ONLY" == "true" ]]; then
+    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
+  else
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+  fi
+}
+
+log_error() {
+  if [[ "$CHECK_ONLY" == "true" ]]; then
+    echo -e "${RED}[ERROR]${NC} $1" >&2
+  else
+    echo -e "${RED}[ERROR]${NC} $1"
+  fi
+}
+
 # Check for --check-only flag
 CHECK_ONLY=false
 if [[ "$1" == "--check-only" ]]; then
   CHECK_ONLY=true
-  log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1" >&2
-  }
-  
-  log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1" >&2
-  }
-  
-  log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
-  }
-  
-  log_error() {
-    echo -e "${RED}[ERROR]${NC} $1" >&2
-  }
-else
-  # Helper functions
-  log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-  }
-  
-  log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-  }
-  
-  log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-  }
-  
-  log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-  }
 fi
 
 # Check if oh-my-zsh is already installed
@@ -97,7 +106,7 @@ fi
 log_info "Setting up custom themes and plugins..."
 
 # Define directories
-ZSH_CUSTOM_DIR="$HOME/dotfiles/zsh_custom"
+ZSH_CUSTOM_DIR="$DOTFILES_DIR/zsh_custom"
 OMZ_CUSTOM_DIR="$HOME/.oh-my-zsh/custom"
 
 # Ensure our dotfiles custom directories exist
@@ -178,7 +187,7 @@ fi
 
 # Ensure zshrc has correct paths
 log_info "Verifying zshrc configuration..."
-ZSHRC="$HOME/dotfiles/zshrc"
+ZSHRC="$DOTFILES_DIR/zshrc"
 
 # Check if zshrc exists
 if [ -f "$ZSHRC" ]; then
@@ -190,7 +199,7 @@ if [ -f "$ZSHRC" ]; then
   fi
   
   # Check if ZSH_CUSTOM path is correctly set
-  if grep -q "export ZSH_CUSTOM=\$HOME/dotfiles/zsh_custom" "$ZSHRC"; then
+  if grep -q "export ZSH_CUSTOM=\$DOTFILES_DIR/zsh_custom\|export ZSH_CUSTOM=\$HOME/dotfiles/zsh_custom" "$ZSHRC"; then
     # This is a legacy approach - we now use symlinks to connect dotfiles/zsh_custom to .oh-my-zsh/custom
     log_warning "Note: Your zshrc sets ZSH_CUSTOM to your dotfiles directory. This works but is redundant with our symlink approach."
     log_info "To simplify your configuration, you can remove the ZSH_CUSTOM line from your zshrc."
