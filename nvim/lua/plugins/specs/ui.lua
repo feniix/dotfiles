@@ -45,7 +45,7 @@ return {
           gitsigns = true,
           nvimtree = true,
           treesitter = true,
-          notify = false,
+          notify = true,
           diffview = true,
           mini = {
             enabled = true,
@@ -109,6 +109,15 @@ return {
     event = "VeryLazy",
     config = function()
       require("plugins.config.which-key").setup()
+    end,
+  },
+
+  -- Notifications
+  {
+    "rcarriga/nvim-notify",
+    event = "VeryLazy",
+    config = function()
+      vim.notify = require("notify")
     end,
   },
 } 
