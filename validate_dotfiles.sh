@@ -43,10 +43,10 @@ run_test() {
   
   if eval "$test_command" > /dev/null 2>&1; then
     echo "  ✅ PASS: $test_name"
-    ((test_passed++))
+    test_passed=$((test_passed + 1))
   else
     echo "  ❌ FAIL: $test_name"
-    ((test_failed++))
+    test_failed=$((test_failed + 1))
   fi
 }
 
@@ -67,20 +67,20 @@ setup_scripts_total=$(find "$SCRIPT_DIR/scripts/setup" -name "*.sh" 2>/dev/null 
 
 if [ "$setup_scripts_with_set_e" -eq "$setup_scripts_total" ] && [ "$setup_scripts_total" -gt 0 ]; then
   echo "  ✅ PASS: All setup scripts have 'set -e'"
-  ((test_passed++))
+  test_passed=$((test_passed + 1))
 else
   echo "  ❌ FAIL: Not all setup scripts have 'set -e' ($setup_scripts_with_set_e/$setup_scripts_total)"
-  ((test_failed++))
+  test_failed=$((test_failed + 1))
 fi
 
 setup_scripts_with_dotfiles_dir=$(find "$SCRIPT_DIR/scripts/setup" -name "*.sh" -exec grep -l "DOTFILES_DIR" {} \; 2>/dev/null | wc -l)
 
 if [ "$setup_scripts_with_dotfiles_dir" -eq "$setup_scripts_total" ] && [ "$setup_scripts_total" -gt 0 ]; then
   echo "  ✅ PASS: All setup scripts use DOTFILES_DIR variable"
-  ((test_passed++))
+  test_passed=$((test_passed + 1))
 else
   echo "  ❌ FAIL: Not all setup scripts use DOTFILES_DIR ($setup_scripts_with_dotfiles_dir/$setup_scripts_total)"
-  ((test_failed++))
+  test_failed=$((test_failed + 1))
 fi
 
 # Test 3: Key Scripts Executable
@@ -101,14 +101,14 @@ run_test "Neovim init.lua exists" "[ -f '$SCRIPT_DIR/nvim/init.lua' ]"
 log_info "5. Testing XDG Environment Variables"
 if [ -n "$XDG_CONFIG_HOME" ]; then
   echo "  ✅ PASS: XDG_CONFIG_HOME is set ($XDG_CONFIG_HOME)"
-  ((test_passed++))
+  test_passed=$((test_passed + 1))
 else
   echo "  ⚠️  INFO: XDG_CONFIG_HOME not set (run 'source zshenv' first)"
 fi
 
 if [ -n "$XDG_DATA_HOME" ]; then
   echo "  ✅ PASS: XDG_DATA_HOME is set ($XDG_DATA_HOME)"
-  ((test_passed++))
+  test_passed=$((test_passed + 1))
 else
   echo "  ⚠️  INFO: XDG_DATA_HOME not set (run 'source zshenv' first)"
 fi
@@ -118,10 +118,10 @@ log_info "6. Testing Symlinks (if created)"
 if [ -L "$HOME/.config/zsh/.zshrc" ]; then
   if [ -e "$HOME/.config/zsh/.zshrc" ]; then
     echo "  ✅ PASS: zshrc symlink exists and is valid"
-    ((test_passed++))
+    test_passed=$((test_passed + 1))
   else
     echo "  ❌ FAIL: zshrc symlink is broken"
-    ((test_failed++))
+    test_failed=$((test_failed + 1))
   fi
 else
   echo "  ⚠️  INFO: zshrc symlink not created yet"
@@ -130,10 +130,10 @@ fi
 if [ -L "$HOME/.config/git/config" ]; then
   if [ -e "$HOME/.config/git/config" ]; then
     echo "  ✅ PASS: git config symlink exists and is valid"
-    ((test_passed++))
+    test_passed=$((test_passed + 1))
   else
     echo "  ❌ FAIL: git config symlink is broken"
-    ((test_failed++))
+    test_failed=$((test_failed + 1))
   fi
 else
   echo "  ⚠️  INFO: git config symlink not created yet"
@@ -159,10 +159,10 @@ setup_scripts_with_log_functions=$(find "$SCRIPT_DIR/scripts/setup" -name "*.sh"
 
 if [ "$setup_scripts_with_log_functions" -eq "$setup_scripts_total" ] && [ "$setup_scripts_total" -gt 0 ]; then
   echo "  ✅ PASS: All setup scripts have standardized log functions"
-  ((test_passed++))
+  test_passed=$((test_passed + 1))
 else
   echo "  ❌ FAIL: Not all setup scripts have log functions ($setup_scripts_with_log_functions/$setup_scripts_total)"
-  ((test_failed++))
+  test_failed=$((test_failed + 1))
 fi
 
 # Test 10: Check for Hardcoded Paths
@@ -171,10 +171,10 @@ hardcoded_paths=$(grep -r "~/dotfiles" "$SCRIPT_DIR/scripts/setup/" 2>/dev/null 
 
 if [ "$hardcoded_paths" -eq 0 ]; then
   echo "  ✅ PASS: No hardcoded ~/dotfiles paths in setup scripts"
-  ((test_passed++))
+  test_passed=$((test_passed + 1))
 else
   echo "  ❌ FAIL: Found $hardcoded_paths hardcoded ~/dotfiles paths in setup scripts"
-  ((test_failed++))
+  test_failed=$((test_failed + 1))
 fi
 
 echo ""
@@ -195,4 +195,4 @@ if [ $test_failed -eq 0 ]; then
 else
   log_error "Some tests failed. Please review and fix the issues."
   exit 1
-fi 
+fi

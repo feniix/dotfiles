@@ -25,10 +25,7 @@ reset_path() {
   export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
   export PATH="$PATH:$HOME/.linkerd2/bin"
   export PATH="$PATH:$HOME/.docker/bin"
-  export PATH="$PATH:$HOME/.config/tempus-app-manager/bin"
   export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
-  export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/bin"
-  export PATH="$PATH:/opt/homebrew/Cellar/bonnie++/2.00a/sbin"
 
   # Add user directories next
   export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/.local/share/go/bin"
@@ -226,10 +223,13 @@ setopt HIST_FIND_NO_DUPS      # Don't display duplicates during searches
 setopt HIST_IGNORE_SPACE      # Don't record commands starting with space
 setopt HIST_REDUCE_BLANKS     # Remove unnecessary blanks
 setopt HIST_SAVE_NO_DUPS      # Don't save duplicates
-setopt HIST_VERIFY            # Show command with history expansion before running it
-setopt HIST_BEEP              # Beep when accessing nonexistent history
+setopt HIST_NO_STORE          # Don't store history command itself
+setopt HIST_FCNTL_LOCK        # Better concurrent access
 setopt INC_APPEND_HISTORY     # Add commands as they are typed, not at shell exit
 setopt SHARE_HISTORY          # Share history between different instances
+
+# Ignore common commands
+HISTORY_IGNORE="(ls|pwd|exit|clear|history)"
 
 # History search functions
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
@@ -386,8 +386,6 @@ function rm_local_branches() {
 }
 
 # === SSH AGENT CONFIGURATION ===
-# Remove FreeDRP known hosts to prevent issues
-rm -rf ~/.freerdp/known_hosts
 
 # === EXTERNAL TOOLS INTEGRATION ===
 # iTerm2 integration

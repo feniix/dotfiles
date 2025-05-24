@@ -5,13 +5,21 @@
 
 set -e
 
-DOTFILES_DIR="$HOME/dotfiles"
+# Set DOTFILES_DIR based on script location
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_DIR="${DOTFILES_DIR:-$SCRIPT_DIR}"
+
+# Ensure we're using the absolute path
+DOTFILES_DIR="$(cd "$DOTFILES_DIR" && pwd)"
+
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-SCRIPTS_DIR="$DOTFILES_DIR/scripts"
 BACKUP_DIR="$XDG_DATA_HOME/dotfiles_backup/$(date +%Y%m%d_%H%M%S)"
+
+# Scripts directory is under DOTFILES_DIR
+SCRIPTS_DIR="$DOTFILES_DIR/scripts"
 
 # Colors for better output
 RED='\033[0;31m'
@@ -121,17 +129,17 @@ validate_repo_structure() {
   log_info "Validating repository structure..."
   
   # Check for required directories
-  local required_dirs=("scripts/setup" "scripts/macos" "scripts/utils")
+  local required_dirs=("scripts/setup" "scripts/macos" "scripts/utils" "scripts/nvim" "scripts/ssh")
   local missing_dirs=0
   
   for dir in "${required_dirs[@]}"; do
     if [ ! -d "$DOTFILES_DIR/$dir" ]; then
-      log_error "Missing directory: $DOTFILES_DIR/$dir"
+      log_warning "Missing directory: $DOTFILES_DIR/$dir"
       missing_dirs=$((missing_dirs + 1))
     fi
   done
   
-  # Check for required setup scripts
+  # Check for critical setup scripts
   local required_scripts=(
     "scripts/setup/setup_xdg.sh"
     "scripts/setup/setup_zsh.sh"
@@ -141,15 +149,20 @@ validate_repo_structure() {
   
   for script in "${required_scripts[@]}"; do
     if [ ! -f "$DOTFILES_DIR/$script" ]; then
-      log_error "Missing script: $DOTFILES_DIR/$script"
+      log_error "Missing critical script: $DOTFILES_DIR/$script"
       missing_scripts=$((missing_scripts + 1))
     fi
   done
   
-  if [ $missing_dirs -gt 0 ] || [ $missing_scripts -gt 0 ]; then
-    log_error "Repository structure validation failed."
-    log_info "Running repository fix to correct structure issues..."
+  # Only create directories if missing, don't fail if scripts are missing
+  if [ $missing_dirs -gt 0 ]; then
+    log_info "Creating missing directories..."
     fix_repo_structure
+  fi
+  
+  if [ $missing_scripts -gt 0 ]; then
+    log_error "Critical scripts are missing. Please ensure the repository is complete."
+    return 1
   else
     log_success "Repository structure validation passed."
   fi
@@ -157,46 +170,16 @@ validate_repo_structure() {
 
 # Fix repository structure if needed
 fix_repo_structure() {
-  log_info "Fixing repository structure..."
+  log_info "Creating required directories..."
   
   # Create required directories
   mkdir -p "$SCRIPTS_DIR/setup"
   mkdir -p "$SCRIPTS_DIR/macos"
   mkdir -p "$SCRIPTS_DIR/utils"
+  mkdir -p "$SCRIPTS_DIR/nvim"
+  mkdir -p "$SCRIPTS_DIR/ssh"
   
-  # Move setup scripts if they exist in root but not in scripts/setup
-  local setup_scripts=("setup_xdg.sh" "setup_macos.sh" "setup_nvim.sh" "setup_zsh.sh")
-  
-  for script in "${setup_scripts[@]}"; do
-    if [ -f "$DOTFILES_DIR/$script" ] && [ ! -f "$SCRIPTS_DIR/setup/$script" ]; then
-      log_info "Moving $script to scripts/setup/"
-      cp "$DOTFILES_DIR/$script" "$SCRIPTS_DIR/setup/"
-      chmod +x "$SCRIPTS_DIR/setup/$script"
-    fi
-  done
-  
-  # Move macOS scripts if they exist in root but not in scripts/macos
-  if [ -f "$DOTFILES_DIR/osx-defaults" ] && [ ! -f "$SCRIPTS_DIR/macos/osx-defaults" ]; then
-    log_info "Moving osx-defaults to scripts/macos/"
-    cp "$DOTFILES_DIR/osx-defaults" "$SCRIPTS_DIR/macos/"
-    chmod +x "$SCRIPTS_DIR/macos/osx-defaults"
-  fi
-  
-  # Copy utility scripts from sbin to scripts/utils if they don't exist there
-  if [ -d "$DOTFILES_DIR/sbin" ]; then
-    for script in "$DOTFILES_DIR/sbin"/*; do
-      if [ -f "$script" ]; then
-        script_name=$(basename "$script")
-        if [ ! -f "$SCRIPTS_DIR/utils/$script_name" ]; then
-          log_info "Copying $script_name to scripts/utils/"
-          cp "$script" "$SCRIPTS_DIR/utils/"
-          chmod +x "$SCRIPTS_DIR/utils/$script_name"
-        fi
-      fi
-    done
-  fi
-  
-  log_success "Repository structure has been fixed."
+  log_success "Directory structure created."
 }
 
 # Create necessary XDG directories
@@ -205,8 +188,7 @@ setup_xdg() {
   
   if [ ! -f "$SCRIPTS_DIR/setup/setup_xdg.sh" ]; then
     log_error "XDG setup script not found at $SCRIPTS_DIR/setup/setup_xdg.sh"
-    log_info "Running repository fix to correct structure issues..."
-    fix_repo_structure
+    return 1
   fi
   
   # Run the dedicated XDG setup script
@@ -220,8 +202,7 @@ setup_macos() {
     
     if [ ! -f "$SCRIPTS_DIR/setup/setup_macos.sh" ]; then
       log_error "macOS setup script not found at $SCRIPTS_DIR/setup/setup_macos.sh"
-      log_info "Running repository fix to correct structure issues..."
-      fix_repo_structure
+      return 1
     fi
     
     # Run the dedicated macOS setup script
@@ -269,8 +250,7 @@ setup_nvim() {
   
   if [ ! -f "$SCRIPTS_DIR/setup/setup_nvim.sh" ]; then
     log_error "Neovim setup script not found at $SCRIPTS_DIR/setup/setup_nvim.sh"
-    log_info "Running repository fix to correct structure issues..."
-    fix_repo_structure
+    return 1
   fi
   
   # Check if user wants to install plugins
