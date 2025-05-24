@@ -5,7 +5,7 @@
 
 set -e
 
-DOTFILES_DIR="$HOME/dotfiles"
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 

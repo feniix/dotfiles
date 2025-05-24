@@ -45,10 +45,11 @@ if [ -f "$ZDOTDIR/.zshrc" ]; then
   source "$ZDOTDIR/.zshrc"
 fi
 
-# AWS CLI Configuration
-export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
-export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
+# AWS CLI Configuration (additional settings)
 export AWS_CLI_HISTORY_FILE="$XDG_DATA_HOME/aws/history"
 export AWS_WEB_IDENTITY_TOKEN_FILE="$XDG_DATA_HOME/aws/token"
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Homebrew environment setup (prevent double-evaluation)
+if [ -z "$HOMEBREW_PREFIX" ]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
 export ASDF_HASHICORP_SKIP_VERIFY=0

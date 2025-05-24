@@ -176,8 +176,8 @@ if [ -f /opt/homebrew/etc/brew-wrap ]; then
 fi
 
 # Homebrew environment variables
-export HOMEBREW_BREWFILE=~/dotfiles/Brewfile
-export HOMEBREW_BREWFILE_BACKUP=~/dotfiles/Brewfile.bak
+export HOMEBREW_BREWFILE="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
+export HOMEBREW_BREWFILE_BACKUP="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile.bak"
 export HOMEBREW_BREWFILE_APPSTORE=1
 export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_NO_ANALYTICS=1
@@ -212,8 +212,7 @@ complete () {
 }
 
 # === HISTORY SETTINGS ===
-# History file configuration
-HISTFILE=~/.zsh_history
+# History file configuration (HISTFILE set in zshenv for XDG compliance)
 HISTSIZE=1000000
 SAVEHIST=1000000
 

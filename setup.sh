@@ -478,11 +478,18 @@ install_dotfiles() {
     ln -sf "$DOTFILES_DIR/tmux.conf" "$XDG_CONFIG_HOME/tmux/tmux.conf"
     log_success "Linked tmux.conf → $XDG_CONFIG_HOME/tmux/tmux.conf"
     
-    # Create a minimal .tmux.conf in home that sources the XDG config
-    if [ ! -f "$HOME/.tmux.conf" ] || ! grep -q "source-file.*tmux\.conf" "$HOME/.tmux.conf"; then
-      echo "# XDG compliant tmux configuration" > "$HOME/.tmux.conf"
-      echo "source-file $XDG_CONFIG_HOME/tmux/tmux.conf" >> "$HOME/.tmux.conf"
-      log_success "Created minimal .tmux.conf that sources the XDG config"
+    # Optional: Create a minimal .tmux.conf in home that sources the XDG config
+    # Note: This maintains backward compatibility but violates strict XDG compliance
+    read -p "Create legacy ~/.tmux.conf for backward compatibility? [y/N] " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      if [ ! -f "$HOME/.tmux.conf" ] || ! grep -q "source-file.*tmux\.conf" "$HOME/.tmux.conf"; then
+        echo "# XDG compliant tmux configuration" > "$HOME/.tmux.conf"
+        echo "source-file $XDG_CONFIG_HOME/tmux/tmux.conf" >> "$HOME/.tmux.conf"
+        log_success "Created minimal .tmux.conf that sources the XDG config"
+      fi
+    else
+      log_info "Skipping legacy ~/.tmux.conf creation for strict XDG compliance"
     fi
   fi
   
@@ -499,12 +506,16 @@ install_dotfiles() {
     fi
     ln -sf "$XDG_CONFIG_HOME/git/config" "$HOME/.gitconfig"
     log_success "Linked $XDG_CONFIG_HOME/git/config → $HOME/.gitconfig"
+  else
+    log_warning "gitconfig not found at $DOTFILES_DIR/gitconfig"
   fi
   
   if [ -f "$DOTFILES_DIR/gitignore_global" ]; then
     mkdir -p "$XDG_CONFIG_HOME/git"
     ln -sf "$DOTFILES_DIR/gitignore_global" "$XDG_CONFIG_HOME/git/ignore"
     log_success "Linked gitignore_global → $XDG_CONFIG_HOME/git/ignore"
+  else
+    log_warning "gitignore_global not found at $DOTFILES_DIR/gitignore_global"
   fi
   
   # SSH configuration
@@ -519,6 +530,8 @@ install_dotfiles() {
     echo "Include ~/.config/ssh/config" >> "$HOME/.ssh/config"
     chmod 600 "$HOME/.ssh/config"
     log_success "Created/overwrote ~/.ssh/config to include the XDG config"
+  else
+    log_warning "ssh_config not found at $DOTFILES_DIR/ssh_config"
   fi
 
   # Link utility scripts to user's bin directory
@@ -535,6 +548,8 @@ install_dotfiles() {
   if [ -f "$DOTFILES_DIR/asdf-tool-versions" ]; then
     ln -sf "$DOTFILES_DIR/asdf-tool-versions" "$HOME/.tool-versions"
     log_success "Linked asdf-tool-versions → $HOME/.tool-versions"
+  else
+    log_warning "asdf-tool-versions not found at $DOTFILES_DIR/asdf-tool-versions"
   fi
   
   # Setup Neovim
@@ -573,17 +588,22 @@ install_dotfiles() {
     fi
   fi
   
-  # Setup Homebrew packages if Homebrew is installed
-  if command -v brew >/dev/null 2>&1; then
+  # Setup Homebrew packages if Homebrew is installed or available
+  if command -v brew >/dev/null 2>&1 || [ -f "$SCRIPTS_DIR/setup/setup_homebrew.sh" ]; then
     read -p "Would you like to install Homebrew packages defined in Brewfile? [y/N] " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-      setup_homebrew
+      if [ -f "$SCRIPTS_DIR/setup/setup_homebrew.sh" ]; then
+        setup_homebrew
+      else
+        log_error "setup_homebrew.sh script not found at $SCRIPTS_DIR/setup/setup_homebrew.sh"
+        log_info "Skipping Homebrew package installation."
+      fi
     else
       log_info "Skipping Homebrew package installation."
     fi
   else
-    log_warning "Homebrew not installed. Skipping package installation."
+    log_warning "Homebrew not installed and setup script not found."
     log_info "Run the following to install Homebrew first:"
     log_info "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
   fi

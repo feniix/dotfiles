@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Setup Homebrew and install packages
-# This script installs Homebrew if missing and manages packages via Brewfile
+# Homebrew Setup Script
+# Installs Homebrew and packages from Brewfile
 
 set -e
 
@@ -34,78 +34,65 @@ log_error() {
   echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Detect architecture
-detect_arch() {
-  if [[ "$(uname -m)" == "arm64" ]]; then
-    echo "arm64"
-  else
-    echo "x86_64"
-  fi
+# Check if a command exists
+has() {
+  type "$1" > /dev/null 2>&1
+  return $?
 }
 
-# Detect system type
-detect_system() {
-  local arch=$(detect_arch)
-  
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    if [[ "$arch" == "arm64" ]]; then
-      echo "macos-apple-silicon"
-    else
-      echo "macos-intel"
-    fi
-  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "linux"
-  else
-    echo "unknown"
-  fi
-}
-
-# Install Homebrew if not already installed
+# Install Homebrew if not present
 install_homebrew() {
-  if ! command -v brew &> /dev/null; then
-    log_info "Homebrew not found. Installing Homebrew..."
-    
-    # Run the Homebrew installer
+  if ! has "brew"; then
+    log_info "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     
-    # Add Homebrew to PATH for the current session
-    local system=$(detect_system)
-    if [[ "$system" == "macos-apple-silicon" ]]; then
-      eval "$(/opt/homebrew/bin/brew shellenv)"
-      log_info "Added Homebrew to the current PATH for Apple Silicon Mac"
-    elif [[ "$system" == "macos-intel" ]]; then
-      eval "$(/usr/local/bin/brew shellenv)"
-      log_info "Added Homebrew to the current PATH for Intel Mac"
-    elif [[ "$system" == "linux" ]]; then
+    # Set up Homebrew environment based on platform
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      if [[ $(uname -m) == "arm64" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      else
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-      log_info "Added Homebrew to the current PATH for Linux"
     fi
     
-    # Verify installation
-    if command -v brew &> /dev/null; then
-      log_success "Homebrew installed successfully!"
-    else
-      log_error "Homebrew installation failed. Please install manually and try again."
-      exit 1
-    fi
+    log_success "Homebrew installed successfully!"
   else
     log_info "Homebrew is already installed."
+    
+    # Ensure shell environment is set up
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      if [[ $(uname -m) == "arm64" ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+      else
+        eval "$(/usr/local/bin/brew shellenv)"
+      fi
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
   fi
 }
 
-# Setup Brewfile in XDG location
-setup_brewfile() {
-  log_info "Setting up Brewfile in XDG location..."
+# Setup XDG-compliant Brewfile location
+setup_xdg_brewfile() {
+  log_info "Setting up XDG-compliant Brewfile location..."
   
-  # Create XDG directory for Homebrew
   mkdir -p "${XDG_CONFIG_HOME}/homebrew"
   
-  # Link Brewfile to XDG location if it exists
   if [ -f "$BREWFILE" ]; then
-    ln -sf "$BREWFILE" "$BREWFILE_XDG"
-    log_success "Linked Brewfile → $BREWFILE_XDG"
+    # Create symlink to XDG location
+    if [ ! -L "$BREWFILE_XDG" ]; then
+      ln -sf "$BREWFILE" "$BREWFILE_XDG"
+      log_success "Linked Brewfile → $BREWFILE_XDG"
+    fi
+    
+    # Set Homebrew to use XDG location
+    export HOMEBREW_BREWFILE="$BREWFILE_XDG"
+    log_success "Set HOMEBREW_BREWFILE to $BREWFILE_XDG"
   else
-    log_warning "Brewfile not found at $BREWFILE"
+    log_error "Brewfile not found at $BREWFILE"
+    return 1
   fi
 }
 
@@ -113,70 +100,53 @@ setup_brewfile() {
 install_packages() {
   log_info "Installing packages from Brewfile..."
   
-  # Check if Brewfile exists in either location
-  if [ -f "$BREWFILE_XDG" ]; then
-    log_info "Using Brewfile at $BREWFILE_XDG"
-    brew bundle --file="$BREWFILE_XDG"
-  elif [ -f "$BREWFILE" ]; then
-    log_info "Using Brewfile at $BREWFILE"
-    brew bundle --file="$BREWFILE"
-  else
-    log_error "No Brewfile found. Skipping package installation."
+  if [ ! -f "$BREWFILE" ]; then
+    log_error "Brewfile not found at $BREWFILE"
     return 1
   fi
   
-  log_success "Homebrew packages installed successfully!"
-}
-
-# Homebrew post-installation setup
-post_install_setup() {
-  log_info "Running post-installation setup..."
-  
-  # Detect system
-  local system=$(detect_system)
-  
-  # Create a Brewfile.lock.json in the XDG location
-  if [ -f "$BREWFILE_XDG" ]; then
-    touch "${XDG_CONFIG_HOME}/homebrew/Brewfile.lock.json"
-  fi
-  
-  # Apply specific fixes based on architecture
-  if [[ "$system" == "macos-apple-silicon" ]]; then
-    log_info "Applying Apple Silicon specific configurations..."
-    
-    # Fix any potential Rosetta-related issues
-    # This is a preventive measure for packages that might need Rosetta
-    if ! pgrep oahd >/dev/null 2>&1; then
-      log_info "Rosetta not detected. You may want to install it using:"
-      log_info "  softwareupdate --install-rosetta"
-    fi
-  fi
-  
-  log_success "Post-installation setup completed."
-}
-
-# Main function
-main() {
-  log_info "Starting Homebrew setup..."
-  
-  # Install Homebrew
-  install_homebrew
-  
-  # Update Homebrew
+  # Update Homebrew first
   log_info "Updating Homebrew..."
   brew update
   
-  # Setup Brewfile
-  setup_brewfile
-  
   # Install packages
-  install_packages
+  log_info "Installing packages (this may take a while)..."
+  brew bundle install --file="$BREWFILE" --verbose
   
-  # Run post-installation setup
-  post_install_setup
+  # Create Brewfile.lock.json in XDG location
+  if [ -f "${DOTFILES_DIR}/Brewfile.lock.json" ]; then
+    mkdir -p "${XDG_CONFIG_HOME}/homebrew"
+    cp "${DOTFILES_DIR}/Brewfile.lock.json" "${XDG_CONFIG_HOME}/homebrew/Brewfile.lock.json"
+    log_success "Copied Brewfile.lock.json to XDG location"
+  else
+    # Create empty lock file if it doesn't exist
+    touch "${XDG_CONFIG_HOME}/homebrew/Brewfile.lock.json"
+  fi
   
-  log_success "Homebrew setup completed successfully!"
+  log_success "All packages installed successfully!"
 }
 
-# Execute main function
-main 
+# Main setup function
+setup_homebrew() {
+  log_info "Setting up Homebrew and packages..."
+  
+  # Install Homebrew if needed
+  install_homebrew
+  
+  # Setup XDG-compliant Brewfile
+  setup_xdg_brewfile
+  
+  # Ask user if they want to install packages
+  read -p "Install all packages from Brewfile? This may take a while. [y/N] " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    install_packages
+  else
+    log_info "Skipping package installation. Run 'brew bundle install' later to install packages."
+  fi
+  
+  log_success "Homebrew setup completed!"
+}
+
+# Run the setup
+setup_homebrew 
