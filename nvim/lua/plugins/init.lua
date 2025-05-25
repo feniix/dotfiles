@@ -55,7 +55,7 @@ function M.setup()
       lazy = true, -- Make plugins lazy by default
     },
     install = {
-      colorscheme = { "neosolarized" }, -- Try to load this colorscheme when installing
+      colorscheme = { "catppuccin" }, -- Try to load this colorscheme when installing
     },
     checker = {
       enabled = true,
