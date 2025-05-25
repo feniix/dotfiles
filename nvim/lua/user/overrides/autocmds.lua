@@ -16,7 +16,7 @@ function M.setup(user_autocmds)
   
   for _, autocmd in ipairs(user_autocmds) do
     if type(autocmd) == 'table' and autocmd.event then
-      local opts = vim.deepcopy(autocmd)
+      local opts = vim.tbl_deep_extend('force', {}, autocmd)
       
       -- Set the group for organization
       opts.group = user_group

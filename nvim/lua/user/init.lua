@@ -107,17 +107,7 @@ function M.safe_override(original, override)
     return original
   end
   
-  local result = vim.deepcopy(original or {})
-  
-  for key, value in pairs(override) do
-    if type(value) == 'table' and type(result[key]) == 'table' then
-      result[key] = M.safe_override(result[key], value)
-    else
-      result[key] = value
-    end
-  end
-  
-  return result
+  return vim.tbl_deep_extend('force', vim.deepcopy(original or {}), override)
 end
 
 -- Utility function to safely extend a list
