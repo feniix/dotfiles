@@ -164,7 +164,7 @@ The configuration includes several custom commands for convenience:
 
 ## Customization
 
-The diffview configuration is in `nvim/lua/user/diffview.lua`. You can:
+The diffview configuration is in `nvim/lua/plugins/config/diffview.lua`. You can:
 - Change panel positions and sizes
 - Modify keybindings
 - Add custom Git commands

@@ -176,7 +176,7 @@ In visual or operator-pending mode, which-key shows text object options:
 
 ## Customization
 
-All groups and descriptions are defined in `nvim/lua/user/which-key.lua`. You can:
+All groups and descriptions are defined in `nvim/lua/plugins/config/which-key.lua`. You can:
 - Add new key groups
 - Modify descriptions
 - Change the popup appearance

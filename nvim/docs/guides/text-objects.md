@@ -101,12 +101,12 @@ func calculateSum(a int, b int) int {
 Quickly reorganize code by swapping elements:
 
 ### Parameters/Arguments
-- `<leader>na` - Swap with **N**ext **A**rgument
-- `<leader>pa` - Swap with **P**revious **A**rgument
+- `<leader>sna` - Swap with **N**ext **A**rgument
+- `<leader>spa` - Swap with **P**revious **A**rgument
 
 ### Functions/Methods
-- `<leader>nm` - Swap with **N**ext **M**ethod
-- `<leader>pm` - Swap with **P**revious **M**ethod
+- `<leader>snm` - Swap with **N**ext **M**ethod
+- `<leader>spm` - Swap with **P**revious **M**ethod
 
 ## LSP Integration
 

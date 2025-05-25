@@ -45,22 +45,27 @@ Plugin specifications define what plugins to install and when to load them.
 ### ui.lua - UI Related Plugins
 
 **Core UI Plugins**:
-- **neo-solarized.nvim** - Color scheme
+- **catppuccin/nvim** - Color scheme
 - **lualine.nvim** - Status line
-- **bufferline.nvim** - Buffer line
 - **which-key.nvim** - Keymap help
 - **indent-blankline.nvim** - Indentation guides
-- **gitsigns.nvim** - Git integration
+- **nvim-web-devicons** - File icons
+- **rainbow-delimiters.nvim** - Rainbow parentheses
+- **todo-comments.nvim** - TODO highlighting
+- **nvim-notify** - Enhanced notifications
 
 **Example Specification**:
 ```lua
 {
-  "ishan9299/nvim-solarized-lua",
-  name = "neosolarized",
+  "catppuccin/nvim",
+  name = "catppuccin",
   lazy = false,
   priority = 1000,
   config = function()
-    require("plugins.config.colorscheme")
+    require("catppuccin").setup({
+      flavour = "mocha",
+    })
+    vim.cmd.colorscheme "catppuccin"
   end,
 }
 ```
@@ -72,7 +77,12 @@ Plugin specifications define what plugins to install and when to load them.
 - **nvim-treesitter** - Syntax highlighting
 - **comment.nvim** - Smart commenting
 - **nvim-autopairs** - Auto-closing brackets
-- **todo-comments.nvim** - TODO highlighting
+- **gitsigns.nvim** - Git integration
+- **nvim-surround** - Surround text objects
+- **retrail.nvim** - Whitespace management
+- **splitjoin.vim** - Split/join code constructs
+- **editorconfig-vim** - EditorConfig support
+- **nvim-ts-context-commentstring** - Context-aware commenting
 
 **Example with Event-based Loading**:
 ```lua
@@ -92,15 +102,17 @@ Plugin specifications define what plugins to install and when to load them.
 - **nvim-lspconfig** - LSP configuration
 - **nvim-cmp** - Completion engine
 - **mason.nvim** - LSP installer
-- **null-ls.nvim** - Diagnostics and formatting
+- **nvim-dap** - Debug Adapter Protocol
+- **nvim-dap-ui** - Debug UI
+- **nvim-dap-virtual-text** - Debug virtual text
 
 ### tools.lua - Development Tools
 
 **Development Tools**:
-- **nvim-dap** - Debug Adapter Protocol
-- **gitsigns.nvim** - Git integration
+- **vim-fugitive** - Git interface
 - **diffview.nvim** - Git diff viewer
-- **trouble.nvim** - Diagnostics viewer
+- **vim-surround** - Surround text objects
+- **lazy.nvim** - Plugin management
 
 ### lang/ - Language-Specific Plugins
 
@@ -668,23 +680,19 @@ return {
 
 The system provides commands for plugin management:
 
-### Available Commands
-```vim
-:InstallPlugins    " Install missing plugins
-:UpdatePlugins     " Update all plugins
-:CleanPlugins      " Remove unused plugins
-:PluginStatus      " Show plugin status
-:ReloadConfig      " Reload configuration
-```
+### Lazy.nvim Commands
+The plugin system uses lazy.nvim for plugin management:
 
-### Lazy.nvim Interface
-Access the lazy.nvim interface:
 ```vim
 :Lazy              " Open lazy.nvim UI
-:Lazy install      " Install plugins
-:Lazy update       " Update plugins
-:Lazy clean        " Clean unused plugins
+:Lazy install      " Install missing plugins
+:Lazy update       " Update all plugins
+:Lazy clean        " Remove unused plugins
+:Lazy sync         " Install missing + update + clean
 :Lazy profile      " Profile startup time
+:Lazy log          " Show recent updates
+:Lazy check        " Check for updates
+:Lazy restore      " Restore plugins to lockfile state
 ```
 
 ## Performance Optimization

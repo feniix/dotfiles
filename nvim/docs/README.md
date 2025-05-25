@@ -26,7 +26,7 @@ Practical guides for daily usage and specific features:
 
 ### **📋 Documentation Integration**
 - [Integration Guide](INTEGRATION_GUIDE.md) - How all documentation sources work together
-- [Implementation Status](../REORGANIZATION.md) - Complete feature tracking and achievements
+- [Architecture Migration](ARCHITECTURE_MIGRATION.md) - Complete feature tracking and achievements
 
 ## Architecture
 

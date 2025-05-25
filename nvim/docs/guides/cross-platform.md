@@ -1,6 +1,6 @@
 # Cross-Platform Usage Guide
 
-This guide covers platform-specific features, configurations, and optimizations for the Neovim configuration across macOS, Linux, and Windows.
+This guide covers platform-specific features, configurations, and optimizations for the Neovim configuration across macOS and Linux. Windows users should use WSL.
 
 ## 🌍 Platform Detection
 
@@ -10,12 +10,17 @@ The configuration automatically detects your platform and applies appropriate se
 -- Platform detection (from core/utils.lua)
 local utils = require('core.utils')
 
-if utils.is_macos() then
+if utils.platform.is_mac() then
   -- macOS specific settings
-elseif utils.is_linux() then  
+elseif utils.platform.is_linux() then  
   -- Linux specific settings
-elseif utils.is_windows() then
-  -- Windows specific settings
+end
+
+-- Or use global functions (backward compatibility)
+if is_mac() then
+  -- macOS specific settings
+elseif is_linux() then
+  -- Linux specific settings
 end
 ```
 
@@ -29,7 +34,7 @@ end
 ### **Optimizations**
 ```lua
 -- macOS specific optimizations
-if utils.is_macos() then
+if utils.platform.is_mac() then
   vim.opt.clipboard = "unnamedplus"  -- System clipboard integration
   vim.g.python3_host_prog = "/usr/bin/python3"  -- System Python
   
@@ -68,7 +73,7 @@ The configuration works across all major Linux distributions:
 ### **System Integration**
 ```lua
 -- Linux specific optimizations
-if utils.is_linux() then
+if utils.platform.is_linux() then
   -- Clipboard integration (X11 or Wayland)
   if os.getenv("WAYLAND_DISPLAY") then
     vim.opt.clipboard = "unnamedplus"  -- Wayland clipboard
@@ -107,27 +112,32 @@ sudo apt install wl-clipboard  # Wayland
 - **i3/Sway**: Tiling window manager optimizations
 - **XFCE**: Lightweight desktop integration
 
-## 🪟 Windows Specific Features
+## 🪟 Windows Users: Use WSL
 
-### **PowerShell Integration**
-```lua
--- Windows specific optimizations
-if utils.is_windows() then
-  -- Use PowerShell as default shell
-  vim.opt.shell = "powershell"
-  vim.opt.shellcmdflag = "-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command"
-  vim.opt.shellquote = ""
-  vim.opt.shellxquote = ""
-  
-  -- Windows path handling
-  vim.opt.shellslash = false  -- Use backslashes
-end
+For Windows users, we recommend using Windows Subsystem for Linux (WSL) instead of native Windows support:
+
+### **Why WSL?**
+- **Better compatibility**: All Unix tools work natively
+- **Consistent experience**: Same configuration works across macOS/Linux/WSL
+- **No platform-specific issues**: Avoid Windows path/shell complications
+- **Better performance**: Native Unix environment
+
+### **WSL Setup**
+```bash
+# Install WSL2 with Ubuntu
+wsl --install -d Ubuntu
+
+# Install Neovim in WSL
+sudo apt update
+sudo apt install neovim git curl build-essential
+
+# Clone and setup this configuration
+git clone <your-repo> ~/.config/nvim
 ```
 
-### **WSL Support**
-Full support for Windows Subsystem for Linux:
+### **WSL Clipboard Integration**
 ```lua
--- WSL detection and optimizations
+-- WSL detection and clipboard setup
 local function is_wsl()
   local version_file = io.open("/proc/version", "r")
   if version_file then
@@ -139,7 +149,6 @@ local function is_wsl()
 end
 
 if is_wsl() then
-  -- WSL specific clipboard integration
   vim.g.clipboard = {
     name = 'WslClipboard',
     copy = {
@@ -155,56 +164,29 @@ if is_wsl() then
 end
 ```
 
-### **Required Tools**
-```powershell
-# Using Chocolatey
-choco install neovim ripgrep fd fzf git
-choco install nodejs python3 golang rust
-
-# Using Scoop
-scoop install neovim ripgrep fd fzf git
-scoop install nodejs python go rust
-
-# Using winget
-winget install Neovim.Neovim
-winget install BurntSushi.ripgrep.MSVC
-winget install sharkdp.fd
-```
-
-### **Terminal Recommendations**
-- **Windows Terminal**: Modern terminal with excellent Neovim support
-- **PowerShell**: Built-in with good integration
-- **WSL2**: Linux environment on Windows
-
 ## ⚙️ Platform-Specific Configurations
 
 ### **Font Handling**
 ```lua
 -- Platform-specific font configuration
 local function setup_fonts()
-  if utils.is_macos() then
+  if utils.platform.is_mac() then
     vim.opt.guifont = "FiraCode Nerd Font:h14"
-  elseif utils.is_linux() then
+  elseif utils.platform.is_linux() then
     vim.opt.guifont = "FiraCode Nerd Font 12"
-  elseif utils.is_windows() then
-    vim.opt.guifont = "FiraCode_NF:h12"
   end
 end
 ```
 
 ### **Path Handling**
 ```lua
--- Cross-platform path utilities
+-- Unix path utilities (macOS/Linux)
 local function get_separator()
-  return utils.is_windows() and "\\" or "/"
+  return "/"
 end
 
 local function normalize_path(path)
-  if utils.is_windows() then
-    return path:gsub("/", "\\")
-  else
-    return path:gsub("\\", "/")
-  end
+  return path:gsub("\\", "/")
 end
 ```
 
@@ -212,15 +194,12 @@ end
 ```lua
 -- Platform-specific environment setup
 local function setup_environment()
-  if utils.is_macos() then
+  if utils.platform.is_mac() then
     -- macOS specific environment
     vim.env.BROWSER = "open"
-  elseif utils.is_linux() then
+  elseif utils.platform.is_linux() then
     -- Linux specific environment  
     vim.env.BROWSER = "xdg-open"
-  elseif utils.is_windows() then
-    -- Windows specific environment
-    vim.env.BROWSER = "start"
   end
 end
 ```
@@ -242,10 +221,8 @@ return {
       }
       
       -- Platform-specific options
-      if require('core.utils').is_macos() then
+      if require('core.utils').platform.is_mac() then
         opts.linespace = 2  -- Extra line spacing on macOS
-      elseif require('core.utils').is_windows() then
-        opts.encoding = "utf-8"  -- Ensure UTF-8 on Windows
       end
       
       return opts
@@ -255,7 +232,7 @@ return {
       local keymaps = {}
       
       -- Platform-specific keymaps
-      if require('core.utils').is_macos() then
+      if require('core.utils').platform.is_mac() then
         keymaps['<D-s>'] = { ':w<CR>', 'Save with Cmd+S' }
         keymaps['<D-v>'] = { '"+p', 'Paste with Cmd+V' }
       end
@@ -273,7 +250,7 @@ plugins = {
   specs = function()
     local specs = {}
     
-    if require('core.utils').is_macos() then
+    if require('core.utils').platform.is_mac() then
       table.insert(specs, {
         "rcarriga/nvim-notify",
         opts = { background_colour = "#000000" }  -- macOS dark mode
@@ -291,21 +268,16 @@ plugins = {
 ```lua
 -- Performance tuning per platform
 local function setup_performance()
-  if utils.is_macos() then
+  if utils.platform.is_mac() then
     -- macOS optimizations
     vim.opt.updatetime = 300
     vim.opt.timeout = true
     vim.opt.timeoutlen = 500
     
-  elseif utils.is_linux() then
+  elseif utils.platform.is_linux() then
     -- Linux optimizations
     vim.opt.updatetime = 100  -- Faster on Linux
     vim.opt.lazyredraw = true -- Faster rendering
-    
-  elseif utils.is_windows() then
-    -- Windows optimizations  
-    vim.opt.updatetime = 500  -- More conservative on Windows
-    vim.opt.hidden = true     -- Better buffer management
   end
 end
 ```
@@ -314,8 +286,8 @@ end
 ```lua
 -- Platform-specific resource limits
 local function setup_resources()
-  local memory_limit = utils.is_windows() and "1g" or "2g"
-  local max_plugins = utils.is_windows() and 50 or 100
+  local memory_limit = "2g"
+  local max_plugins = 100
   
   -- Apply platform-appropriate limits
 end
@@ -335,10 +307,10 @@ end
 - **Permission errors**: Check file permissions in `~/.config/nvim`
 - **Missing tools**: Install development packages for your distribution
 
-#### **Windows Issues**
-- **PowerShell errors**: Enable script execution with `Set-ExecutionPolicy RemoteSigned`
-- **Path issues**: Use forward slashes in configuration paths
-- **WSL clipboard**: Install `wslu` package for better integration
+#### **WSL Issues**
+- **Clipboard not working**: Ensure `clip.exe` is available in PATH
+- **Path issues**: Use Unix paths within WSL environment
+- **Performance**: WSL2 performs better than WSL1
 
 ### **Health Checks**
 Run platform-specific health checks:
@@ -350,14 +322,14 @@ Run platform-specific health checks:
 
 ## 📋 Platform Comparison
 
-| Feature | macOS | Linux | Windows |
-|---------|-------|-------|---------|
-| **Clipboard** | Native | xclip/wl-clipboard | Native/WSL |
-| **Performance** | Excellent | Excellent | Good |
+| Feature | macOS | Linux | WSL |
+|---------|-------|-------|-----|
+| **Clipboard** | Native | xclip/wl-clipboard | clip.exe |
+| **Performance** | Excellent | Excellent | Very Good |
 | **Terminal** | iTerm2/Alacritty | Many options | Windows Terminal |
-| **Package Manager** | Homebrew | APT/DNF/Pacman | Chocolatey/Scoop |
-| **Development Tools** | Excellent | Excellent | Good (WSL better) |
+| **Package Manager** | Homebrew | APT/DNF/Pacman | APT (Ubuntu) |
+| **Development Tools** | Excellent | Excellent | Excellent |
 | **Font Support** | Excellent | Good | Good |
-| **Integration** | Native | DE-dependent | PowerShell/WSL |
+| **Integration** | Native | DE-dependent | Windows/Linux hybrid |
 
-This cross-platform guide ensures you get the best Neovim experience regardless of your operating system! 🎉 
+This guide ensures you get the best Neovim experience on macOS, Linux, or WSL! 🎉 

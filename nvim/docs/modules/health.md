@@ -89,9 +89,9 @@ Validates the foundation of the configuration system.
 **Example validation:**
 ```lua
 -- Platform detection test
-local os_name = utils.get_os()  -- Should return: macos, linux, windows, etc.
-local terminal = utils.get_terminal()  -- Should detect terminal type
-local clipboard = utils.get_clipboard_config()  -- Should configure clipboard
+local os_name = utils.platform.get_os()  -- Should return: macos, linux, etc.
+local terminal = utils.platform.get_terminal()  -- Should detect terminal type
+local clipboard = utils.platform.get_clipboard_config()  -- Should configure clipboard
 
 -- Options validation
 vim.opt.number         -- Should be true

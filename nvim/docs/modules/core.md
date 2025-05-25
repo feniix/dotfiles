@@ -50,10 +50,13 @@ core.setup() -- Load all core modules
 local utils = require('core.utils')
 
 -- Platform detection
-utils.is_macos()     -- Returns true on macOS
-utils.is_linux()     -- Returns true on Linux
-utils.is_windows()   -- Returns true on Windows
-utils.get_os()       -- Returns 'Darwin', 'Linux', or 'Windows'
+utils.platform.is_mac()     -- Returns true on macOS
+utils.platform.is_linux()   -- Returns true on Linux
+utils.platform.get_os()     -- Returns 'macos', 'linux', or 'unknown'
+
+-- Global functions (backward compatibility)
+is_mac()     -- Returns true on macOS
+is_linux()   -- Returns true on Linux
 ```
 
 #### File System Utilities
@@ -286,10 +289,10 @@ The core modules automatically adapt to different platforms:
 - Linux-specific file paths
 - Distribution-specific optimizations
 
-### Windows
-- Windows clipboard integration
-- Path separator handling
-- PowerShell integration
+### WSL Support
+- WSL clipboard integration via clip.exe
+- Unix path handling in WSL environment
+- Cross-platform compatibility
 
 ## Performance Considerations
 
@@ -304,7 +307,7 @@ The core modules automatically adapt to different platforms:
 
 1. **Keymap Conflicts**: Check for conflicting keymaps in user overrides
 2. **Option Not Working**: Verify option name and value in `user/overrides/options.lua`
-3. **Platform Issues**: Check platform detection with `:lua print(require('core.utils').get_os())`
+3. **Platform Issues**: Check platform detection with `:lua print(require('core.utils').platform.get_os())`
 
 ### Debugging
 

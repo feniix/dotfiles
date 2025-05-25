@@ -1,248 +1,254 @@
 # Documentation Integration Guide
 
-This guide explains how the various documentation sources work together to provide comprehensive coverage of the Neovim configuration system.
+This guide explains how the documentation sources work together to provide comprehensive coverage of the Neovim configuration system.
 
-## 📚 Documentation Ecosystem
+## 📚 Documentation Structure
 
-### **Unified Documentation Structure**
+### **Current Documentation Layout**
 
 ```
 nvim/docs/
 ├── Technical Reference (modules/)
-│   ├── Architecture and implementation details
-│   ├── API documentation
-│   ├── Configuration patterns
-│   └── Integration guides
+│   ├── core.md - Core functionality and platform detection
+│   ├── plugins.md - Plugin system and configurations
+│   ├── user.md - User override system
+│   ├── languages.md - Language-specific configurations
+│   └── health.md - Health check system
 │
 ├── User Guides (guides/)
-│   ├── Practical usage tutorials
-│   ├── Daily workflow guides
-│   ├── Feature-specific instructions
-│   └── Tips and troubleshooting
+│   ├── README.md - Guide overview and navigation
+│   ├── which-key.md - Keymap discovery and reference
+│   ├── diffview.md - Git diff and history workflows
+│   ├── colorschemes.md - Theme customization
+│   ├── text-objects.md - Advanced text manipulation
+│   ├── health-checks.md - System validation
+│   └── cross-platform.md - macOS/Linux/WSL usage
 │
-└── Implementation Status (*.md)
-    ├── Completion tracking
-    ├── Implementation highlights
-    ├── Recent accomplishments
-    └── Future roadmap
+└── Implementation Documentation
+    ├── README.md - Main documentation index
+    ├── INTEGRATION_GUIDE.md - This document
+    ├── TESTING_STRATEGY.md - Testing approach
+    └── ARCHITECTURE_MIGRATION.md - System architecture
 ```
-
-**Benefits of Unified Structure**:
-- 📁 All nvim documentation in one location
-- 🔗 Simpler cross-references and navigation
-- 📚 Consistent documentation patterns
-- 🚀 Easier maintenance and updates
 
 ## 🔄 Information Flow
 
-### **How `USER_OVERRIDE_SYSTEM_COMPLETE.md` Informs Module Documentation**
+### **Technical Reference → User Guides**
 
-The completion document provides **implementation status** and **technical achievements** that enhance the module documentation:
+Technical documentation provides implementation details that inform practical guides:
 
-#### **1. Implementation Proof**
+#### **Core Modules → Platform Guides**
 ```markdown
-USER_OVERRIDE_SYSTEM_COMPLETE.md provides:
-- ✅ Verification that features are actually implemented
-- 📊 Detailed file structure and line counts
-- 🎯 Specific implementation highlights
-- 🚀 Production-ready status confirmation
+docs/modules/core.md provides:
+- Platform detection functions (utils.platform.is_mac(), utils.platform.is_linux())
+- Clipboard configuration patterns
+- Path handling utilities
 
-This informs docs/modules/user.md by:
-- Adding "Implementation Status" sections
-- Providing real file examples
-- Confirming feature completeness
-- Showing actual achievements
+This informs docs/guides/cross-platform.md:
+- Platform-specific setup instructions
+- Clipboard integration examples
+- WSL configuration patterns
 ```
 
-#### **2. Technical Details Integration**
-```lua
--- From USER_OVERRIDE_SYSTEM_COMPLETE.md
-"user/init.lua - Main override system with complete API (120+ lines)"
+#### **Plugin System → Feature Guides**
+```markdown
+docs/modules/plugins.md provides:
+- Plugin configuration architecture
+- Lazy loading specifications
+- Override system integration
 
--- Becomes in docs/modules/user.md
-"The user override system (`user/init.lua`) provides a complete API for 
- customization with over 120 lines of robust implementation including
- error handling, graceful degradation, and comprehensive integration."
+This informs guides like:
+- which-key.md - Keymap plugin usage
+- diffview.md - Git workflow plugin usage
+- colorschemes.md - Theme plugin configuration
 ```
 
-#### **3. Feature Completeness Validation**
-```markdown
-USER_OVERRIDE_SYSTEM_COMPLETE.md shows:
-- [x] Core module override system ✅
-- [x] Plugin override capabilities ✅  
-- [x] Custom module system ✅
-- [x] Hot reload functionality ✅
+### **User Guides → Technical Reference**
 
-This validates that docs/modules/user.md can confidently state:
-"The user override system is COMPLETE and production-ready"
+Practical guides validate and enhance technical documentation:
+
+#### **Usage Patterns → API Design**
+```markdown
+docs/guides/which-key.md shows:
+- Common keymap discovery workflows
+- Frequently used key combinations
+- User interaction patterns
+
+This validates docs/modules/plugins.md:
+- which-key configuration completeness
+- Keymap organization effectiveness
+- Plugin integration success
 ```
 
-### **How `docs/guides/` Guides Inform Module Documentation**
-
-The practical guides provide **real-world usage patterns** and **actionable examples**:
-
-#### **1. Which-Key Guide → Plugin Documentation**
+#### **Workflow Examples → Configuration Patterns**
 ```markdown
-WHICH_KEY_GUIDE.md provides:
-- 🔍 Complete keymap reference
-- 📋 Organized key groups
-- 🎯 Text object documentation
-- ⚡ Usage tips and workflows
+docs/guides/diffview.md demonstrates:
+- Git workflow integration
+- File navigation patterns
+- Merge conflict resolution
 
-This enhances docs/modules/plugins.md by:
-- Adding practical keymap examples
-- Showing real configuration patterns
-- Providing user-focused explanations
-- Including troubleshooting tips
-```
-
-#### **2. Diffview Guide → Plugin Configuration**
-```markdown
-DIFFVIEW_GUIDE.md provides:
-- 🌊 Complete workflow examples
-- ⌨️  Detailed navigation keymaps
-- 🔧 Interface configuration patterns
-- 🎭 Merge conflict resolution steps
-
-This enhances docs/modules/plugins.md by:
-- Adding comprehensive usage examples
-- Showing advanced configuration options
-- Providing step-by-step workflows
-- Including integration patterns
-```
-
-#### **3. Cross-Pollination Benefits**
-```markdown
-User Guides → Technical Documentation:
-- Real usage patterns inform API design
-- Common workflows guide configuration examples
-- User pain points highlight important features
-- Practical tips enhance troubleshooting sections
-
-Technical Documentation → User Guides:
-- Implementation details validate guide accuracy
-- API capabilities expand guide coverage
-- Configuration patterns inspire new workflows
-- System architecture explains guide organization
+This enhances docs/modules/plugins.md:
+- Diffview configuration examples
+- Integration with other Git tools
+- Performance optimization patterns
 ```
 
 ## 🔀 Integration Patterns
 
-### **1. Cross-References**
+### **Cross-References**
 
-Each documentation layer references others appropriately:
+Documentation layers reference each other appropriately:
 
 ```markdown
 # In docs/modules/plugins.md
-For practical usage examples and daily workflows, see:
-- [Which-Key Guide](../../guides/WHICH_KEY_GUIDE.md)
-- [Diffview Guide](../../guides/DIFFVIEW_GUIDE.md)
+For practical usage examples:
+- [Which-Key Guide](../guides/which-key.md)
+- [Diffview Guide](../guides/diffview.md)
 
-# In docs/guides/WHICH_KEY_GUIDE.md  
-For technical implementation details, see:
-- [Plugin System Documentation](../modules/plugins.md)
-- [User Override Documentation](../modules/user.md)
+# In docs/guides/which-key.md  
+For technical implementation:
+- [Plugin System](../modules/plugins.md)
+- [User Override System](../modules/user.md)
 ```
 
-### **2. Information Layering**
+### **Information Layering**
 
-Different documentation types serve different needs:
+Different documentation serves different needs:
 
 ```markdown
 📊 Technical Reference (modules/):
-- "The which-key configuration uses the v3 API with add() method"
-- "Plugin specifications define lazy loading conditions"
-- "Override system provides safe configuration merging"
+- "Plugin specifications use lazy.nvim with conditional loading"
+- "User override system provides safe configuration merging"
+- "Health checks validate system integrity"
 
-📖 User Guide (guides/):
-- "Press <leader> and wait to see available options"
-- "Use <Tab> to cycle through changed files in diffview"
-- "Copy this example to customize your keymaps"
+📖 User Guides (guides/):
+- "Press <leader> to see available keymaps"
+- "Use <Tab> to cycle through diffview files"
+- "Run :checkhealth to validate setup"
 
-✅ Status Tracking (*.md):
-- "which-key.lua - Comprehensive keymap management (COMPLETE)"
-- "User override system - Production ready with 400+ lines docs"
-- "Plugin configuration migration - All major configs complete"
+🏗️ Implementation Docs:
+- "Testing strategy covers unit and integration tests"
+- "Architecture migration maintains backward compatibility"
+- "Documentation integration ensures consistency"
 ```
 
-### **3. Synchronized Updates**
+### **Content Synchronization**
 
-When implementations change, all documentation layers update:
+When implementations change, documentation updates together:
 
 ```markdown
 Implementation Change:
-- New plugin configuration added to plugins/config/
+- New plugin added to plugins/specs/
 
-Updates Required:
-1. Technical docs (modules/plugins.md) - API and configuration details
-2. User guide (guides/) - New practical examples and workflows  
-3. Status tracking (*.md) - Mark feature as complete with details
+Required Updates:
+1. Technical docs (modules/plugins.md) - Add plugin specification
+2. User guide (guides/) - Add usage examples if user-facing
+3. Health checks (modules/health.md) - Add validation if needed
 
 Cross-references:
-- Technical docs link to user guides for examples
-- User guides link to technical docs for deep details
-- Status docs validate both with implementation proof
+- Technical docs link to relevant user guides
+- User guides reference technical implementation
+- Health system validates documented features
 ```
 
-## 📋 Content Distribution Strategy
+## 📋 Content Distribution
 
 ### **Technical Documentation** (`modules/`)
 
 **Focuses on:**
-- 🏗️ Architecture and design principles
-- 🔧 API documentation and interfaces  
-- ⚙️ Configuration patterns and options
-- 🔗 Integration points and dependencies
-- 🎯 User override capabilities
-- 📈 Performance considerations
+- System architecture and design
+- API documentation and interfaces
+- Configuration patterns and options
+- Integration points and dependencies
+- Performance considerations
 
-**Example Topics:**
-- "Core module loading order and dependencies"
-- "Plugin specification vs configuration separation"
-- "User override system API and safe merging"
-- "Language-specific plugin architecture"
+**Coverage:**
+- `core.md` - Platform detection, utilities, options, keymaps, autocmds
+- `plugins.md` - Plugin management, specifications, configurations
+- `user.md` - Override system, customization patterns
+- `languages.md` - Language-specific configurations and LSP
+- `health.md` - Validation system and diagnostics
 
 ### **User Guides** (`guides/`)
 
 **Focuses on:**
-- 📱 Daily usage and workflows
-- ⌨️ Keymap references and discovery
-- 🎬 Step-by-step tutorials
-- 💡 Tips, tricks, and best practices
-- 🔍 Feature-specific deep dives
-- 🚨 Troubleshooting common issues
+- Daily usage workflows
+- Feature-specific tutorials
+- Practical examples and tips
+- Troubleshooting common issues
 
-**Example Topics:**
-- "How to use which-key for keymap discovery"
-- "Git workflow with diffview and gitsigns"
-- "Customizing colorschemes and themes"
-- "Advanced text object manipulation"
+**Coverage:**
+- `which-key.md` - Keymap discovery and navigation
+- `diffview.md` - Git workflow and diff visualization
+- `colorschemes.md` - Theme customization and management
+- `text-objects.md` - Advanced text manipulation
+- `health-checks.md` - System validation workflows
+- `cross-platform.md` - Platform-specific usage (macOS/Linux/WSL)
 
-### **Implementation Status** (`*.md`)
+### **Implementation Documentation**
 
 **Focuses on:**
-- ✅ Feature completion tracking
-- 📊 Implementation statistics and metrics
-- 🎉 Recent accomplishments and highlights
-- 🗺️ Roadmap and future plans
-- 🔍 Technical implementation details
-- 🚀 Production readiness status
+- System architecture and migration
+- Testing strategies and validation
+- Documentation integration and maintenance
+- Development patterns and practices
 
-**Example Topics:**
-- "User override system - COMPLETE with 400+ lines documentation"
-- "Plugin configuration migration - All major configs implemented"
-- "Language support - 5 languages with full LSP integration"
+## 🎯 Navigation Strategy
 
-## 🎯 Best Practices for Integration
+### **Entry Points**
 
-### **1. Maintain Consistency**
+Different users start at different places:
+
+```markdown
+🎯 New Users → docs/guides/README.md
+   └─ Practical guides and tutorials
+   └─ Links to technical docs when needed
+
+🔧 Developers → docs/README.md  
+   └─ Technical architecture overview
+   └─ Links to user guides for examples
+
+📊 Contributors → docs/TESTING_STRATEGY.md
+   └─ Development and testing approach
+   └─ Links to architecture documentation
+```
+
+### **Progressive Disclosure**
+
+Information revealed based on user needs:
+
+```markdown
+Level 1: Quick Start
+- Essential keymaps (which-key.md)
+- Basic health checks (health-checks.md)
+- Platform setup (cross-platform.md)
+
+Level 2: Daily Usage  
+- Git workflows (diffview.md)
+- Theme customization (colorschemes.md)
+- Text manipulation (text-objects.md)
+
+Level 3: Technical Details
+- Core system (modules/core.md)
+- Plugin architecture (modules/plugins.md)
+- User customization (modules/user.md)
+
+Level 4: Advanced/Contributing
+- Language support (modules/languages.md)
+- Health system (modules/health.md)
+- Testing strategy (TESTING_STRATEGY.md)
+```
+
+## 🔗 Best Practices
+
+### **Maintain Consistency**
 
 ```markdown
 ✅ Do:
 - Use consistent terminology across all docs
-- Keep cross-references up to date
+- Keep cross-references current
 - Maintain similar structure in related sections
-- Use the same examples where appropriate
+- Use same examples where appropriate
 
 ❌ Avoid:
 - Contradictory information between docs
@@ -251,7 +257,7 @@ Cross-references:
 - Inconsistent naming conventions
 ```
 
-### **2. Leverage Strengths**
+### **Leverage Strengths**
 
 ```markdown
 Technical Docs Excel At:
@@ -265,79 +271,17 @@ User Guides Excel At:
 - Workflow demonstrations
 - Troubleshooting help
 - Learning progression
-
-Status Docs Excel At:
-- Implementation validation
-- Progress tracking
-- Achievement highlighting
-- Technical metrics
 ```
 
-### **3. Avoid Duplication**
-
-```markdown
-Instead of duplicating content:
-- Cross-reference between documentation types
-- Focus each doc type on its strengths
-- Use the "single source of truth" principle
-- Link to authoritative sources
-```
-
-### **4. Regular Synchronization**
+### **Regular Maintenance**
 
 ```markdown
 When making changes:
-1. Update the authoritative source first
+1. Update authoritative source first
 2. Update cross-references and links
 3. Verify consistency across doc types
-4. Update status tracking if applicable
-5. Test all links and examples
+4. Test all links and examples
+5. Update navigation if structure changes
 ```
 
-## 🔗 Navigation Strategy
-
-### **Entry Points**
-
-Different users start at different places:
-
-```markdown
-🎯 New Users → guides/README.md
-   └─ Practical guides and tutorials
-   └─ Links to technical docs when needed
-
-🔧 Developers → nvim/docs/README.md  
-   └─ Technical architecture overview
-   └─ Links to user guides for examples
-
-📊 Contributors → nvim/REORGANIZATION.md
-   └─ Implementation status and progress
-   └─ Links to both technical and user docs
-```
-
-### **Progressive Disclosure**
-
-Information is revealed based on user needs:
-
-```markdown
-Level 1: Quick Start
-- Basic usage patterns
-- Essential keymaps
-- Getting started guides
-
-Level 2: Daily Usage  
-- Complete feature guides
-- Workflow documentation
-- Customization examples
-
-Level 3: Deep Technical
-- Architecture details
-- API documentation
-- Implementation specifics
-
-Level 4: Advanced/Contributing
-- Implementation status
-- Technical achievements
-- Development patterns
-```
-
-This integrated documentation system ensures that users can find the right information at the right level of detail, while maintaining consistency and avoiding duplication across the entire documentation ecosystem. 
+This documentation integration ensures users find appropriate information at the right level of detail while maintaining consistency across the entire system. 

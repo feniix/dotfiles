@@ -45,7 +45,7 @@ Welcome to the practical user guides for the modular Neovim configuration! These
 
 #### 🌍 [Cross-Platform Guide](cross-platform.md)
 **Platform-specific features and configurations**
-- macOS, Linux, and Windows differences
+- macOS and Linux differences (Windows users should use WSL)
 - Platform-specific optimizations
 - Cross-platform compatibility tips
 - Environment-specific setups
@@ -82,7 +82,7 @@ For implementation details and API documentation:
 
 ### **Integration Information**
 - [Integration Guide](../INTEGRATION_GUIDE.md) - How all documentation works together
-- [Implementation Status](../../REORGANIZATION.md) - Feature completion tracking
+- [Testing Strategy](../TESTING_STRATEGY.md) - Development and testing approach
 
 ## 🚀 Getting Started
 

@@ -1,89 +1,139 @@
 # Neovim Colorscheme Guide
 
-This guide explains how to use and customize the NeoSolarized colorscheme in your Neovim setup, as well as how to switch to other colorschemes if desired.
+This guide explains how to use and customize the Catppuccin colorscheme in your Neovim setup, as well as how to switch to other colorschemes if desired.
 
 ## Table of Contents
 
-1. [Using NeoSolarized](#using-neosolarized)
-2. [Toggling Light and Dark Modes](#toggling-light-and-dark-modes)
-3. [Customizing NeoSolarized](#customizing-neosolarized)
+1. [Using Catppuccin](#using-catppuccin)
+2. [Switching Flavours](#switching-flavours)
+3. [Customizing Catppuccin](#customizing-catppuccin)
 4. [Switching to Other Colorschemes](#switching-to-other-colorschemes)
 5. [Adding New Colorschemes](#adding-new-colorschemes)
 6. [Troubleshooting](#troubleshooting)
 
-## Using NeoSolarized
+## Using Catppuccin
 
-Your Neovim configuration is set up to use NeoSolarized, a modern implementation of the classic Solarized colorscheme using the ColorBuddy framework.
+Your Neovim configuration is set up to use Catppuccin, a modern colorscheme with multiple flavours and excellent plugin integration.
 
 ### Default Setup
 
-NeoSolarized is configured to start in dark mode by default. The colorscheme is loaded automatically when you start Neovim.
+Catppuccin is configured to use the "mocha" flavour (dark theme) by default. The colorscheme is loaded automatically when you start Neovim.
 
 ### Key Features
 
-- Based on the classic Solarized color palette
-- Enhanced for modern Neovim features (Treesitter, LSP)
-- Supports both light and dark variants
-- Built with ColorBuddy for easier customization
+- Four beautiful flavours: Latte (light), Frappé, Macchiato, and Mocha (dark)
+- Excellent integration with modern Neovim plugins
+- Consistent color palette across all flavours
+- Highly customizable with extensive configuration options
 
-## Toggling Light and Dark Modes
+## Switching Flavours
 
-You can easily switch between light and dark variants of the Solarized theme:
+You can switch between Catppuccin's four flavours:
 
-1. Inside Neovim, run the command:
-   ```
-   :ToggleTheme
-   ```
+### Available Flavours
+- **Latte** - Light theme with warm tones
+- **Frappé** - Dark theme with muted colors
+- **Macchiato** - Dark theme with vibrant colors  
+- **Mocha** - Dark theme with rich, deep colors (default)
 
-2. This will switch from dark to light mode or vice versa.
+### Temporary Switch
+To temporarily switch flavours in your current session:
 
-3. You can also manually set a specific mode:
-   - For dark mode: `:set background=dark`
-   - For light mode: `:set background=light`
+```
+:Catppuccin latte
+:Catppuccin frappe
+:Catppuccin macchiato
+:Catppuccin mocha
+```
 
-## Customizing NeoSolarized
+### Using Telescope
+You can also browse and switch colorschemes using Telescope:
+- Press `<leader>fc` to open colorscheme picker
+- Navigate and preview different themes
 
-The NeoSolarized theme can be customized to your preferences.
+## Customizing Catppuccin
+
+The Catppuccin theme can be extensively customized to your preferences.
 
 ### Basic Customization
 
 Edit the configuration file at:
 ```
-~/dotfiles/nvim/lua/user/colorbuddy_setup.lua
+~/dotfiles/nvim/lua/plugins/specs/ui.lua
 ```
 
-Inside this file, you can modify the NeoSolarized setup options:
+Inside the Catppuccin setup function, you can modify these options:
 
 ```lua
-neosolarized.setup({
-  comment_italics = true,     -- Enable/disable italics for comments
-  background_set = false,     -- Let Neovim control the background
-  transparent = false,        -- Set to true for transparent background
+require("catppuccin").setup({
+  flavour = "mocha", -- latte, frappe, macchiato, mocha
+  background = {
+    light = "latte",
+    dark = "mocha",
+  },
+  transparent_background = false, -- Set to true for transparent background
+  show_end_of_buffer = false,
+  term_colors = false,
+  dim_inactive = {
+    enabled = false,
+    shade = "dark",
+    percentage = 0.15,
+  },
+  no_italic = false,    -- Disable italics
+  no_bold = false,      -- Disable bold
+  no_underline = false, -- Disable underlines
 })
 ```
 
-### Advanced Customization
+### Style Customization
 
-For more advanced customization, you can use ColorBuddy to define or override specific highlight groups after the theme is loaded. Add your customizations to the setup function in `colorbuddy_setup.lua`:
+You can customize specific syntax highlighting styles:
 
 ```lua
--- After neosolarized.setup() call:
-local Color = require('colorbuddy').Color
-local Group = require('colorbuddy').Group
-local colors = require('colorbuddy').colors
-local styles = require('colorbuddy').styles
+styles = {
+  comments = { "italic" },
+  conditionals = { "italic" },
+  loops = {},
+  functions = { "bold" },
+  keywords = { "italic" },
+  strings = {},
+  variables = {},
+  numbers = {},
+  booleans = {},
+  properties = {},
+  types = { "bold" },
+  operators = {},
+},
+```
 
--- Modify existing colors
-colors.red = colors.red:light()
+### Plugin Integration
 
--- Override specific highlight groups
-Group.new('Comment', colors.base01, nil, styles.italic)
-Group.new('Function', colors.blue, nil, styles.bold)
+Catppuccin includes built-in integration for many plugins:
+
+```lua
+integrations = {
+  cmp = true,
+  gitsigns = true,
+  nvimtree = true,
+  treesitter = true,
+  notify = true,
+  diffview = true,
+  telescope = true,
+  which_key = true,
+  indent_blankline = {
+    enabled = true,
+    colored_indent_levels = false,
+  },
+  mini = {
+    enabled = true,
+    indentscope_color = "",
+  },
+},
 ```
 
 ## Switching to Other Colorschemes
 
-While NeoSolarized is the default theme, you can temporarily switch to any other installed colorscheme.
+While Catppuccin is the default theme, you can temporarily switch to any other installed colorscheme.
 
 ### Temporary Switch
 
@@ -98,35 +148,42 @@ For example:
 - `:colorscheme gruvbox`
 - `:colorscheme nord`
 
+### Using Telescope
+
+Press `<leader>fc` to open the colorscheme picker and preview themes interactively.
+
 ### Permanent Switch
 
 To permanently switch to another colorscheme:
 
-1. Edit your Neovim config file:
+1. Edit the UI plugins file:
    ```
-   nvim ~/dotfiles/nvim/init.lua
+   nvim ~/dotfiles/nvim/lua/plugins/specs/ui.lua
    ```
 
-2. Find the colorscheme section and modify it to use your preferred theme.
+2. Modify the Catppuccin configuration or replace it with your preferred theme.
 
 ## Adding New Colorschemes
 
 To add a new colorscheme to your Neovim setup:
 
-1. Edit the plugins file:
+1. Edit the UI plugins file:
    ```
-   nvim ~/dotfiles/nvim/lua/user/plugins.lua
+   nvim ~/dotfiles/nvim/lua/plugins/specs/ui.lua
    ```
 
-2. Add your desired colorscheme within the lazy.nvim setup function:
+2. Add your desired colorscheme to the return table:
 
 ```lua
 {
   "your-colorscheme/plugin",
+  lazy = false,
+  priority = 1000,
   config = function()
+    -- Optional: configure the colorscheme
     vim.cmd("colorscheme your-theme")
   end,
-}
+},
 ```
 
 3. Run `:Lazy sync` to install
@@ -136,16 +193,50 @@ To add a new colorscheme to your Neovim setup:
    :colorscheme [new-theme-name]
    ```
 
-5. To make it the default, update the setup in `~/dotfiles/nvim/init.lua`
-
 ### Example: Adding Tokyo Night
 
 ```lua
--- In plugins.lua
-use 'folke/tokyonight.nvim'
+-- In lua/plugins/specs/ui.lua, add to the return table:
+{
+  'folke/tokyonight.nvim',
+  lazy = false,
+  priority = 1000,
+  config = function()
+    require("tokyonight").setup({
+      style = "night", -- storm, moon, night, day
+    })
+    -- Uncomment to make it default:
+    -- vim.cmd("colorscheme tokyonight")
+  end,
+},
+```
 
--- Then in init.lua (after installing), replace or modify the colorscheme section:
--- vim.cmd('colorscheme tokyonight')
+## Advanced Customization
+
+### Custom Highlight Groups
+
+You can override specific highlight groups after Catppuccin loads:
+
+```lua
+-- In the Catppuccin config function:
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "catppuccin*",
+  callback = function()
+    local colors = require("catppuccin.palettes").get_palette()
+    vim.api.nvim_set_hl(0, "Comment", { fg = colors.overlay1, italic = true })
+    vim.api.nvim_set_hl(0, "Function", { fg = colors.blue, bold = true })
+  end,
+})
+```
+
+### Transparent Background
+
+To enable transparent background:
+
+```lua
+require("catppuccin").setup({
+  transparent_background = true,
+})
 ```
 
 ## Troubleshooting
@@ -159,25 +250,30 @@ use 'folke/tokyonight.nvim'
 
 2. **Colors don't look right**
    - Ensure your terminal supports true colors: `export TERM=xterm-256color`
-   - Add to your init.lua: `vim.opt.termguicolors = true`
+   - Verify `vim.opt.termguicolors = true` is set in your config
    - Check terminal color palette settings
 
 3. **Theme not applying on startup**
-   - Check init.lua for errors in the colorscheme section
+   - Check ui.lua for errors in the colorscheme section
    - Ensure the colorscheme name is spelled correctly
    - Verify the plugin is installed via `:Lazy`
+
+4. **Plugin integrations not working**
+   - Ensure the integration is enabled in the Catppuccin setup
+   - Check that the plugin is loaded after Catppuccin
+   - Restart Neovim after configuration changes
 
 ### Getting Help
 
 If you encounter issues with your colorscheme:
 
-1. Check the documentation for the specific theme
+1. Check the [Catppuccin documentation](https://github.com/catppuccin/nvim)
 2. Try the theme's GitHub issues page
-3. For ColorBuddy-specific issues, see the ColorBuddy documentation
+3. Use `:checkhealth` to verify plugin status
 
 ## Resources
 
-- [NeoSolarized GitHub](https://github.com/svrana/neosolarized.nvim)
-- [ColorBuddy GitHub](https://github.com/tjdevries/colorbuddy.nvim)
+- [Catppuccin for Neovim](https://github.com/catppuccin/nvim)
+- [Catppuccin Website](https://catppuccin.com/)
 - [Neovim Highlight Groups](https://neovim.io/doc/user/syntax.html#highlight-groups)
-- [Original Solarized](https://ethanschoonover.com/solarized/) 
+- [Catppuccin Palette](https://github.com/catppuccin/catppuccin#-palette) 

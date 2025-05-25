@@ -407,10 +407,10 @@ local M = {}
 -- Custom functions
 function M.toggle_theme()
   local current = vim.g.colors_name
-  if current == "neosolarized" then
+  if current == "catppuccin" then
     vim.cmd("colorscheme tokyonight")
   else
-    vim.cmd("colorscheme neosolarized")
+    vim.cmd("colorscheme catppuccin")
   end
 end
 
