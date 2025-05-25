@@ -29,15 +29,10 @@ return {
     end,
   },
 
-  -- Surround text objects
-  {
-    "tpope/vim-surround",
-    event = { "BufReadPre", "BufNewFile" },
-  },
-
   -- Plugin management tools and utilities
   {
     "folke/lazy.nvim",
+    lazy = false,
     config = function()
       require("plugins.config.tools").setup()
     end,

@@ -65,15 +65,6 @@ return {
     end,
   },
 
-  -- Git integration
-  {
-    "lewis6991/gitsigns.nvim",
-    event = { "BufReadPre", "BufNewFile" },
-    config = function()
-      require("plugins.config.gitsigns").setup()
-    end,
-  },
-
   -- Surround text objects
   {
     "kylechui/nvim-surround",
@@ -105,14 +96,5 @@ return {
   {
     "AndrewRadev/splitjoin.vim",
     keys = { "gS", "gJ" },
-  },
-
-  -- Which-key for key bindings help
-  {
-    "folke/which-key.nvim",
-    event = "VeryLazy",
-    config = function()
-      require("plugins.config.which-key").setup()
-    end,
   },
 } 
