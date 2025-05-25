@@ -20,6 +20,9 @@ return {
     ft = "python",
     build = "make install",
     cmd = { "Pydocstring" },
+    keys = {
+      { "<leader>pD", "<cmd>Pydocstring<cr>", desc = "Generate Python docstring", ft = "python" },
+    },
   },
 
   -- Python text objects
