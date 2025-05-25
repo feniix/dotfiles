@@ -24,9 +24,18 @@ return {
       "nvim-tree/nvim-web-devicons",
       {
         "nvim-telescope/telescope-fzf-native.nvim",
-        build = "make",
+        build = function()
+          local utils = require('core.utils')
+          -- Platform-specific build command
+          if utils.platform.is_mac() then
+            return "make"
+          else
+            return "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build"
+          end
+        end,
         cond = function()
-          return vim.fn.executable("make") == 1
+          local utils = require('core.utils')
+          return utils.platform.command_available("make") or utils.platform.command_available("cmake")
         end,
       },
     },

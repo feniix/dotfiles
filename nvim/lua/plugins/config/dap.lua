@@ -10,9 +10,9 @@ local default_config = {
 
 function M.setup(opts)
   -- Merge user options with defaults
-  local config = default_config
+  local _ = default_config
   if opts then
-    config = vim.tbl_deep_extend("force", config, opts)
+    _ = vim.tbl_deep_extend("force", _, opts)
   end
 
   -- Initialize DAP

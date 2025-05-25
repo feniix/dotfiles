@@ -76,6 +76,17 @@ M.platform = {
     end
   end,
 
+  get_arch = function()
+    local uname = vim.fn.system('uname -m'):gsub('\n', '')
+    if uname:match('arm64') or uname:match('aarch64') then 
+      return 'arm64'
+    elseif uname:match('x86_64') then 
+      return 'x86_64' -- Linux only (Intel Macs not supported)
+    else 
+      return 'unknown' 
+    end
+  end,
+
   is_gui = function()
     return vim.fn.has("gui_running") == 1
   end,
@@ -90,6 +101,19 @@ M.platform = {
     end
   end,
 
+  get_package_manager = function()
+    if M.platform.is_mac() then
+      if M.platform.command_available('brew') then return 'homebrew' end
+      if M.platform.command_available('port') then return 'macports' end
+    elseif M.platform.is_linux() then
+      if M.platform.command_available('apt') then return 'apt' end
+      if M.platform.command_available('dnf') then return 'dnf' end
+      if M.platform.command_available('pacman') then return 'pacman' end
+      if M.platform.command_available('zypper') then return 'zypper' end
+    end
+    return 'none'
+  end,
+
   get_terminal_config = function()
     return {
       supports_true_color = true,
@@ -100,21 +124,119 @@ M.platform = {
     }
   end,
 
+  get_capabilities = function()
+    local caps = {}
+    
+    -- True color support detection
+    caps.true_color = vim.env.COLORTERM == "truecolor" or 
+                      vim.env.COLORTERM == "24bit" or
+                      (vim.env.TERM and vim.env.TERM:match("256color") ~= nil) or
+                      M.platform.is_iterm2()
+    
+    -- Undercurl support (mostly terminal dependent)
+    caps.undercurl = M.platform.is_iterm2() or
+                     (vim.env.TERM and (
+                       vim.env.TERM:match("xterm") ~= nil or
+                       vim.env.TERM:match("tmux") ~= nil or
+                       vim.env.TERM:match("screen") ~= nil
+                     )) or false
+    
+    -- Mouse support
+    caps.mouse = vim.fn.has("mouse") == 1
+    
+    -- Clipboard support
+    caps.clipboard = vim.fn.has("clipboard") == 1 or
+                     M.platform.command_available("pbcopy") or  -- macOS
+                     M.platform.command_available("xclip") or   -- X11
+                     M.platform.command_available("wl-copy")    -- Wayland
+    
+    -- Focus events (terminal dependent)
+    caps.focus_events = M.platform.is_iterm2() or
+                        (vim.env.TERM and vim.env.TERM:match("xterm") ~= nil) or
+                        false
+    
+    -- Strikethrough support
+    caps.strikethrough = caps.true_color  -- Usually available with true color
+    
+    -- Italic support
+    caps.italic = vim.fn.has("gui_running") == 1 or
+                  M.platform.is_iterm2() or
+                  (vim.env.TERM and (
+                    vim.env.TERM:match("xterm") ~= nil or
+                    vim.env.TERM:match("tmux") ~= nil
+                  )) or false
+    
+    return caps
+  end,
+
   get_platform_keymaps = function()
     local keymaps = {}
     
     if M.platform.is_mac() then
-      -- Return macOS specific keymaps
+      -- macOS specific keymaps using Option key
       keymaps = {
+        -- Line movement (Option+j/k)
         { mode = "n", lhs = "∆", rhs = ":m .+1<CR>==", desc = "Move line down (Option+j)" },
         { mode = "n", lhs = "˚", rhs = ":m .-2<CR>==", desc = "Move line up (Option+k)" },
         { mode = "i", lhs = "∆", rhs = "<Esc>:m .+1<CR>==gi", desc = "Move line down (Option+j)" },
         { mode = "i", lhs = "˚", rhs = "<Esc>:m .-2<CR>==gi", desc = "Move line up (Option+k)" },
         { mode = "v", lhs = "∆", rhs = ":m '>+1<CR>gv=gv", desc = "Move selection down (Option+j)" },
         { mode = "v", lhs = "˚", rhs = ":m '<-2<CR>gv=gv", desc = "Move selection up (Option+k)" },
+        
+        -- Word movement (Option+h/l)
         { mode = "n", lhs = "˙", rhs = "b", desc = "Jump word backward (Option+h)" },
         { mode = "n", lhs = "¬", rhs = "w", desc = "Jump word forward (Option+l)" },
+        { mode = "i", lhs = "˙", rhs = "<C-o>b", desc = "Jump word backward (Option+h)" },
+        { mode = "i", lhs = "¬", rhs = "<C-o>w", desc = "Jump word forward (Option+l)" },
+        
+        -- macOS-style text editing (Option+Delete)
+        { mode = "i", lhs = "∂", rhs = "<C-o>dw", desc = "Delete word forward (Option+Delete)" },
+        { mode = "i", lhs = "ƒ", rhs = "<C-w>", desc = "Delete word backward (Option+Backspace)" },
       }
+    elseif M.platform.is_linux() then
+      -- Linux specific keymaps using Alt key
+      keymaps = {
+        -- Line movement (Alt+j/k)
+        { mode = "n", lhs = "<A-j>", rhs = ":m .+1<CR>==", desc = "Move line down (Alt+j)" },
+        { mode = "n", lhs = "<A-k>", rhs = ":m .-2<CR>==", desc = "Move line up (Alt+k)" },
+        { mode = "i", lhs = "<A-j>", rhs = "<Esc>:m .+1<CR>==gi", desc = "Move line down (Alt+j)" },
+        { mode = "i", lhs = "<A-k>", rhs = "<Esc>:m .-2<CR>==gi", desc = "Move line up (Alt+k)" },
+        { mode = "v", lhs = "<A-j>", rhs = ":m '>+1<CR>gv=gv", desc = "Move selection down (Alt+j)" },
+        { mode = "v", lhs = "<A-k>", rhs = ":m '<-2<CR>gv=gv", desc = "Move selection up (Alt+k)" },
+        
+        -- Word movement (Alt+h/l)
+        { mode = "n", lhs = "<A-h>", rhs = "b", desc = "Jump word backward (Alt+h)" },
+        { mode = "n", lhs = "<A-l>", rhs = "w", desc = "Jump word forward (Alt+l)" },
+        { mode = "i", lhs = "<A-h>", rhs = "<C-o>b", desc = "Jump word backward (Alt+h)" },
+        { mode = "i", lhs = "<A-l>", rhs = "<C-o>w", desc = "Jump word forward (Alt+l)" },
+      }
+    end
+    
+    return keymaps
+  end,
+
+  get_clipboard_keymaps = function()
+    local keymaps = {}
+    local caps = M.platform.get_capabilities()
+    
+    if caps.clipboard then
+      if M.platform.is_mac() then
+        -- macOS clipboard keymaps (Cmd+C/V/X)
+        keymaps = {
+          { mode = "v", lhs = "<D-c>", rhs = '"+y', desc = "Copy to clipboard (Cmd+C)" },
+          { mode = "n", lhs = "<D-v>", rhs = '"+p', desc = "Paste from clipboard (Cmd+V)" },
+          { mode = "i", lhs = "<D-v>", rhs = '<C-r>+', desc = "Paste from clipboard (Cmd+V)" },
+          { mode = "v", lhs = "<D-x>", rhs = '"+d', desc = "Cut to clipboard (Cmd+X)" },
+        }
+      else
+        -- Linux clipboard keymaps (Ctrl+C/V/X)
+        keymaps = {
+          { mode = "v", lhs = "<C-c>", rhs = '"+y', desc = "Copy to clipboard (Ctrl+C)" },
+          { mode = "n", lhs = "<C-v>", rhs = '"+p', desc = "Paste from clipboard (Ctrl+V)" },
+          { mode = "i", lhs = "<C-v>", rhs = '<C-r>+', desc = "Paste from clipboard (Ctrl+V)" },
+          { mode = "v", lhs = "<C-x>", rhs = '"+d', desc = "Cut to clipboard (Ctrl+X)" },
+        }
+      end
     end
     
     return keymaps

@@ -13,6 +13,10 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPre", "BufNewFile" },
+    cond = function()
+      local utils = require('core.utils')
+      return utils.platform.command_available("git")
+    end,
     opts = {},
     config = function()
       require("plugins.config.gitsigns").setup()

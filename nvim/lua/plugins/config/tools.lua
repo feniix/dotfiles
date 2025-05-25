@@ -3,11 +3,6 @@
 
 local M = {}
 
--- Check if lazy is available
-local function is_lazy_available()
-  return pcall(require, 'lazy')
-end
-
 -- Install plugins using lazy.nvim
 local function install_plugins()
   local safe_require = _G.safe_require or require

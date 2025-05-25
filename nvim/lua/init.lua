@@ -13,7 +13,6 @@ vim.g.skip_plugin_installer = false  -- Enable the plugin installer
 
 -- Add our lua directory to package.path
 local config_path = vim.fn.stdpath('config')
-local runtime_path = vim.fn.stdpath('data')
 package.path = config_path .. "/lua/?.lua;" .. 
                config_path .. "/lua/?/init.lua;" ..
                config_path .. "/lua/user/?.lua;" ..

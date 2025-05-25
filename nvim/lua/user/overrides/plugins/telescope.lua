@@ -1,12 +1,19 @@
--- User telescope override
--- This module allows users to override telescope configuration
+-- User telescope override with platform awareness
+-- This module allows users to override telescope configuration with platform-specific settings
 
+local utils = require('core.utils')
+local platform_config = require('plugins.config.platform')
 local M = {}
 
 -- Apply user telescope configuration overrides
 function M.setup(user_config)
-  if not user_config or type(user_config) ~= 'table' then
-    return
+  -- Get platform-specific base configuration
+  local base_config = platform_config.get_telescope_config()
+  
+  -- Merge with user config if provided
+  local final_config = base_config
+  if user_config and type(user_config) == 'table' then
+    final_config = vim.tbl_deep_extend('force', base_config, user_config)
   end
   
   -- Check if telescope is available
@@ -16,16 +23,11 @@ function M.setup(user_config)
     return
   end
   
-  -- Get current telescope configuration
-  local current_config = telescope._config or {}
+  -- Apply the configuration
+  telescope.setup(final_config)
   
-  -- Merge user configuration with current config
-  local merged_config = vim.tbl_deep_extend('force', current_config, user_config)
-  
-  -- Apply the merged configuration
-  telescope.setup(merged_config)
-  
-  vim.notify('Applied user telescope configuration overrides', vim.log.levels.INFO)
+  local platform_info = utils.platform.is_mac() and "macOS" or "Linux"
+  vim.notify('Applied telescope configuration for ' .. platform_info, vim.log.levels.INFO)
 end
 
 -- Override function for advanced customization

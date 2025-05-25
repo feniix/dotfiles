@@ -13,6 +13,9 @@ function M.setup()
   -- Clear search highlight
   keymap("n", "<leader>q", ":nohlsearch<CR>", opts)
 
+  -- Luacheck
+  keymap("n", "<leader>lc", ":!luacheck %<CR>", { desc = "Luacheck current file" })
+
   -- LSP operations - toggle list
   keymap("n", "<leader>ll", ":set list!<CR>", opts)
 
@@ -33,56 +36,52 @@ function M.setup()
   keymap("n", "<C-l>", "<C-w>l", opts)
 
   -- Platform-specific key mappings
-  local platform = _G.platform
-  if platform and platform.get_platform_keymaps then
-    local platform_keymaps = platform.get_platform_keymaps()
-    for _, mapping in ipairs(platform_keymaps) do
-      keymap(mapping.mode, mapping.lhs, mapping.rhs, { noremap = true, silent = true, desc = mapping.desc })
-    end
-  else
-    -- Fallback to macOS keymaps if platform detection fails
-    if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
-      -- Map Option+j/k to move lines up and down
-      keymap("n", "∆", ":m .+1<CR>==", opts)
-      keymap("n", "˚", ":m .-2<CR>==", opts)
-      keymap("i", "∆", "<Esc>:m .+1<CR>==gi", opts)
-      keymap("i", "˚", "<Esc>:m .-2<CR>==gi", opts)
-      keymap("v", "∆", ":m '>+1<CR>gv=gv", opts)
-      keymap("v", "˚", ":m '<-2<CR>gv=gv", opts)
-
-      -- Map Option+h/l to jump words
-      keymap("n", "˙", "b", opts)
-      keymap("n", "¬", "w", opts)
-    end
+  local utils = require('core.utils')
+  
+  -- Apply platform-specific movement keymaps
+  local platform_keymaps = utils.platform.get_platform_keymaps()
+  for _, mapping in ipairs(platform_keymaps) do
+    keymap(mapping.mode, mapping.lhs, mapping.rhs, { noremap = true, silent = true, desc = mapping.desc })
+  end
+  
+  -- Apply platform-specific clipboard keymaps
+  local clipboard_keymaps = utils.platform.get_clipboard_keymaps()
+  for _, mapping in ipairs(clipboard_keymaps) do
+    keymap(mapping.mode, mapping.lhs, mapping.rhs, { noremap = true, silent = true, desc = mapping.desc })
   end
 
-  -- VSCode-like keyboard shortcuts
-  -- Save with Ctrl+S
-  keymap("n", "<C-s>", ":w<CR>", opts)
-  keymap("i", "<C-s>", "<Esc>:w<CR>", opts)
-  
-  -- Select all with Ctrl+A
-  keymap("n", "<C-a>", "ggVG", opts)
-  
-  -- Undo with Ctrl+Z
-  keymap("n", "<C-z>", "u", opts)
-  keymap("i", "<C-z>", "<C-o>u", opts)
-  
-  -- Redo with Ctrl+Y
-  keymap("n", "<C-y>", "<C-r>", opts)
-  keymap("i", "<C-y>", "<C-o><C-r>", opts)
-  
-  -- Comment line/block with Ctrl+/
-  keymap("n", "<C-_>", ":lua require('Comment.api').toggle.linewise.current()<CR>", opts)
-  keymap("v", "<C-_>", ":lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", opts)
+  -- VSCode-like keyboard shortcuts (platform-aware)
+  if utils.platform.is_mac() then
+    -- macOS uses Cmd key for system shortcuts
+    keymap("n", "<D-s>", ":w<CR>", opts)
+    keymap("i", "<D-s>", "<Esc>:w<CR>", opts)
+    keymap("n", "<D-a>", "ggVG", opts)
+    keymap("n", "<D-z>", "u", opts)
+    keymap("i", "<D-z>", "<C-o>u", opts)
+    keymap("n", "<D-y>", "<C-r>", opts)
+    keymap("i", "<D-y>", "<C-o><C-r>", opts)
+    keymap("n", "<D-/>", ":lua require('Comment.api').toggle.linewise.current()<CR>", opts)
+    keymap("v", "<D-/>", ":lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", opts)
+  else
+    -- Linux uses Ctrl key
+    keymap("n", "<C-s>", ":w<CR>", opts)
+    keymap("i", "<C-s>", "<Esc>:w<CR>", opts)
+    keymap("n", "<C-a>", "ggVG", opts)
+    keymap("n", "<C-z>", "u", opts)
+    keymap("i", "<C-z>", "<C-o>u", opts)
+    keymap("n", "<C-y>", "<C-r>", opts)
+    keymap("i", "<C-y>", "<C-o><C-r>", opts)
+    keymap("n", "<C-_>", ":lua require('Comment.api').toggle.linewise.current()<CR>", opts)
+    keymap("v", "<C-_>", ":lua require('Comment.api').toggle.linewise(vim.fn.visualmode())<CR>", opts)
+  end
 
   -- Terminal mode escape
   keymap("t", "<Esc>", "<C-\\><C-n>", opts)
   
   -- Mouse shortcuts and behaviors
-  if vim.fn.has("mouse") == 1 then
-    -- Get terminal configuration for terminal-specific optimizations
-    local terminal_config = platform and platform.get_terminal_config and platform.get_terminal_config() or {}
+  local capabilities = utils.platform.get_capabilities()
+  if capabilities.mouse then
+    local terminal_config = utils.platform.get_terminal_config()
     
     -- Ctrl+Right Click to go back (like VSCode/browser back)
     keymap("n", "<C-RightMouse>", "<LeftMouse><C-o>", opts)
@@ -98,7 +97,7 @@ function M.setup()
     keymap("n", "<S-LeftMouse>", "<LeftMouse>v", opts)
     
     -- Terminal-specific mouse optimizations
-    if terminal_config.enable_smooth_scrolling and platform and platform.get_terminal and platform.get_terminal() == "iterm2" then
+    if terminal_config.enable_smooth_scrolling and utils.platform.is_iterm2() then
       -- Better mouse wheel handling in iTerm2
       vim.cmd([[
         " Smoother mouse wheel scrolling for iTerm2

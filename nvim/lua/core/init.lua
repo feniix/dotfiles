@@ -17,6 +17,12 @@ function M.setup()
   -- Load autocommands
   require('core.autocmds').setup()
   
+  -- Setup installer commands
+  local installer_ok, installer = pcall(require, 'core.installer')
+  if installer_ok then
+    installer.setup_commands()
+  end
+  
   -- Apply user overrides to core modules
   local ok, user = pcall(require, 'user')
   if ok then

@@ -74,6 +74,31 @@ return {
     lazy = true,
   },
 
+  -- Modern file icons (alternative to nvim-web-devicons)
+  {
+    "echasnovski/mini.icons",
+    lazy = true,
+    config = function()
+      require("mini.icons").setup()
+    end,
+  },
+
+  -- File tree explorer
+  {
+    "nvim-tree/nvim-tree.lua",
+    cmd = { "NvimTreeToggle", "NvimTreeOpen", "NvimTreeFocus" },
+    keys = {
+      { "<leader>e", "<cmd>NvimTreeToggle<cr>", desc = "Toggle file tree" },
+    },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    config = function()
+      local platform_config = require('plugins.config.platform')
+      local config = platform_config.get_filetree_config()
+      
+      require("nvim-tree").setup(config)
+    end,
+  },
+
   -- Status line
   {
     "nvim-lualine/lualine.nvim",
@@ -115,13 +140,20 @@ return {
   -- Notifications
   {
     "rcarriga/nvim-notify",
-    event = "VeryLazy",
+    lazy = false,
+    priority = 900,
     config = function()
+      local utils = require('core.utils')
       local notify = require("notify")
-      notify.setup({
-        background_colour = "#000000",
-        timeout = 3000,
-      })
+      
+      -- Platform-specific configuration
+      local config = {
+        background_colour = utils.platform.is_mac() and "#000000" or "#1e1e1e",
+        timeout = utils.platform.is_iterm2() and 3000 or 5000,
+        render = utils.platform.get_capabilities().true_color and "default" or "minimal",
+      }
+      
+      notify.setup(config)
       vim.notify = notify
     end,
   },

@@ -128,14 +128,14 @@ function M.has_override(module_path)
 end
 
 -- Helper function to apply user override if it exists
-function M.apply_override(module_path, default_config, user_config)
+function M.apply_override(module_path, default_config, config)
   if not M.has_override(module_path) then
     return default_config
   end
   
   local override_module = require('user.overrides.' .. module_path)
   if override_module and override_module.override then
-    return override_module.override(default_config, user_config)
+    return override_module.override(default_config, config)
   end
   
   return default_config

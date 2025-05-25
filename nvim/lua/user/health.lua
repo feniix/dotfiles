@@ -26,6 +26,103 @@ local function has_executable(cmd)
   return vim.fn.executable(cmd) == 1
 end
 
+-- Check installer module and tool availability
+local function check_installer()
+  start("Tool Installation System")
+  
+  -- Check if installer module is available
+  local installer_ok, installer = pcall(require, "core.installer")
+  if installer_ok then
+    ok("Installer module is loaded correctly")
+    
+    -- Show available commands
+    info("Available commands: :InstallSystemTools, :InstallGoTools, :InstallNodeTools, :InstallPythonTools, :InstallAllTools")
+    
+    -- Check system tools
+    local system_tools = { "ripgrep", "fd", "fzf" }
+    local missing_system = {}
+    
+    for _, tool in ipairs(system_tools) do
+      if has_executable(tool) or has_executable(tool:gsub("ripgrep", "rg")) then
+        ok(tool .. " is installed")
+      else
+        table.insert(missing_system, tool)
+        warn(tool .. " is not installed")
+      end
+    end
+    
+    if #missing_system > 0 then
+      info("Run :InstallSystemTools to install missing tools")
+      info("Or manually: :lua require('core.installer').install_system_tools()")
+    else
+      ok("All system tools are installed")
+    end
+    
+    -- Check language tools
+    local languages = { "go", "node", "python" }
+    
+    for _, lang in ipairs(languages) do
+      if has_executable(lang) then
+        ok(lang .. " runtime is available")
+        
+        -- Get available tools for this language
+        local tools = installer.get_available_tools(lang)
+        if #tools > 0 then
+          local missing_tools = {}
+          for _, tool in ipairs(tools) do
+            if installer.is_tool_installed(tool) then
+              ok(lang .. " tool: " .. tool .. " is installed")
+            else
+              table.insert(missing_tools, tool)
+              warn(lang .. " tool: " .. tool .. " is missing")
+            end
+          end
+          
+          if #missing_tools > 0 then
+            info("Run :Install" .. lang:gsub("^%l", string.upper) .. "Tools to install missing " .. lang .. " tools")
+            info("Or manually: :lua require('core.installer').install_language_tools('" .. lang .. "')")
+          else
+            ok("All " .. lang .. " tools are installed")
+          end
+        else
+          info("No additional tools defined for " .. lang)
+        end
+      else
+        warn(lang .. " runtime not found")
+        info("Install " .. lang .. " via asdf: asdf install " .. lang .. " latest")
+      end
+    end
+    
+    -- Check rust separately (has minimal tools)
+    if has_executable("rustc") then
+      ok("rust runtime is available")
+      if has_executable("rust-analyzer") then
+        ok("rust-analyzer is installed")
+      else
+        warn("rust-analyzer is missing")
+        info("Install via asdf: asdf install rust-analyzer latest")
+      end
+    else
+      warn("rust runtime not found")
+      info("Install rust via asdf: asdf install rust latest")
+    end
+    
+    -- Check asdf itself
+    if has_executable("asdf") then
+      ok("asdf version manager is available")
+      local asdf_version = vim.fn.trim(vim.fn.system("asdf --version"))
+      info("asdf version: " .. asdf_version)
+    else
+      warn("asdf version manager not found")
+      info("Install asdf: https://asdf-vm.com/guide/getting-started.html")
+    end
+    
+  else
+    error("Installer module could not be loaded: " .. tostring(installer))
+    info("Check that lua/core/installer.lua exists and is valid")
+  end
+end
+
 -- Check debugger configuration
 local function check_dap()
   start("Debugging Configuration")
@@ -169,18 +266,33 @@ local function check_platform()
   start("Platform Detection")
   
   -- Check if platform module is available
-  local platform = _G.platform
-  if platform then
+  local utils_ok, utils = pcall(require, 'core.utils')
+  if utils_ok and utils.platform then
+    local platform = utils.platform
     ok("Platform detection module is loaded")
     
     -- Show platform information
     local os_name = platform.get_os()
     local terminal = platform.get_terminal()
     local is_gui = platform.is_gui()
+    local arch = platform.get_arch()
+    local pm = platform.get_package_manager()
     
     info("Operating System: " .. os_name)
+    info("Architecture: " .. arch)
+    info("Package Manager: " .. pm)
     info("Terminal: " .. terminal)
     info("GUI Environment: " .. (is_gui and "Yes" or "No"))
+    
+    -- Check platform-specific recommendations
+    if os_name == "macos" and arch ~= "arm64" then
+      warn("Intel Mac detected - this configuration is optimized for Apple Silicon")
+      info("Consider using ARM64 macOS or x86_64 Linux instead")
+    elseif os_name == "linux" and arch ~= "x86_64" then
+      warn("Non-x86_64 Linux detected - this configuration is optimized for x86_64")
+    else
+      ok("Platform is supported: " .. os_name .. " " .. arch)
+    end
     
     -- Check clipboard configuration
     local clipboard_config = platform.get_clipboard_config()
@@ -196,7 +308,16 @@ local function check_platform()
         elseif vim.fn.executable('xsel') == 1 then
           ok("X11 clipboard utility (xsel) is available")
         else
-          warn("No clipboard utilities found. Install wl-clipboard (Wayland) or xclip/xsel (X11)")
+          warn("No clipboard utilities found")
+          if pm == "homebrew" then
+            info("Install with: brew install wl-clipboard")
+          elseif pm == "apt" then
+            info("Install with: sudo apt install wl-clipboard xclip")
+          elseif pm == "dnf" then
+            info("Install with: sudo dnf install wl-clipboard xclip")
+          elseif pm == "pacman" then
+            info("Install with: sudo pacman -S wl-clipboard xclip")
+          end
         end
 
       elseif os_name == "macos" then
@@ -211,31 +332,38 @@ local function check_platform()
     end
     
     -- Check terminal capabilities
-    local terminal_config = platform.get_terminal_config()
-    if terminal_config.supports_true_color then
+    local caps = platform.get_capabilities()
+    if caps.true_color then
       ok("Terminal supports true color")
     else
       warn("Terminal may not support true color")
+      info("Set COLORTERM=truecolor or use a modern terminal")
     end
     
-    if terminal_config.supports_mouse then
+    if caps.mouse then
       ok("Terminal supports mouse")
     else
       warn("Terminal may not support mouse")
     end
     
-    if terminal_config.supports_undercurl then
+    if caps.undercurl then
       ok("Terminal supports undercurl")
     else
       info("Terminal does not support undercurl (cosmetic only)")
     end
     
-    -- Check platform-specific keymaps
-    local keymaps = platform.get_platform_keymaps()
-    if #keymaps > 0 then
-      ok(#keymaps .. " platform-specific keymaps are configured")
+    if caps.clipboard then
+      ok("Clipboard integration is available")
     else
-      info("No platform-specific keymaps configured")
+      warn("Clipboard integration may not work properly")
+    end
+    
+    -- Check platform-specific plugin configurations
+    local platform_config_ok, _ = pcall(require, 'plugins.config.platform')
+    if platform_config_ok then
+      ok("Platform-specific plugin configurations are available")
+    else
+      warn("Platform-specific plugin configurations not found")
     end
     
   else
@@ -244,7 +372,6 @@ local function check_platform()
     -- Show basic fallback information
     if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
       info("Operating System: macOS (fallback detection)")
-
     elseif vim.fn.has("unix") == 1 then
       info("Operating System: Unix/Linux (fallback detection)")
     else
@@ -284,16 +411,16 @@ local function check_treesitter()
   
   -- Use pcall to protect against any treesitter errors
   local parser_installed = function(lang)
-    local ok, parsers = pcall(require, "nvim-treesitter.parsers")
-    if not ok then return false end
+    local parser_ok, parsers = pcall(require, "nvim-treesitter.parsers")
+    if not parser_ok then return false end
     
     -- Prefer using the newer treesitter API if available
     if parsers.has_parser then
       return parsers.has_parser(lang)
     else
       -- Fallback to older method
-      local ok2, configs = pcall(require, "nvim-treesitter.configs")
-      if not ok2 then return false end
+      local config_ok, _ = pcall(require, "nvim-treesitter.configs")
+      if not config_ok then return false end
       
       return vim.fn.executable(
         vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/parser/" .. 
@@ -343,9 +470,102 @@ local function check_completion()
   end
 end
 
+-- Check plugin platform compatibility
+local function check_plugin_compatibility()
+  start("Plugin Platform Compatibility")
+  
+  -- Check platform-aware plugin override system
+  local platform_override_ok, platform_override = pcall(require, 'user.overrides.plugins.platform')
+  if platform_override_ok then
+    ok("Platform-aware plugin override system is available")
+    
+    -- Test platform conditions
+    local conditions = platform_override.get_platform_conditions()
+    local utils = require('core.utils')
+    
+    -- Check git-dependent plugins
+    if conditions.git_required() then
+      ok("Git-dependent plugins will load (git is available)")
+    else
+      warn("Git-dependent plugins will be disabled (git not found)")
+      info("Install git via package manager or asdf")
+    end
+    
+    -- Check build tools for native extensions
+    if conditions.build_tools_required() then
+      ok("Build tools available for native plugin extensions")
+    else
+      warn("Build tools missing - some plugins may not compile")
+      local pm = utils.platform.get_package_manager()
+      if pm == "homebrew" then
+        info("Install with: xcode-select --install")
+      elseif pm == "apt" then
+        info("Install with: sudo apt install build-essential cmake")
+      elseif pm == "dnf" then
+        info("Install with: sudo dnf groupinstall 'Development Tools' && sudo dnf install cmake")
+      elseif pm == "pacman" then
+        info("Install with: sudo pacman -S base-devel cmake")
+      end
+    end
+    
+    -- Check terminal capabilities for UI plugins
+    if conditions.true_color_required() then
+      ok("True color support available for colorschemes")
+    else
+      warn("True color support missing - colorschemes may look incorrect")
+      info("Use a modern terminal or set COLORTERM=truecolor")
+    end
+    
+    if conditions.clipboard_required() then
+      ok("Clipboard integration available")
+    else
+      warn("Clipboard integration may not work")
+      info("Install clipboard utilities for your platform")
+    end
+    
+    -- Platform-specific recommendations
+    if utils.platform.is_mac() then
+      info("macOS detected - using Cmd key bindings")
+      if utils.platform.is_iterm2() then
+        ok("iTerm2 detected - enhanced terminal features available")
+      else
+        info("Consider using iTerm2 for better terminal integration")
+      end
+    else
+      info("Linux detected - using Ctrl key bindings")
+      if vim.env.WAYLAND_DISPLAY then
+        info("Wayland detected - ensure wl-clipboard is installed")
+      elseif vim.env.DISPLAY then
+        info("X11 detected - ensure xclip or xsel is installed")
+      end
+    end
+    
+  else
+    warn("Platform-aware plugin override system not found")
+    info("Some plugins may not be optimized for your platform")
+  end
+  
+  -- Check specific plugin configurations
+  local telescope_override_ok, _ = pcall(require, 'user.overrides.plugins.telescope')
+  if telescope_override_ok then
+    ok("Telescope platform overrides are available")
+  else
+    warn("Telescope platform overrides not found")
+  end
+  
+  local platform_config_ok, _ = pcall(require, 'plugins.config.platform')
+  if platform_config_ok then
+    ok("Platform-specific plugin configurations are available")
+  else
+    warn("Platform-specific plugin configurations not found")
+  end
+end
+
 -- Register the health check with Neovim's built-in health check system
 function M.check()
   check_platform()
+  check_installer()
+  check_plugin_compatibility()
   check_dap()
   check_go()
   check_treesitter()

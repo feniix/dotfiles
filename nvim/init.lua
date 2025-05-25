@@ -104,7 +104,7 @@ local startup_time = (end_time - start_time) / 1e6 -- Convert to milliseconds
 if debug_mode then
   vim.notify(string.format("Neovim startup completed in %.2f ms", startup_time), vim.log.levels.INFO)
   vim.notify("Configuration loaded successfully", vim.log.levels.INFO)
-elseif startup_time > 100 then
+elseif startup_time > 250 then
   vim.notify(string.format("Neovim startup completed in %.2f ms (consider optimizing)", startup_time), vim.log.levels.WARN)
 end
 
