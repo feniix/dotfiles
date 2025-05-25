@@ -59,8 +59,8 @@ setup_asdf() {
 
   # Check asdf version for syntax compatibility
   ASDF_VERSION=$(asdf version | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
-  ASDF_MAJOR=$(echo $ASDF_VERSION | cut -d '.' -f1)
-  ASDF_MINOR=$(echo $ASDF_VERSION | cut -d '.' -f2)
+  ASDF_MAJOR=$(echo "$ASDF_VERSION" | cut -d '.' -f1)
+  ASDF_MINOR=$(echo "$ASDF_VERSION" | cut -d '.' -f2)
   log_info "Detected asdf version: $ASDF_VERSION (major: $ASDF_MAJOR, minor: $ASDF_MINOR)"
   
   # Install plugins from asdf-tool-versions

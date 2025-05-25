@@ -8,7 +8,7 @@ set -e
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 FONTS_DIR="${DOTFILES_DIR}/fonts"
 USER_FONTS_DIR="${HOME}/Library/Fonts"
-SYSTEM_FONTS_DIR="/Library/Fonts"
+# SYSTEM_FONTS_DIR="/Library/Fonts"  # Currently unused
 
 # Colors for better output
 RED='\033[0;31m'
@@ -52,7 +52,8 @@ create_font_dirs() {
   mkdir -p "$FONTS_DIR"
   
   # Create system-specific font directories
-  local system=$(detect_system)
+  local system
+  system=$(detect_system)
   
   if [[ "$system" == "macos" ]]; then
     mkdir -p "$USER_FONTS_DIR"
@@ -79,9 +80,7 @@ download_nerd_font() {
   local url="https://github.com/ryanoasis/nerd-fonts/releases/download/${font_version}/${font_name}.zip"
   
   # Download the font
-  curl -fsSL --output "$download_dir/${font_name}.zip" "$url"
-  
-  if [ $? -eq 0 ]; then
+  if curl -fsSL --output "$download_dir/${font_name}.zip" "$url"; then
     log_success "$font_name Nerd Font downloaded successfully."
     return 0
   else
@@ -105,7 +104,8 @@ extract_fonts() {
   # Extract all zip files
   for font_zip in "$download_dir"/*.zip; do
     if [ -f "$font_zip" ]; then
-      local font_name=$(basename "$font_zip" .zip)
+      local font_name
+      font_name=$(basename "$font_zip" .zip)
       local extract_dir="$FONTS_DIR/extracted/$font_name"
       
       mkdir -p "$extract_dir"

@@ -65,9 +65,7 @@ install_github_cli() {
   else
     # Install GitHub CLI
     log_info "Installing GitHub CLI..."
-    brew install gh
-    
-    if [ $? -eq 0 ]; then
+    if brew install gh; then
       log_success "GitHub CLI installed successfully."
     else
       log_error "Failed to install GitHub CLI."
@@ -121,9 +119,7 @@ setup_github_auth() {
   log_info "Authenticating with GitHub..."
   log_info "Choose your preferred authentication method when prompted."
   
-  gh auth login
-  
-  if [ $? -eq 0 ]; then
+  if gh auth login; then
     log_success "GitHub authentication completed successfully."
     return 0
   else
@@ -213,9 +209,7 @@ setup_ssh_keys() {
   log_info "Generating a new SSH key..."
   read -p "Enter your email for the SSH key: " email
   
-  ssh-keygen -t ed25519 -C "$email" -f "$HOME/.ssh/id_ed25519"
-  
-  if [ $? -eq 0 ]; then
+  if ssh-keygen -t ed25519 -C "$email" -f "$HOME/.ssh/id_ed25519"; then
     log_success "SSH key generated successfully."
     
     # Start ssh-agent and add the key
@@ -251,9 +245,7 @@ setup_ssh_keys() {
         # Add the key to GitHub
         log_info "Adding SSH key to GitHub..."
         
-        gh ssh-key add "$HOME/.ssh/id_ed25519.pub" --title "$key_title"
-        
-        if [ $? -eq 0 ]; then
+        if gh ssh-key add "$HOME/.ssh/id_ed25519.pub" --title "$key_title"; then
           log_success "SSH key added to GitHub successfully."
         else
           log_error "Failed to add SSH key to GitHub."

@@ -125,7 +125,7 @@ remove_deprecated_dirs() {
   for dir in "${DEPRECATED_DIRS[@]}"; do
     if [ -d "$DOTFILES_DIR/$dir" ]; then
       log_info "Removing deprecated directory: $dir"
-      rm -rf "$DOTFILES_DIR/$dir"
+      rm -rf "${DOTFILES_DIR:?}/$dir"
     fi
   done
   

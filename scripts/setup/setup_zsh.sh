@@ -92,9 +92,7 @@ else
   
   # Install oh-my-zsh using the official installer
   # But we disable auto-setting the shell since we'll handle that
-  RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  
-  if [ $? -eq 0 ]; then
+  if RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"; then
     log_success "Oh My Zsh has been installed successfully."
   else
     log_error "Failed to install Oh My Zsh."
@@ -123,11 +121,9 @@ if [ -f "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
 else
   log_info "Installing Bullet Train theme..."
   
-  # Skip theme download in check-only mode
-  if [ "$CHECK_ONLY" = false ]; then
-    curl -fsSL -o "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" https://raw.githubusercontent.com/caiogondim/bullet-train.zsh/master/bullet-train.zsh-theme
-    
-    if [ $? -eq 0 ]; then
+      # Skip theme download in check-only mode
+    if [ "$CHECK_ONLY" = false ]; then
+      if curl -fsSL -o "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" https://raw.githubusercontent.com/caiogondim/bullet-train.zsh/master/bullet-train.zsh-theme; then
       log_success "Bullet Train theme installed successfully."
     else
       log_error "Failed to install Bullet Train theme."
@@ -168,9 +164,7 @@ else
   # Skip plugin installation in check-only mode
   if [ "$CHECK_ONLY" = false ]; then
     # Clone directly instead of using git submodule
-    git clone https://github.com/zsh-users/zsh-completions.git "$ZSH_COMPLETIONS_DIR"
-    
-    if [ $? -eq 0 ]; then
+    if git clone https://github.com/zsh-users/zsh-completions.git "$ZSH_COMPLETIONS_DIR"; then
       log_success "zsh-completions plugin installed successfully."
     else
       log_error "Failed to install zsh-completions plugin."

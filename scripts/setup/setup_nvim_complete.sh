@@ -84,10 +84,6 @@ if [ -d "$SCRIPTS_DIR/nvim" ]; then
     echo -e "${GREEN}• Plugin status:${RESET} $SCRIPTS_DIR/nvim/check_plugins.sh"
   fi
   
-  if [ -f "$SCRIPTS_DIR/nvim/test_colorbuddy.sh" ]; then
-    echo -e "${GREEN}• Test colorscheme:${RESET} $SCRIPTS_DIR/nvim/test_colorbuddy.sh"
-  fi
-  
   echo -e "\n${YELLOW}For a complete reference, run:${RESET} $SCRIPTS_DIR/nvim/nvim_help.sh"
 fi
 
