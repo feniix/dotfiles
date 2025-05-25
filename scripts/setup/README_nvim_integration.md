@@ -45,7 +45,6 @@ From `scripts/nvim/`:
 - **`health_check.sh`** - Quick health check
 - **`check_plugins.sh`** - Comprehensive plugin check
 - **`plugin_status.sh`** - Plugin status via lazy.nvim
-- **`test_colorbuddy.sh`** - Test colorscheme setup
 - **`nvim_help.sh`** - Quick reference and help
 
 ## Setup Flow Details
@@ -115,7 +114,6 @@ The integration provides:
 - `scripts/nvim/health_check.sh` - Health checking
 - `scripts/nvim/check_plugins.sh` - Plugin verification
 - `scripts/nvim/plugin_status.sh` - Plugin status
-- `scripts/nvim/test_colorbuddy.sh` - Colorscheme testing
 - `scripts/nvim/nvim_help.sh` - Help and reference
 
 ### Configuration Files
