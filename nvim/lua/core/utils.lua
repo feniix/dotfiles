@@ -43,10 +43,6 @@ M.platform = {
     return vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 
   end,
   
-  is_windows = function() 
-    return vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 
-  end,
-  
   is_linux = function() 
     return vim.fn.has("unix") == 1 and not M.platform.is_mac() 
   end,
@@ -61,8 +57,6 @@ M.platform = {
   get_os = function()
     if M.platform.is_mac() then
       return "macos"
-    elseif M.platform.is_windows() then
-      return "windows"
     elseif M.platform.is_linux() then
       return "linux"
     else
@@ -89,8 +83,6 @@ M.platform = {
   get_clipboard_config = function()
     if M.platform.is_mac() then
       return { name = "macOS", provider = "pbcopy/pbpaste" }
-    elseif M.platform.is_windows() then
-      return { name = "Windows", provider = "win32yank" }
     elseif M.platform.is_linux() then
       return { name = "Linux", provider = "xclip/wl-clipboard" }
     else
@@ -190,7 +182,6 @@ function M.setup()
   -- Make platform detection globally available for backward compatibility
   _G.is_iterm2 = M.platform.is_iterm2
   _G.is_mac = M.platform.is_mac
-  _G.is_windows = M.platform.is_windows
   _G.is_linux = M.platform.is_linux
   _G.platform = M.platform
   

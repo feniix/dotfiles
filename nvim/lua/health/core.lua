@@ -54,7 +54,7 @@ local function check_core_utils()
     info("Detected OS: " .. os_name)
     
     -- Validate OS detection
-    local valid_os = { "macos", "linux", "windows", "freebsd", "openbsd" }
+    local valid_os = { "macos", "linux", "freebsd", "openbsd" }
     local is_valid = false
     for _, valid in ipairs(valid_os) do
       if os_name == valid then

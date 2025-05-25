@@ -46,7 +46,7 @@ function M.setup()
     end
     
     -- Enhanced clipboard handling for supported terminals
-    if platform.get_terminal and platform.get_terminal() == "iterm2" or terminal_config.support_focus_events then
+    if (platform.get_terminal and platform.get_terminal() == "iterm2") or terminal_config.support_focus_events then
       autocmd("TextYankPost", {
         group = augroup("TerminalClipboard", { clear = true }),
         callback = function()

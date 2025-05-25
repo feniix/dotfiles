@@ -94,7 +94,7 @@ local function check_go()
   end
   
   -- Check Go tools using platform module if available
-  local platform = _G.platform or safe_require('user.platform')
+  local platform = _G.platform
   if platform then
     local tools = platform.get_language_tools()
     if tools.go then
@@ -198,12 +198,7 @@ local function check_platform()
         else
           warn("No clipboard utilities found. Install wl-clipboard (Wayland) or xclip/xsel (X11)")
         end
-      elseif os_name == "windows" then
-        if vim.fn.executable('win32yank.exe') == 1 then
-          ok("Windows clipboard utility (win32yank) is available")
-        else
-          warn("win32yank.exe not found. Install for better clipboard support")
-        end
+
       elseif os_name == "macos" then
         if vim.fn.executable('pbcopy') == 1 and vim.fn.executable('pbpaste') == 1 then
           ok("macOS clipboard utilities (pbcopy/pbpaste) are available")
@@ -249,8 +244,7 @@ local function check_platform()
     -- Show basic fallback information
     if vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 then
       info("Operating System: macOS (fallback detection)")
-    elseif vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 then
-      info("Operating System: Windows (fallback detection)")
+
     elseif vim.fn.has("unix") == 1 then
       info("Operating System: Unix/Linux (fallback detection)")
     else

@@ -86,12 +86,11 @@ _G.safe_require = safe_require
 
 -- Make platform detection globally available for backward compatibility
 if platform then
-  _G.is_iterm2 = platform.is_iterm2
-  _G.is_mac = platform.is_mac
-  _G.is_windows = platform.is_windows
-  _G.is_linux = platform.is_linux
+  _G.is_iterm2 = platform.platform.is_iterm2
+  _G.is_mac = platform.platform.is_mac
+  _G.is_linux = platform.platform.is_linux
   -- Also make the platform module globally available
-  _G.platform = platform
+  _G.platform = platform.platform
 else
   -- Fallback functions if platform module fails to load
   _G.is_iterm2 = function()
@@ -100,7 +99,6 @@ else
            vim.env.LC_TERMINAL == "iTerm2"
   end
   _G.is_mac = function() return vim.fn.has("mac") == 1 or vim.fn.has("macunix") == 1 end
-  _G.is_windows = function() return vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1 end
   _G.is_linux = function() return vim.fn.has("unix") == 1 and not is_mac() end
 end
 
