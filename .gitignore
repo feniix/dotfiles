@@ -14,3 +14,4 @@ id_*
 *.key
 known_hosts
 authorized_keys
+__pycache__
