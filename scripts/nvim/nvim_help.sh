@@ -3,7 +3,7 @@
 # Shows available scripts and common commands
 
 # Colors for output
-RED='\033[0;31m'
+# RED='\033[0;31m'  # Currently unused
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
@@ -21,7 +21,6 @@ echo -e "${GREEN}• Complete setup:${RESET}      $SCRIPT_DIR/setup_and_check.sh
 echo -e "${GREEN}• Health check:${RESET}        $SCRIPT_DIR/health_check.sh"
 echo -e "${GREEN}• Plugin status:${RESET}       $SCRIPT_DIR/plugin_status.sh"
 echo -e "${GREEN}• Full plugin check:${RESET}   $SCRIPT_DIR/check_plugins.sh"
-echo -e "${GREEN}• Test colorscheme:${RESET}    $SCRIPT_DIR/test_colorbuddy.sh"
 echo -e "${GREEN}• Structure check:${RESET}     $SCRIPT_DIR/check_structure.sh"
 echo -e "${GREEN}• General structure:${RESET}   ./scripts/utils/check_dotfiles_structure.sh"
 
@@ -45,12 +44,12 @@ echo -e "${GREEN}• Core settings:${RESET}       ~/.config/nvim/lua/core/"
 echo -e "${GREEN}• Plugin specs:${RESET}        ~/.config/nvim/lua/plugins/specs/"
 echo -e "${GREEN}• Plugin configs:${RESET}      ~/.config/nvim/lua/plugins/config/"
 echo -e "${GREEN}• User overrides:${RESET}      ~/.config/nvim/lua/user/"
-echo -e "${GREEN}• Colorscheme:${RESET}         ~/.config/nvim/lua/plugins/config/colorbuddy.lua"
+echo -e "${GREEN}• Colorscheme:${RESET}         ~/.config/nvim/lua/plugins/config/catppuccin.lua"
 
 echo -e "\n${YELLOW}${BOLD}Common Issues & Solutions:${RESET}"
 echo -e "${GREEN}• Plugins not found:${RESET}   Run :Lazy sync in Neovim"
 echo -e "${GREEN}• Health check fails:${RESET}  Check :checkhealth user for details"
-echo -e "${GREEN}• Theme not working:${RESET}   Run ./scripts/nvim/test_colorbuddy.sh"
+echo -e "${GREEN}• Theme not working:${RESET}   Check :ToggleTheme command in Neovim"
 echo -e "${GREEN}• Config not loaded:${RESET}   Check ~/.config/nvim symlink"
 echo -e "${GREEN}• Circular symlinks:${RESET}   Run ./scripts/nvim/check_structure.sh"
 echo -e "${GREEN}• Repository issues:${RESET}   Run ./scripts/utils/check_dotfiles_structure.sh"

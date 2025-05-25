@@ -17,9 +17,6 @@ This directory contains scripts for setting up, managing, and troubleshooting Ne
 - **`check_plugins.sh`** - Comprehensive plugin installation check
 - **`plugin_status.sh`** - Detailed plugin status via lazy.nvim
 
-### 🎨 Colorscheme
-- **`test_colorbuddy.sh`** - Set up and test NeoSolarized colorscheme
-
 ### 📚 Documentation
 - **`nvim_help.sh`** - Quick reference for all commands and scripts
 - **`check_structure.sh`** - Check and fix structural issues (circular symlinks)
@@ -87,15 +84,7 @@ This directory contains scripts for setting up, managing, and troubleshooting Ne
 
 **Usage**: `./scripts/nvim/plugin_status.sh`
 
-### test_colorbuddy.sh
-**Purpose**: Set up and verify NeoSolarized colorscheme
 
-**What it does**:
-- Installs plugins if needed
-- Provides usage instructions for :ToggleTheme
-- Shows colorscheme configuration file location
-
-**Usage**: `./scripts/nvim/test_colorbuddy.sh`
 
 ### nvim_help.sh
 **Purpose**: Quick reference and help
@@ -150,8 +139,8 @@ This directory contains scripts for setting up, managing, and troubleshooting Ne
 
 ### Theme Issues
 ```bash
-# Test colorscheme setup
-./scripts/nvim/test_colorbuddy.sh
+# Test colorscheme in Neovim
+nvim -c ':ToggleTheme'
 
 # In Neovim: toggle theme
 :ToggleTheme

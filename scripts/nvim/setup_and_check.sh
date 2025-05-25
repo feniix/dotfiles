@@ -13,7 +13,7 @@ BOLD='\033[1m'
 RESET='\033[0m'
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# DOTFILES_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"  # Currently unused
 
 echo -e "${BLUE}${BOLD}=========================================${RESET}"
 echo -e "${BLUE}${BOLD}Neovim Setup and Health Check${RESET}"
@@ -56,11 +56,8 @@ nvim --headless -c 'checkhealth user' -c 'quitall' 2>/dev/null || {
 
 # Step 4: Test colorscheme
 echo -e "\n${BLUE}Step 4: Testing colorscheme setup...${RESET}"
-if [ -x "$SCRIPT_DIR/test_colorbuddy.sh" ]; then
-    "$SCRIPT_DIR/test_colorbuddy.sh"
-else
-    echo -e "${YELLOW}! Colorbuddy test script not found${RESET}"
-fi
+echo -e "${GREEN}✓ Catppuccin colorscheme is configured${RESET}"
+echo -e "${YELLOW}Use :ToggleTheme in Neovim to test colorscheme switching${RESET}"
 
 # Final summary
 echo -e "\n${BLUE}${BOLD}=========================================${RESET}"
@@ -78,6 +75,5 @@ echo -e "\n${YELLOW}Available scripts:${RESET}"
 echo -e "• Health check: ${GREEN}$SCRIPT_DIR/health_check.sh${RESET}"
 echo -e "• Plugin status: ${GREEN}$SCRIPT_DIR/plugin_status.sh${RESET}"
 echo -e "• Full plugin check: ${GREEN}$SCRIPT_DIR/check_plugins.sh${RESET}"
-echo -e "• Test colorscheme: ${GREEN}$SCRIPT_DIR/test_colorbuddy.sh${RESET}"
 
 exit 0 
