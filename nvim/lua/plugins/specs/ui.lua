@@ -117,7 +117,12 @@ return {
     "rcarriga/nvim-notify",
     event = "VeryLazy",
     config = function()
-      vim.notify = require("notify")
+      local notify = require("notify")
+      notify.setup({
+        background_colour = "#000000",
+        timeout = 3000,
+      })
+      vim.notify = notify
     end,
   },
 } 
