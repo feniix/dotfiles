@@ -11,25 +11,13 @@ function M.setup(user_keymaps)
   
   local total_mappings = 0
   
-  -- Apply keymaps for each mode
-  for mode, mappings in pairs(user_keymaps) do
-    if type(mappings) == 'table' then
-      for key, mapping in pairs(mappings) do
-        local rhs, opts
-        
-        -- Handle different mapping formats
-        if type(mapping) == 'string' then
-          rhs = mapping
-          opts = {}
-        elseif type(mapping) == 'table' then
-          rhs = mapping[1] or mapping.rhs
-          opts = vim.tbl_deep_extend('force', {}, mapping)
-          opts[1] = nil
-          opts.rhs = nil
-        else
-          rhs = mapping
-          opts = {}
-        end
+  -- Handle both array-style and mode-grouped keymaps
+  if vim.tbl_islist(user_keymaps) then
+    -- Array format: { { mode, lhs, rhs, opts }, ... }
+    for _, mapping in ipairs(user_keymaps) do
+      if type(mapping) == 'table' and #mapping >= 3 then
+        local mode, lhs, rhs = mapping[1], mapping[2], mapping[3]
+        local opts = mapping[4] or {}
         
         -- Set default options
         opts = vim.tbl_deep_extend('force', {
@@ -37,15 +25,54 @@ function M.setup(user_keymaps)
           noremap = true,
         }, opts)
         
-        -- Apply the mapping
-        local ok, err = pcall(vim.keymap.set, mode, key, rhs, opts)
+        local ok, err = pcall(vim.keymap.set, mode, lhs, rhs, opts)
         if ok then
           total_mappings = total_mappings + 1
         else
           vim.notify(
-            string.format('Failed to set keymap %s in mode %s: %s', key, mode, err),
+            string.format('Failed to set keymap %s in mode %s: %s', lhs, mode, err),
             vim.log.levels.WARN
           )
+        end
+      end
+    end
+  else
+    -- Mode-grouped format: { n = { key = mapping }, ... }
+    for mode, mappings in pairs(user_keymaps) do
+      if type(mappings) == 'table' then
+        for key, mapping in pairs(mappings) do
+          local rhs, opts
+          
+          -- Handle different mapping formats
+          if type(mapping) == 'string' then
+            rhs = mapping
+            opts = {}
+          elseif type(mapping) == 'table' then
+            rhs = mapping[1] or mapping.rhs
+            opts = vim.tbl_deep_extend('force', {}, mapping)
+            opts[1] = nil
+            opts.rhs = nil
+          else
+            rhs = mapping
+            opts = {}
+          end
+          
+          -- Set default options
+          opts = vim.tbl_deep_extend('force', {
+            silent = true,
+            noremap = true,
+          }, opts)
+          
+          -- Apply the mapping
+          local ok, err = pcall(vim.keymap.set, mode, key, rhs, opts)
+          if ok then
+            total_mappings = total_mappings + 1
+          else
+            vim.notify(
+              string.format('Failed to set keymap %s in mode %s: %s', key, mode, err),
+              vim.log.levels.WARN
+            )
+          end
         end
       end
     end

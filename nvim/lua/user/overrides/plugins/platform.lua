@@ -1,15 +1,23 @@
 -- Platform-aware plugin override system
 -- Provides platform-specific overrides for plugins
 
-local utils = require('core.utils')
-local platform_config = require('plugins.config.platform')
 local M = {}
+
+-- Lazy load dependencies to avoid circular requires
+local function get_utils()
+  return require('core.utils')
+end
+
+local function get_platform_config()
+  return require('plugins.config.platform')
+end
 
 -- Apply platform-specific overrides to any plugin configuration
 function M.apply_platform_overrides(plugin_name, base_config, user_config)
   local final_config = base_config or {}
   
   -- Get platform-specific configuration if available
+  local platform_config = get_platform_config()
   local platform_getter = platform_config['get_' .. plugin_name .. '_config']
   if platform_getter and type(platform_getter) == 'function' then
     local platform_specific = platform_getter()
@@ -26,6 +34,7 @@ end
 
 -- Get platform-specific plugin conditions
 function M.get_platform_conditions()
+  local utils = get_utils()
   return {
     -- Only load on platforms with git
     git_required = function()
@@ -100,6 +109,7 @@ end
 
 -- Get platform-specific key mappings
 function M.get_platform_keymaps()
+  local utils = get_utils()
   if utils.platform.is_mac() then
     -- macOS-specific keymaps (using Cmd key)
     return {
@@ -119,6 +129,9 @@ end
 
 -- Setup platform-specific plugin configurations
 function M.setup()
+  local utils = get_utils()
+  local platform_config = get_platform_config()
+  
   -- Apply platform-specific keymaps
   local platform_keymaps = M.get_platform_keymaps()
   for _, keymap in ipairs(platform_keymaps) do
@@ -127,7 +140,7 @@ function M.setup()
   
   -- Set platform-specific clipboard
   local clipboard_config = platform_config.get_clipboard_config()
-  if clipboard_config.providers then
+  if clipboard_config and clipboard_config.providers then
     vim.g.clipboard = clipboard_config
   end
   

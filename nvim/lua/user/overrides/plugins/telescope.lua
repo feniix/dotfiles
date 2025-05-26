@@ -1,12 +1,14 @@
 -- User telescope override with platform awareness
 -- This module allows users to override telescope configuration with platform-specific settings
 
-local utils = require('core.utils')
-local platform_config = require('plugins.config.platform')
 local M = {}
 
 -- Apply user telescope configuration overrides
 function M.setup(user_config)
+  -- Lazy load dependencies
+  local utils = require('core.utils')
+  local platform_config = require('plugins.config.platform')
+  
   -- Get platform-specific base configuration
   local base_config = platform_config.get_telescope_config()
   

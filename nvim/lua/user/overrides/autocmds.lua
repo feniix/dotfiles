@@ -18,6 +18,9 @@ function M.setup(user_autocmds)
     if type(autocmd) == 'table' and autocmd.event then
       local opts = vim.tbl_deep_extend('force', {}, autocmd)
       
+      -- Remove event from opts since it's passed separately
+      opts.event = nil
+      
       -- Set the group for organization
       opts.group = user_group
       

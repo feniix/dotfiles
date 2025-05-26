@@ -9,13 +9,33 @@ function M.setup(user_options)
     return
   end
   
+  local applied_count = 0
+  
   -- Apply each user option
   for option, value in pairs(user_options) do
     local ok, err = pcall(function()
-      vim.opt[option] = value
+      -- Handle different option types
+      if option:match('^g:') then
+        -- Global variable
+        local var_name = option:sub(3)
+        vim.g[var_name] = value
+      elseif option:match('^b:') then
+        -- Buffer variable
+        local var_name = option:sub(3)
+        vim.b[var_name] = value
+      elseif option:match('^w:') then
+        -- Window variable
+        local var_name = option:sub(3)
+        vim.w[var_name] = value
+      else
+        -- Regular vim option
+        vim.opt[option] = value
+      end
     end)
     
-    if not ok then
+    if ok then
+      applied_count = applied_count + 1
+    else
       vim.notify(
         string.format('Failed to set option %s: %s', option, err),
         vim.log.levels.WARN
@@ -24,10 +44,9 @@ function M.setup(user_options)
   end
   
   -- Notify user that custom options were applied
-  local option_count = vim.tbl_count(user_options)
-  if option_count > 0 then
+  if applied_count > 0 then
     vim.notify(
-      string.format('Applied %d custom vim options', option_count),
+      string.format('Applied %d custom vim options', applied_count),
       vim.log.levels.INFO
     )
   end
