@@ -663,11 +663,32 @@ main() {
   echo "║     XDG-compliant Dotfiles Setup       ║"
   echo "╚════════════════════════════════════════╝"
 
-  # Check dependencies first
-  check_dependencies || {
-    log_error "Missing required dependencies. Please install them and try again."
-    exit 1
-}
+  # Load platform detection and package coordination
+  log_info "Loading platform detection..."
+  if [ -f "$SCRIPTS_DIR/utils/platform_detection.sh" ]; then
+    source "$SCRIPTS_DIR/utils/platform_detection.sh"
+    detect_platform
+    validate_platform_requirements || {
+      log_error "Platform requirements validation failed. Please install missing dependencies and try again."
+      exit 1
+    }
+  else
+    log_warning "Platform detection script not found, using legacy dependency checks"
+    # Check dependencies first
+    check_dependencies || {
+      log_error "Missing required dependencies. Please install them and try again."
+      exit 1
+    }
+  fi
+
+  # Load package coordination
+  log_info "Setting up package coordination..."
+  if [ -f "$SCRIPTS_DIR/utils/package_coordination.sh" ]; then
+    source "$SCRIPTS_DIR/utils/package_coordination.sh"
+    coordinate_packages
+  else
+    log_warning "Package coordination script not found, proceeding without coordination"
+  fi
 
 if [ -d "$DOTFILES_DIR" ]; then
     log_info "Dotfiles directory already exists."
@@ -683,9 +704,10 @@ if [ -d "$DOTFILES_DIR" ]; then
     echo "9. Clean up legacy files"
     echo "10. Set up SSH keys"
     echo "11. Set up asdf version manager"
-    echo "12. Exit"
+    echo "12. Show platform and package coordination info"
+    echo "13. Exit"
     
-    read -p "Enter your choice (1-12): " choice
+    read -p "Enter your choice (1-13): " choice
     
     case $choice in
       1)
@@ -759,6 +781,27 @@ fi
         log_success "asdf version manager setup complete."
         ;;
       12)
+        echo ""
+        log_info "=== Platform Information ==="
+        if [ -f "$SCRIPTS_DIR/utils/platform_detection.sh" ]; then
+          source "$SCRIPTS_DIR/utils/platform_detection.sh"
+          detect_platform
+          echo ""
+          log_info "=== Package Coordination ==="
+          if [ -f "$SCRIPTS_DIR/utils/package_coordination.sh" ]; then
+            source "$SCRIPTS_DIR/utils/package_coordination.sh"
+            coordinate_packages
+            show_coordination_summary
+            check_package_conflicts
+          fi
+        else
+          log_error "Platform detection scripts not available"
+        fi
+        echo ""
+        read -p "Press any key to continue..." -n 1 -r
+        echo ""
+        ;;
+      13)
         log_info "Exiting without changes."
         exit 0
         ;;
