@@ -744,4 +744,5 @@ main() {
 # Execute main function if script is run directly
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   main "$@"
-fi 
+fi   export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
