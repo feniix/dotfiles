@@ -76,8 +76,14 @@ configure_asdf_environment() {
       fi
       ;;
     "ubuntu"|"linux")
-      # On Linux, asdf 0.17+ should work via shims in PATH
-      log_info "Using modern asdf 0.17+ shims approach"
+      # On Linux, check if installed via Linuxbrew
+      if has "brew" && [ -f "$(brew --prefix asdf 2>/dev/null)/libexec/asdf.sh" ]; then
+        . "$(brew --prefix asdf)/libexec/asdf.sh"
+        log_info "Sourced asdf via Linuxbrew"
+      else
+        # Otherwise use modern asdf 0.17+ shims approach
+        log_info "Using modern asdf 0.17+ shims approach"
+      fi
       ;;
   esac
 }

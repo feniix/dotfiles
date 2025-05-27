@@ -10,11 +10,12 @@
 - ✅ **Bonus**: Modern asdf binary installation (no more git clone approach)
 
 **Key Technical Improvements:**
-- 🔧 Modern asdf 0.17+ installation using pre-compiled binaries
-- 🔧 Shims-based PATH configuration (no shell sourcing required)
-- 🔧 Coordinated package management: apt → asdf → snap hierarchy
+- 🔧 Modern asdf installation using **Linuxbrew** (Homebrew for Linux)
+- 🔧 Unified package management: Homebrew on both macOS and Linux
+- 🔧 Coordinated package management: apt → asdf (via Linuxbrew) → snap hierarchy
 - 🔧 Platform-aware installation with intelligent fallbacks
 - 🔧 Comprehensive test suite for validation
+- 🔧 **Simplified**: Uses Linuxbrew for consistent asdf installation across platforms
 
 ## Overview
 
@@ -120,11 +121,11 @@ install_asdf_via_homebrew() {
 }
 ```
 
-#### Ubuntu Package Strategy
+#### Ubuntu Package Strategy ✅ **UPDATED**
 **System Packages**: apt (primary)
-**Development Tools**: asdf (via apt or manual install)
+**Development Tools**: asdf (via **Linuxbrew** - unified with macOS)
 **Fallback Packages**: snap (for packages not in apt)
-**Coordination**: Clear separation of responsibilities
+**Coordination**: Clear separation of responsibilities with Linuxbrew for asdf
 
 ```bash
 # Enhanced scripts/setup/setup_ubuntu.sh
@@ -173,18 +174,16 @@ install_core_apt_packages() {
 
 install_asdf_ubuntu() {
     if ! command -v asdf >/dev/null; then
-        log_info "Installing asdf on Ubuntu..."
+        log_info "Installing asdf on Ubuntu via Linuxbrew..."
         
-        # Try apt first (if available in repos)
-        if apt-cache search asdf | grep -q "^asdf "; then
-            sudo apt install -y asdf
+        # Install via Linuxbrew (unified with macOS approach)
+        if command -v brew >/dev/null 2>&1; then
+            brew install asdf
+        elif install_linuxbrew; then
+            brew install asdf
         else
-            # Manual installation
-            git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.17.0
-            echo '. "$HOME/.asdf/asdf.sh"' >> ~/.bashrc
-            echo '. "$HOME/.asdf/completions/asdf.bash"' >> ~/.bashrc
-            # Source for current session
-            . "$HOME/.asdf/asdf.sh"
+            # Fallback to source build only if Linuxbrew fails
+            install_asdf_fallback
         fi
     fi
 }
@@ -266,22 +265,37 @@ ensure_asdf_installed_modern() {
     fi
 }
 
-# ✅ IMPLEMENTED: Modern binary installation for asdf 0.17+
-install_asdf_binary() {
-    local arch=$(uname -m)
-    case "$arch" in
-        x86_64) arch="amd64" ;;
-        aarch64) arch="arm64" ;;
-    esac
+# ✅ IMPLEMENTED: Modern asdf installation via Linuxbrew
+install_asdf_via_linuxbrew() {
+    # Method 1: Use existing Linuxbrew
+    if command -v brew >/dev/null 2>&1; then
+        brew install asdf
+        return 0
+    fi
     
-    local asdf_version="v0.17.0"
-    local download_url="https://github.com/asdf-vm/asdf/releases/download/${asdf_version}/asdf_${asdf_version}_linux_${arch}.tar.gz"
+    # Method 2: Install Linuxbrew first, then asdf
+    if install_linuxbrew; then
+        brew install asdf
+        return 0
+    fi
     
-    # Download and install binary to ~/.local/bin
-    curl -fsSL "$download_url" | tar -xz -C /tmp
-    mkdir -p "$HOME/.local/bin"
-    cp /tmp/asdf "$HOME/.local/bin/asdf"
-    chmod +x "$HOME/.local/bin/asdf"
+    # Method 3: Fallback to source build (if Linuxbrew fails)
+    install_asdf_fallback
+}
+
+# ✅ IMPLEMENTED: Linuxbrew installation
+install_linuxbrew() {
+    # Install Linuxbrew (Homebrew for Linux)
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    
+    # Configure environment
+    if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+        export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    elif [ -d "$HOME/.linuxbrew" ]; then
+        export PATH="$HOME/.linuxbrew/bin:$PATH"
+        eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+    fi
 }
 
 # ✅ IMPLEMENTED: Modern shims-based configuration

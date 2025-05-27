@@ -226,19 +226,16 @@ install_asdf_tools() {
   else
     log_info "Installing asdf using modern 0.17+ approach..."
     
-    # Method 1: Try package manager installation (recommended)
-    if command -v apt >/dev/null 2>&1; then
-      # Check if asdf is available in repositories
-      if apt-cache search asdf | grep -q "^asdf "; then
-        log_info "Installing asdf via apt package manager..."
-        sudo apt install -y asdf
-      else
-        log_info "asdf not available in apt repositories, using binary installation..."
-        install_asdf_binary
-      fi
+    # Method 1: Try Linuxbrew installation (recommended for asdf)
+    if command -v brew >/dev/null 2>&1; then
+      log_info "Installing asdf via Linuxbrew..."
+      brew install asdf
+    elif install_linuxbrew; then
+      log_info "Installing asdf via newly installed Linuxbrew..."
+      brew install asdf
     else
-      log_info "apt not available, using binary installation..."
-      install_asdf_binary
+      log_info "Linuxbrew not available, using fallback installation..."
+      install_asdf_fallback
     fi
   fi
   
@@ -260,49 +257,107 @@ install_asdf_tools() {
   fi
 }
 
-# Install asdf binary (modern 0.17+ method)
-install_asdf_binary() {
-  log_info "Installing asdf via pre-compiled binary..."
+# Install Linuxbrew (Homebrew for Linux)
+install_linuxbrew() {
+  log_info "Installing Linuxbrew (Homebrew for Linux)..."
+  
+  # Check if curl is available
+  if ! command -v curl >/dev/null 2>&1; then
+    log_error "curl is required to install Linuxbrew"
+    return 1
+  fi
+  
+  # Install Linuxbrew
+  log_info "Downloading and installing Linuxbrew..."
+  if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+    # Add Linuxbrew to PATH for current session
+    if [ -d "/home/linuxbrew/.linuxbrew" ]; then
+      export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+      eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    elif [ -d "$HOME/.linuxbrew" ]; then
+      export PATH="$HOME/.linuxbrew/bin:$PATH"
+      eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+    fi
+    
+    # Add to shell configuration
+    local shell_config=""
+    if [[ "$SHELL" == *"zsh"* ]]; then
+      shell_config="$HOME/.zshrc"
+    else
+      shell_config="$HOME/.bashrc"
+    fi
+    
+    if [ -f "$shell_config" ]; then
+      if ! grep -q "linuxbrew" "$shell_config"; then
+        log_info "Adding Linuxbrew to shell configuration..."
+        echo '' >> "$shell_config"
+        echo '# Linuxbrew configuration' >> "$shell_config"
+        echo 'if [ -d "/home/linuxbrew/.linuxbrew" ]; then' >> "$shell_config"
+        echo '  export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"' >> "$shell_config"
+        echo '  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> "$shell_config"
+        echo 'elif [ -d "$HOME/.linuxbrew" ]; then' >> "$shell_config"
+        echo '  export PATH="$HOME/.linuxbrew/bin:$PATH"' >> "$shell_config"
+        echo '  eval "$($HOME/.linuxbrew/bin/brew shellenv)"' >> "$shell_config"
+        echo 'fi' >> "$shell_config"
+      fi
+    fi
+    
+    log_success "Linuxbrew installed successfully"
+    return 0
+  else
+    log_error "Failed to install Linuxbrew"
+    return 1
+  fi
+}
+
+# Install asdf via fallback methods (when Linuxbrew is not available)
+install_asdf_fallback() {
+  log_info "Installing asdf via modern installation methods..."
+  
+  # Method 1: Try go install (if Go is available)
+  if command -v go >/dev/null 2>&1; then
+    log_info "Installing asdf via 'go install'..."
+    if go install github.com/asdf-vm/asdf/cmd/asdf@v0.17.0; then
+      log_success "asdf installed via 'go install'"
+      return 0
+    else
+      log_warning "Failed to install asdf via 'go install', trying source build..."
+    fi
+  fi
+  
+  # Method 2: Build from source (fallback)
+  log_info "Installing asdf by building from source..."
   
   # Create temporary directory
   local temp_dir=$(mktemp -d)
   cd "$temp_dir"
   
-  # Detect architecture
-  local arch=$(uname -m)
-  case "$arch" in
-    x86_64) arch="amd64" ;;
-    aarch64) arch="arm64" ;;
-    *) 
-      log_error "Unsupported architecture: $arch"
-      return 1
-      ;;
-  esac
-  
-  # Download and install asdf binary
-  local asdf_version="v0.17.0"
-  local download_url="https://github.com/asdf-vm/asdf/releases/download/${asdf_version}/asdf_${asdf_version}_linux_${arch}.tar.gz"
-  
-  log_info "Downloading asdf ${asdf_version} for ${arch}..."
-  if curl -fsSL "$download_url" -o asdf.tar.gz; then
-    tar -xzf asdf.tar.gz
+  # Clone and build asdf
+  if git clone https://github.com/asdf-vm/asdf.git --branch v0.17.0 --depth 1; then
+    cd asdf
     
-    # Install to ~/.local/bin (which should be in PATH)
-    mkdir -p "$HOME/.local/bin"
-    cp asdf "$HOME/.local/bin/asdf"
-    chmod +x "$HOME/.local/bin/asdf"
-    
-    log_success "asdf binary installed to ~/.local/bin/asdf"
+    # Build asdf
+    if make; then
+      # Install to ~/.local/bin
+      mkdir -p "$HOME/.local/bin"
+      cp asdf "$HOME/.local/bin/asdf"
+      chmod +x "$HOME/.local/bin/asdf"
+      
+      log_success "asdf built and installed to ~/.local/bin/asdf"
+      cd - >/dev/null
+      rm -rf "$temp_dir"
+      return 0
+    else
+      log_error "Failed to build asdf from source"
+    fi
   else
-    log_error "Failed to download asdf binary"
-    cd - >/dev/null
-    rm -rf "$temp_dir"
-    return 1
+    log_error "Failed to clone asdf repository"
   fi
   
-  # Cleanup
+  # Cleanup on failure
   cd - >/dev/null
   rm -rf "$temp_dir"
+  return 1
 }
 
 # Configure asdf for modern 0.17+ usage
