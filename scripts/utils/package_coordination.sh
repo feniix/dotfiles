@@ -115,15 +115,15 @@ coordinate_ubuntu_packages() {
   
   # Define package responsibilities for Ubuntu
   APT_PACKAGES=(
-    # Core system tools
+    # Core system tools (MUST come from apt, not Linuxbrew)
     "git" "curl" "wget" "zsh" "tmux"
     # Build tools
     "build-essential" "cmake" "autoconf" "automake"
     # System libraries
     "libssl-dev" "libreadline-dev" "libsqlite3-dev" "zlib1g-dev"
-    # Python support
+    # Python support (system version for compatibility)
     "python3" "python3-pip" "python3-dev"
-    # Node.js (basic version)
+    # Node.js (basic version for system compatibility)
     "nodejs" "npm"
     # Basic CLI tools (if available in apt)
     "tree" "htop" "jq"
@@ -133,6 +133,8 @@ coordinate_ubuntu_packages() {
     "xclip"
     # Modern CLI tools (if available)
     "ripgrep" "fd-find" "fzf"
+    # Locale support
+    "locales"
   )
   
   SNAP_PACKAGES=(
@@ -168,11 +170,12 @@ coordinate_ubuntu_packages() {
   export ASDF_TOOLS
   export GITHUB_TOOLS
   
-  log_info "Ubuntu coordination: apt for system, asdf for dev runtimes, snap for modern tools"
-  log_info "apt packages: ${#APT_PACKAGES[@]} defined"
-  log_info "snap packages: ${#SNAP_PACKAGES[@]} defined"
-  log_info "asdf tools: ${#ASDF_TOOLS[@]} defined"
-  log_info "GitHub tools: ${#GITHUB_TOOLS[@]} defined"
+  log_info "Ubuntu coordination: apt for system, asdf (via Linuxbrew) for dev runtimes, snap for modern tools"
+  log_info "  • apt: System tools, libraries, zsh, git, etc. (${#APT_PACKAGES[@]} packages)"
+  log_info "  • Linuxbrew: ONLY for asdf installation (not for system tools)"
+  log_info "  • asdf: Development runtimes and tools (${#ASDF_TOOLS[@]} tools)"
+  log_info "  • snap: Modern CLI tools and applications (${#SNAP_PACKAGES[@]} packages)"
+  log_info "  • GitHub: Direct releases (${#GITHUB_TOOLS[@]} tools)"
 }
 
 # Check for conflicts between Brewfile and asdf tools

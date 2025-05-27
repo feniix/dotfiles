@@ -226,12 +226,13 @@ install_asdf_tools() {
   else
     log_info "Installing asdf using modern 0.17+ approach..."
     
-    # Method 1: Try Linuxbrew installation (recommended for asdf)
+    # Method 1: Try Linuxbrew installation (recommended ONLY for asdf)
     if command -v brew >/dev/null 2>&1; then
-      log_info "Installing asdf via Linuxbrew..."
+      log_info "Installing asdf via existing Linuxbrew..."
       brew install asdf
     elif install_linuxbrew; then
       log_info "Installing asdf via newly installed Linuxbrew..."
+      log_warning "Note: Linuxbrew is ONLY used for asdf. System tools come from apt."
       brew install asdf
     else
       log_info "Linuxbrew not available, using fallback installation..."

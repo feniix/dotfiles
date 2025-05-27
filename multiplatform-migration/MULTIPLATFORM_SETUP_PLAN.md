@@ -10,12 +10,12 @@
 - ✅ **Bonus**: Modern asdf binary installation (no more git clone approach)
 
 **Key Technical Improvements:**
-- 🔧 Modern asdf installation using **Linuxbrew** (Homebrew for Linux)
-- 🔧 Unified package management: Homebrew on both macOS and Linux
+- 🔧 Modern asdf installation using **Linuxbrew** (ONLY for asdf, not system tools)
+- 🔧 Clear package separation: apt for system tools, Linuxbrew only for asdf
 - 🔧 Coordinated package management: apt → asdf (via Linuxbrew) → snap hierarchy
 - 🔧 Platform-aware installation with intelligent fallbacks
 - 🔧 Comprehensive test suite for validation
-- 🔧 **Simplified**: Uses Linuxbrew for consistent asdf installation across platforms
+- 🔧 **Focused**: Linuxbrew used minimally - only for asdf consistency across platforms
 
 ## Overview
 
@@ -122,10 +122,10 @@ install_asdf_via_homebrew() {
 ```
 
 #### Ubuntu Package Strategy ✅ **UPDATED**
-**System Packages**: apt (primary)
-**Development Tools**: asdf (via **Linuxbrew** - unified with macOS)
+**System Packages**: apt (primary) - **zsh, git, curl, build tools, etc.**
+**Development Tools**: asdf (via **Linuxbrew** - ONLY for asdf installation)
 **Fallback Packages**: snap (for packages not in apt)
-**Coordination**: Clear separation of responsibilities with Linuxbrew for asdf
+**Coordination**: Clear separation - Linuxbrew ONLY for asdf, NOT for system tools
 
 ```bash
 # Enhanced scripts/setup/setup_ubuntu.sh
