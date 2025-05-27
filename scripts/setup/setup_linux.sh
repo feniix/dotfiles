@@ -718,6 +718,12 @@ main() {
   log_success "🎉 Enhanced Linux setup completed successfully!"
   log_info "You may need to log out and log back in for all changes to take effect."
   log_info "Run 'source ~/.profile' to update PATH in current session."
+  
+  # Check if zsh configuration is properly set up
+  if [[ "$SHELL" == *"zsh"* ]] && [[ -f "$HOME/.zshenv" ]]; then
+    log_info "💡 If you see Homebrew path errors, restart your shell or run:"
+    log_info "   source ~/.zshenv"
+  fi
 }
 
 # Execute main function if script is run directly

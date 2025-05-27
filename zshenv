@@ -45,8 +45,18 @@ export CURLOPT_COOKIEFILE="$XDG_DATA_HOME/curl/cookies"
 # AWS CLI Configuration (additional settings)
 export AWS_CLI_HISTORY_FILE="$XDG_DATA_HOME/aws/history"
 export AWS_WEB_IDENTITY_TOKEN_FILE="$XDG_DATA_HOME/aws/token"
-# Homebrew environment setup (prevent double-evaluation)
+# Homebrew environment setup (platform-aware, prevent double-evaluation)
 if [ -z "$HOMEBREW_PREFIX" ]; then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
+  # macOS Homebrew paths
+  if [ -f "/opt/homebrew/bin/brew" ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [ -f "/usr/local/bin/brew" ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  # Linux Homebrew (Linuxbrew) paths
+  elif [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  elif [ -f "$HOME/.linuxbrew/bin/brew" ]; then
+    eval "$($HOME/.linuxbrew/bin/brew shellenv)"
+  fi
 fi
 export ASDF_HASHICORP_SKIP_VERIFY=0
