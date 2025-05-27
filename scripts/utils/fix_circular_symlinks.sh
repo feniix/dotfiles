@@ -82,6 +82,40 @@ main() {
   
   local issues_found=0
   
+  # First, check for circular symlinks within source directories
+  log_info "Checking for circular symlinks within source directories..."
+  
+  # Check for nvim/nvim circular symlink
+  if [ -L "$DOTFILES_DIR/nvim/nvim" ]; then
+    log_error "Circular symlink detected within source: $DOTFILES_DIR/nvim/nvim"
+    rm -f "$DOTFILES_DIR/nvim/nvim"
+    log_success "Removed circular symlink: $DOTFILES_DIR/nvim/nvim"
+    ((issues_found++))
+  fi
+  
+  # Check for zsh-completions/zsh-completions circular symlink
+  if [ -L "$DOTFILES_DIR/zsh_custom/plugins/zsh-completions/zsh-completions" ]; then
+    log_error "Circular symlink detected within source: $DOTFILES_DIR/zsh_custom/plugins/zsh-completions/zsh-completions"
+    rm -f "$DOTFILES_DIR/zsh_custom/plugins/zsh-completions/zsh-completions"
+    log_success "Removed circular symlink: $DOTFILES_DIR/zsh_custom/plugins/zsh-completions/zsh-completions"
+    ((issues_found++))
+  fi
+  
+  # General check for any symlinks within dotfiles directory that point back to themselves
+  log_info "Scanning for other circular symlinks within dotfiles directory..."
+  while IFS= read -r -d '' symlink; do
+    local target=$(readlink "$symlink")
+    local symlink_name=$(basename "$symlink")
+    
+    # Check if symlink points to a path containing the dotfiles directory and the same name
+    if [[ "$target" == *"$DOTFILES_DIR"* && "$target" == *"$symlink_name"* ]]; then
+      log_error "Circular symlink detected: $symlink → $target"
+      rm -f "$symlink"
+      log_success "Removed circular symlink: $symlink"
+      ((issues_found++))
+    fi
+  done < <(find "$DOTFILES_DIR" -type l -print0 2>/dev/null)
+  
   # Check nvim configuration
   local nvim_config="$XDG_CONFIG_HOME/nvim"
   local nvim_source="$DOTFILES_DIR/nvim"
