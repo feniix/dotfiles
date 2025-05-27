@@ -115,35 +115,8 @@ mkdir -p "$ZSH_CUSTOM_DIR/plugins"
 mkdir -p "$OMZ_CUSTOM_DIR/themes"
 mkdir -p "$OMZ_CUSTOM_DIR/plugins"
 
-# Check if our bullet-train theme exists
-if [ -f "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
-  log_info "Bullet Train theme already exists in dotfiles."
-else
-  log_info "Installing Bullet Train theme..."
-  
-      # Skip theme download in check-only mode
-    if [ "$CHECK_ONLY" = false ]; then
-      if curl -fsSL -o "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" https://raw.githubusercontent.com/caiogondim/bullet-train.zsh/master/bullet-train.zsh-theme; then
-      log_success "Bullet Train theme installed successfully."
-    else
-      log_error "Failed to install Bullet Train theme."
-    fi
-  fi
-fi
-
-# Create symlink from oh-my-zsh custom themes to our theme
-if [ -f "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
-  log_info "Creating symlink for bullet-train theme in oh-my-zsh directory..."
-  
-  # Remove existing symlink if it exists (to avoid circular symlinks)
-  if [ -L "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
-    rm -f "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme"
-  fi
-  
-  # Create the symlink using absolute paths
-  ln -sf "$(realpath "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme")" "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme"
-  log_success "Theme symlink created successfully."
-fi
+# Note: Custom themes should be managed in your zshrc configuration
+# This setup script focuses on plugin management only
 
 # Check for and install zsh-completions if missing
 ZSH_COMPLETIONS_DIR="$ZSH_CUSTOM_DIR/plugins/zsh-completions"

@@ -712,6 +712,12 @@ main() {
   # Fix Neovim on Linux
   fix_neovim_linux
   
+  # Fix any circular symlinks that might have been created
+  if [ -f "$SCRIPT_DIR/../utils/fix_circular_symlinks.sh" ]; then
+    log_info "Checking for and fixing any circular symlinks..."
+    bash "$SCRIPT_DIR/../utils/fix_circular_symlinks.sh"
+  fi
+  
   # Show summary
   show_installation_summary
   

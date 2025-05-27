@@ -118,23 +118,7 @@ main() {
     log_success "Created zsh-completions symlink"
   fi
   
-  # Check bullet-train theme
-  local bullet_train_link="$omz_custom/themes/bullet-train.zsh-theme"
-  local bullet_train_source="$DOTFILES_DIR/zsh_custom/themes/bullet-train.zsh-theme"
-  
-  if is_circular_symlink "$bullet_train_link"; then
-    log_error "Circular symlink detected: $bullet_train_link"
-    if fix_circular_symlink "$bullet_train_link" "$bullet_train_source"; then
-      ((issues_found++))
-    fi
-  elif [ -L "$bullet_train_link" ] && [ -e "$bullet_train_link" ]; then
-    log_success "bullet-train theme symlink is correct"
-  elif [ -f "$bullet_train_source" ]; then
-    log_warning "bullet-train theme not linked. Creating symlink..."
-    mkdir -p "$(dirname "$bullet_train_link")"
-    ln -sf "$(realpath "$bullet_train_source")" "$bullet_train_link"
-    log_success "Created bullet-train theme symlink"
-  fi
+  # Note: Custom themes are managed in zshrc, not as symlinks
   
   # Summary
   echo ""
@@ -159,12 +143,6 @@ main() {
     echo "  zsh-completions: $zsh_completions_link → $(readlink "$zsh_completions_link")"
   else
     echo "  zsh-completions: Not linked"
-  fi
-  
-  if [ -L "$bullet_train_link" ]; then
-    echo "  bullet-train: $bullet_train_link → $(readlink "$bullet_train_link")"
-  else
-    echo "  bullet-train: Not linked"
   fi
 }
 

@@ -5,7 +5,7 @@ A collection of configuration files for a macOS development environment, followi
 ## Features
 
 - **XDG Compliance**: Uses `~/.config`, `~/.cache`, `~/.local/share` for cleaner organization
-- **Shell**: ZSH with Oh-My-ZSH and bullet-train theme
+- **Shell**: ZSH with Oh-My-ZSH and Powerlevel10k theme
 - **Editors**: Neovim with programming support
 - **Terminal**: iTerm2 configuration
 - **Git**: Custom aliases and settings with GitHub integration
@@ -145,7 +145,7 @@ The setup script automatically detects your platform and runs the appropriate co
 ## How It Works
 
 - **Symlink Approach**: Configuration files remain in the dotfiles repository and are symlinked to their respective XDG locations
-- **Zsh Theme**: The bullet-train theme is installed and linked from the dotfiles repository to the standard oh-my-zsh location
+- **Zsh Theme**: Powerlevel10k theme is configured via zshrc
 - **Plugin Management**: Plugins like zsh-completions are managed directly without git submodules
 - **Modular Setup**: Each component (Neovim, Zsh, macOS settings) has its own setup script for easier maintenance
 
@@ -162,6 +162,32 @@ The setup script automatically detects your platform and runs the appropriate co
 - Some legacy applications may still create dotfiles in the home directory
 - Utility scripts are now linked to `~/bin` instead of `~/sbin` for better PATH compatibility
 - Backups are stored in `~/.local/share/dotfiles_backup/TIMESTAMP/`
+
+## 🔧 Troubleshooting
+
+If you encounter issues during setup, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for detailed solutions.
+
+### Quick Fixes
+
+**Circular Symlinks**: If you see symlinks pointing to `@nvim` or `@zsh-completions`:
+```bash
+./scripts/utils/fix_circular_symlinks.sh
+```
+
+**Missing zsh plugins**: Install external oh-my-zsh plugins:
+```bash
+install_zsh_plugins
+```
+
+**Linux Homebrew path errors**: Restart your shell or run:
+```bash
+source ~/.zshenv
+```
+
+Common issues and solutions:
+- **Permission errors**: Ensure scripts are executable (`chmod +x`)
+- **Missing dependencies**: Install required tools for your platform
+- **Path issues**: Verify `DOTFILES_DIR` environment variable is set correctly
 
 ## License
 
