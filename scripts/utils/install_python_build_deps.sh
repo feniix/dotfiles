@@ -86,21 +86,32 @@ fi
 log_info "Updating package list..."
 sudo apt update
 
-# Install packages
+# Install all packages in one command to avoid stdin issues
 log_info "Installing Python build dependencies..."
-installed_count=0
-failed_packages=()
+log_info "Running: sudo apt install -y ${PYTHON_BUILD_DEPS[*]}"
 
-for pkg in "${PYTHON_BUILD_DEPS[@]}"; do
-  log_info "Installing $pkg..."
-  if sudo apt install -y "$pkg"; then
-    ((installed_count++))
-    log_success "✓ $pkg installed"
-  else
-    failed_packages+=("$pkg")
-    log_warning "✗ Failed to install $pkg"
-  fi
-done
+if sudo apt install -y "${PYTHON_BUILD_DEPS[@]}"; then
+  log_success "✓ All Python build dependencies installed successfully"
+  installed_count=${#PYTHON_BUILD_DEPS[@]}
+  failed_packages=()
+else
+  log_warning "Some packages may have failed to install"
+  # If bulk install fails, try individual installation
+  log_info "Trying individual package installation..."
+  installed_count=0
+  failed_packages=()
+  
+  for pkg in "${PYTHON_BUILD_DEPS[@]}"; do
+    log_info "Installing $pkg..."
+    if sudo apt install -y "$pkg" </dev/null; then
+      ((installed_count++))
+      log_success "✓ $pkg installed"
+    else
+      failed_packages+=("$pkg")
+      log_warning "✗ Failed to install $pkg"
+    fi
+  done
+fi
 
 echo ""
 log_success "Installation complete: $installed_count/${#PYTHON_BUILD_DEPS[@]} packages installed"

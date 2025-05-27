@@ -105,20 +105,29 @@ install_apt_packages() {
   log_info "Updating apt package list..."
   sudo apt update
   
-  # Install packages one by one to handle missing packages gracefully
+  # Try bulk installation first, then individual if needed
   local installed_count=0
   local failed_packages=()
   
-  for pkg in "${APT_PACKAGES[@]}"; do
-    log_info "Installing $pkg..."
-    if sudo apt install -y "$pkg"; then
-      ((installed_count++))
-      log_success "✓ $pkg installed"
-    else
-      failed_packages+=("$pkg")
-      log_warning "✗ Failed to install $pkg"
-    fi
-  done
+  log_info "Attempting bulk installation of all packages..."
+  if sudo apt install -y "${APT_PACKAGES[@]}"; then
+    log_success "✓ All apt packages installed successfully"
+    installed_count=${#APT_PACKAGES[@]}
+  else
+    log_warning "Bulk installation failed, trying individual packages..."
+    
+    # Install packages one by one to handle missing packages gracefully
+    for pkg in "${APT_PACKAGES[@]}"; do
+      log_info "Installing $pkg..."
+      if sudo apt install -y "$pkg" </dev/null; then
+        ((installed_count++))
+        log_success "✓ $pkg installed"
+      else
+        failed_packages+=("$pkg")
+        log_warning "✗ Failed to install $pkg"
+      fi
+    done
+  fi
   
   log_success "apt installation complete: $installed_count/${#APT_PACKAGES[@]} packages installed"
   
@@ -191,7 +200,7 @@ install_snap_packages() {
     
     # Install with options if specified
     if [[ "$pkg_options" != "$pkg_spec" ]] && [[ "$pkg_options" != "$pkg_name" ]]; then
-      if sudo snap install "$pkg_name" $pkg_options; then
+      if sudo snap install "$pkg_name" $pkg_options </dev/null; then
         ((installed_count++))
         log_success "✓ $pkg_name installed via snap"
       else
@@ -199,7 +208,7 @@ install_snap_packages() {
         log_warning "✗ Failed to install $pkg_name via snap"
       fi
     else
-      if sudo snap install "$pkg_name"; then
+      if sudo snap install "$pkg_name" </dev/null; then
         ((installed_count++))
         log_success "✓ $pkg_name installed via snap"
       else
