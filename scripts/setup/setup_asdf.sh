@@ -88,35 +88,8 @@ configure_asdf_environment() {
   esac
 }
 
-# Install plugins using modern asdf 0.17+ syntax
-install_plugins_modern() {
-  local plugins="$1"
-  
-  for plugin in $plugins; do
-    if ! asdf plugin list | grep -q "^$plugin$"; then
-      log_info "Installing asdf plugin: $plugin"
-      if asdf plugin install "$plugin"; then
-        log_success "✓ Plugin $plugin installed"
-      else
-        log_warning "✗ Failed to install plugin $plugin"
-      fi
-    else
-      log_info "asdf plugin already installed: $plugin"
-    fi
-  done
-  
-  # Install all tools with specified versions
-  log_info "Installing tool versions specified in .tool-versions..."
-  if asdf install; then
-    log_success "All tool versions installed successfully"
-  else
-    log_warning "Some tool versions failed to install"
-    log_info "You can install individual tools later with: asdf install <plugin> <version>"
-  fi
-}
-
-# Install plugins using legacy asdf syntax (pre-0.17)
-install_plugins_legacy() {
+# Install plugins using standard asdf syntax
+install_plugins_standard() {
   local plugins="$1"
   
   for plugin in $plugins; do
@@ -141,6 +114,8 @@ install_plugins_legacy() {
     log_info "You can install individual tools later with: asdf install <plugin> <version>"
   fi
 }
+
+
 
 # Setup asdf version manager (modern 0.17+ approach)
 setup_asdf() {
@@ -181,14 +156,9 @@ setup_asdf() {
     # Extract plugin names (first column) from asdf-tool-versions
     PLUGINS=$(awk '{print $1}' "$DOTFILES_DIR/asdf-tool-versions")
     
-    # Use modern asdf 0.17+ syntax (preferred) with fallback to legacy
-    if [ "$ASDF_MAJOR" -gt 0 ] || [ "$ASDF_MINOR" -ge 17 ]; then
-      log_info "Using modern asdf 0.17+ syntax (detected version: $ASDF_VERSION)"
-      install_plugins_modern "$PLUGINS"
-    else
-      log_info "Using legacy asdf syntax (detected version: $ASDF_VERSION)"
-      install_plugins_legacy "$PLUGINS"
-    fi
+    # Use standard asdf plugin add syntax (works for all versions)
+    log_info "Installing plugins using standard asdf syntax (detected version: $ASDF_VERSION)"
+    install_plugins_standard "$PLUGINS"
     
     log_success "All asdf plugins and versions have been installed!"
   else

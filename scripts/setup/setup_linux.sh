@@ -465,6 +465,45 @@ setup_linux_folders() {
   log_success "Linux folder structure set up successfully."
 }
 
+# Configure Linux locales
+configure_linux_locales() {
+  log_info "Configuring Linux locales..."
+  
+  # Update package list and install locales
+  sudo apt update
+  sudo apt install -y locales
+  
+  # Generate en_US.UTF-8 locale
+  sudo locale-gen en_US.UTF-8
+  
+  # Update system locale
+  sudo update-locale LANG=en_US.UTF-8
+  
+  # Export for current session
+  export LANG=en_US.UTF-8
+  export LC_ALL=en_US.UTF-8
+  
+  # Add to shell configuration for persistence
+  local shell_config=""
+  if [[ "$SHELL" == *"zsh"* ]]; then
+    shell_config="$HOME/.zshrc"
+  else
+    shell_config="$HOME/.bashrc"
+  fi
+  
+  if [ -f "$shell_config" ]; then
+    if ! grep -q "LANG=en_US.UTF-8" "$shell_config"; then
+      log_info "Adding locale configuration to $shell_config..."
+      echo '' >> "$shell_config"
+      echo '# Locale configuration' >> "$shell_config"
+      echo 'export LANG=en_US.UTF-8' >> "$shell_config"
+      echo 'export LC_ALL=en_US.UTF-8' >> "$shell_config"
+    fi
+  fi
+  
+  log_success "Linux locales configured successfully"
+}
+
 # Configure Linux-specific settings
 configure_linux_settings() {
   log_info "Configuring Linux-specific settings..."
@@ -644,6 +683,9 @@ main() {
   
   # Setup folder structure
   setup_linux_folders
+  
+  # Configure locales first (important for package installations)
+  configure_linux_locales
   
   # Install packages in coordinated order
   log_info "📦 Installing packages using coordinated approach..."

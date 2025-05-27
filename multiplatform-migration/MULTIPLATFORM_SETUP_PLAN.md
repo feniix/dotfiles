@@ -308,20 +308,14 @@ configure_asdf_environment() {
     echo 'export PATH="${ASDF_DATA_DIR:-$HOME/.asdf}/shims:$PATH"' >> ~/.bashrc
 }
 
-# ✅ IMPLEMENTED: Modern plugin installation with legacy fallback
-install_asdf_tools_modern() {
-    # Detect asdf version and use appropriate syntax
-    local asdf_version=$(asdf version | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
-    local major=$(echo "$asdf_version" | cut -d '.' -f1)
-    local minor=$(echo "$asdf_version" | cut -d '.' -f2)
-    
-    if [ "$major" -gt 0 ] || [ "$minor" -ge 17 ]; then
-        # Modern 0.17+ syntax
-        asdf plugin install "$plugin"
-    else
-        # Legacy syntax fallback
-        asdf plugin add "$plugin"
-    fi
+# ✅ IMPLEMENTED: Standard asdf plugin installation
+install_asdf_tools_standard() {
+    # Use standard asdf plugin add syntax (works for all versions)
+    for plugin in $plugins; do
+        if ! asdf plugin list | grep -q "^$plugin$"; then
+            asdf plugin add "$plugin"
+        fi
+    done
     
     # Install all tools from .tool-versions
     asdf install
