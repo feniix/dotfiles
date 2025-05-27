@@ -723,6 +723,15 @@ main() {
   if [[ "$SHELL" == *"zsh"* ]] && [[ -f "$HOME/.zshenv" ]]; then
     log_info "💡 If you see Homebrew path errors, restart your shell or run:"
     log_info "   source ~/.zshenv"
+    
+    # Check for missing zsh plugins
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+      local custom_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+      if [[ ! -d "$custom_dir/plugins/zsh-completions" ]]; then
+        log_info "💡 Missing zsh plugins detected. Install them with:"
+        log_info "   install_zsh_plugins"
+      fi
+    fi
   fi
 }
 

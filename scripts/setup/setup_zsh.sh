@@ -134,7 +134,14 @@ fi
 # Create symlink from oh-my-zsh custom themes to our theme
 if [ -f "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
   log_info "Creating symlink for bullet-train theme in oh-my-zsh directory..."
-  ln -sf "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme" "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme"
+  
+  # Remove existing symlink if it exists (to avoid circular symlinks)
+  if [ -L "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme" ]; then
+    rm -f "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme"
+  fi
+  
+  # Create the symlink using absolute paths
+  ln -sf "$(realpath "$ZSH_CUSTOM_DIR/themes/bullet-train.zsh-theme")" "$OMZ_CUSTOM_DIR/themes/bullet-train.zsh-theme"
   log_success "Theme symlink created successfully."
 fi
 
@@ -175,7 +182,14 @@ fi
 # Create symlink from oh-my-zsh custom plugins to our plugins
 if [ -d "$ZSH_COMPLETIONS_DIR" ]; then
   log_info "Creating symlink for zsh-completions plugin in oh-my-zsh directory..."
-  ln -sf "$ZSH_COMPLETIONS_DIR" "$OMZ_CUSTOM_DIR/plugins/zsh-completions"
+  
+  # Remove existing symlink if it exists (to avoid circular symlinks)
+  if [ -L "$OMZ_CUSTOM_DIR/plugins/zsh-completions" ]; then
+    rm -f "$OMZ_CUSTOM_DIR/plugins/zsh-completions"
+  fi
+  
+  # Create the symlink using absolute paths
+  ln -sf "$(realpath "$ZSH_COMPLETIONS_DIR")" "$OMZ_CUSTOM_DIR/plugins/zsh-completions"
   log_success "Plugin symlink created successfully."
 fi
 

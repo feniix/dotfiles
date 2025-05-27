@@ -152,7 +152,6 @@ plugins=(
   history-substring-search
   colored-man-pages
   command-not-found
-  zsh-completions
 
   # Movement and navigation
   last-working-dir
@@ -181,6 +180,31 @@ plugins=(
   gradle
   mvn
 )
+
+# Add platform-specific or optional plugins
+# Function to safely add plugins that might not be installed
+add_plugin_if_exists() {
+  local plugin_name="$1"
+  local install_cmd="$2"
+  
+  if [[ -d "$ZSH/custom/plugins/$plugin_name" ]] || [[ -d "$ZSH/plugins/$plugin_name" ]]; then
+    plugins+=(${plugin_name})
+  else
+    echo "Note: $plugin_name plugin not found." >&2
+    if [[ -n "$install_cmd" ]]; then
+      echo "  Install with: $install_cmd" >&2
+    fi
+  fi
+}
+
+# zsh-completions: External plugin for additional completions
+add_plugin_if_exists "zsh-completions" "git clone https://github.com/zsh-users/zsh-completions \${ZSH_CUSTOM:-\$ZSH/custom}/plugins/zsh-completions"
+
+# zsh-syntax-highlighting: External plugin for syntax highlighting (optional)
+add_plugin_if_exists "zsh-syntax-highlighting" "git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \${ZSH_CUSTOM:-\$ZSH/custom}/plugins/zsh-syntax-highlighting"
+
+# zsh-autosuggestions: External plugin for autosuggestions (optional)
+add_plugin_if_exists "zsh-autosuggestions" "git clone https://github.com/zsh-users/zsh-autosuggestions \${ZSH_CUSTOM:-\$ZSH/custom}/plugins/zsh-autosuggestions"
 
 # Plugin configurations
 # SSH Agent configuration
@@ -420,6 +444,33 @@ function rm_local_branches() {
   else
     echo "not a git repo"
   fi
+}
+
+# Install missing oh-my-zsh plugins
+function install_zsh_plugins() {
+  echo "Installing missing oh-my-zsh plugins..."
+  
+  local custom_dir="${ZSH_CUSTOM:-$ZSH/custom}"
+  
+  # zsh-completions
+  if [[ ! -d "$custom_dir/plugins/zsh-completions" ]]; then
+    echo "Installing zsh-completions..."
+    git clone https://github.com/zsh-users/zsh-completions "$custom_dir/plugins/zsh-completions"
+  fi
+  
+  # zsh-syntax-highlighting
+  if [[ ! -d "$custom_dir/plugins/zsh-syntax-highlighting" ]]; then
+    echo "Installing zsh-syntax-highlighting..."
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$custom_dir/plugins/zsh-syntax-highlighting"
+  fi
+  
+  # zsh-autosuggestions
+  if [[ ! -d "$custom_dir/plugins/zsh-autosuggestions" ]]; then
+    echo "Installing zsh-autosuggestions..."
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$custom_dir/plugins/zsh-autosuggestions"
+  fi
+  
+  echo "Plugin installation complete! Restart your shell or run 'source ~/.zshrc' to activate."
 }
 
 # === SSH AGENT CONFIGURATION ===

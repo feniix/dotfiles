@@ -55,8 +55,13 @@ if [ -d "$DOTFILES_DIR/nvim" ]; then
     mv "$XDG_CONFIG_HOME/nvim" "$XDG_CONFIG_HOME/nvim.backup.$(date +%Y%m%d_%H%M%S)"
   fi
   
-  # Create the symlink to the entire nvim directory
-  ln -sf "$DOTFILES_DIR/nvim" "$XDG_CONFIG_HOME/nvim"
+  # Remove existing symlink if it exists (to avoid circular symlinks)
+  if [ -L "$XDG_CONFIG_HOME/nvim" ]; then
+    rm -f "$XDG_CONFIG_HOME/nvim"
+  fi
+  
+  # Create the symlink to the entire nvim directory using absolute paths
+  ln -sf "$(realpath "$DOTFILES_DIR/nvim")" "$XDG_CONFIG_HOME/nvim"
   log_success "Linked nvim/ → $XDG_CONFIG_HOME/nvim"
   
   # Install plugins if nvim is available and --install-plugins flag is passed
