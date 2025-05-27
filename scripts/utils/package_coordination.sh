@@ -121,6 +121,9 @@ coordinate_ubuntu_packages() {
     "build-essential" "cmake" "autoconf" "automake"
     # System libraries
     "libssl-dev" "libreadline-dev" "libsqlite3-dev" "zlib1g-dev"
+    # Python build dependencies (for asdf python builds)
+    "libffi-dev" "libbz2-dev" "liblzma-dev" "libncurses5-dev" "libncursesw5-dev"
+    "libmpdec-dev" "libexpat1-dev" "tk-dev" "libgdbm-dev" "libnss3-dev"
     # Python support (system version for compatibility)
     "python3" "python3-pip" "python3-dev"
     # Node.js (basic version for system compatibility)
