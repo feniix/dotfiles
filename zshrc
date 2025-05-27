@@ -11,15 +11,19 @@ reset_path() {
   local sbin="/sbin"
 
   # Add homebrew core utils next (highest priority after base homebrew)
-  export PATH="$PATH:/opt/homebrew/opt/curl/bin"
-  export PATH="$PATH:/opt/homebrew/opt/make/libexec/gnubin"
-  export PATH="$PATH:/opt/homebrew/opt/gnu-getopt/bin"
-  export PATH="$PATH:/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-  export PATH="$PATH:/opt/homebrew/opt/findutils/bin"
-  export PATH="$PATH:/opt/homebrew/opt/gawk/bin"
-  export PATH="$PATH:/opt/homebrew/opt/less/bin"
-  export PATH="$PATH:/opt/homebrew/opt/libpq/bin"
-  export PATH="$PATH:/opt/homebrew/opt/ssh-copy-id/bin"
+  # Only add Homebrew GNU tool paths on macOS (Linux already has GNU tools)
+  if command -v brew >/dev/null 2>&1 && [[ "$OSTYPE" == "darwin"* ]]; then
+    local brew_prefix="$(brew --prefix)"
+    export PATH="$PATH:$brew_prefix/opt/curl/bin"
+    export PATH="$PATH:$brew_prefix/opt/make/libexec/gnubin"
+    export PATH="$PATH:$brew_prefix/opt/gnu-getopt/bin"
+    export PATH="$PATH:$brew_prefix/opt/gnu-tar/libexec/gnubin"
+    export PATH="$PATH:$brew_prefix/opt/findutils/bin"
+    export PATH="$PATH:$brew_prefix/opt/gawk/bin"
+    export PATH="$PATH:$brew_prefix/opt/less/bin"
+    export PATH="$PATH:$brew_prefix/opt/libpq/bin"
+    export PATH="$PATH:$brew_prefix/opt/ssh-copy-id/bin"
+  fi
 
   # Tool-specific paths
   export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
@@ -85,14 +89,32 @@ debug_path() {
 # === COMPLETION SETUP ===
 # Set up completions once, efficiently
 if type brew &>/dev/null; then
-  FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
-  # Skip global compinit in oh-my-zsh, we'll call it once efficiently
-  skip_global_compinit=1
+  local brew_prefix="$(brew --prefix)"
+  FPATH="$brew_prefix/share/zsh/site-functions:$brew_prefix/share/zsh-completions:$FPATH"
+fi
 
-  # Load completions without compiling
-  autoload -Uz compinit
+# Skip global compinit in oh-my-zsh, we'll call it once efficiently
+skip_global_compinit=1
+
+# Load completions without compiling
+autoload -Uz compinit
   # Only rebuild completion cache once a week, without compiling
-  if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
+  # Platform-aware stat command for checking .zcompdump modification time
+  local zcompdump_file="${ZDOTDIR:-$HOME}/.zcompdump"
+  local current_day=$(date +'%j')
+  local file_day=""
+  
+  if [[ -f "$zcompdump_file" ]]; then
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      # macOS/BSD stat
+      file_day=$(/usr/bin/stat -f '%Sm' -t '%j' "$zcompdump_file" 2>/dev/null)
+    else
+      # Linux/GNU stat
+      file_day=$(stat -c '%Y' "$zcompdump_file" 2>/dev/null | xargs -I {} date -d @{} +'%j')
+    fi
+  fi
+  
+  if [[ "$current_day" != "$file_day" ]]; then
     compinit -D
   else
     compinit -D -C
@@ -106,7 +128,6 @@ if type brew &>/dev/null; then
   zstyle ':completion:*' menu select
   zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
   zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-fi
 
 # === OH-MY-ZSH CONFIGURATION ===
 export ZSH=$HOME/.oh-my-zsh
@@ -167,25 +188,30 @@ zstyle :omz:plugins:ssh-agent agent-forwarding on
 zstyle :omz:plugins:ssh-agent identities id_rsa
 
 # === HOMEBREW CONFIGURATION ===
-# Homebrew wrapper if available
-if [ -f /opt/homebrew/etc/brew-wrap ]; then
-  source /opt/homebrew/etc/brew-wrap
+# Homebrew wrapper if available (platform-aware)
+if command -v brew >/dev/null 2>&1; then
+  local brew_prefix="$(brew --prefix)"
+  if [ -f "$brew_prefix/etc/brew-wrap" ]; then
+    source "$brew_prefix/etc/brew-wrap"
+  fi
+  
+  # Homebrew environment variables
+  export HOMEBREW_BREWFILE="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
+  export HOMEBREW_BREWFILE_BACKUP="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile.bak"
+  export HOMEBREW_BREWFILE_APPSTORE=1
+  export HOMEBREW_NO_ENV_HINTS=1
+  export HOMEBREW_NO_ANALYTICS=1
+  export HOMEBREW_AUTOREMOVE=1
+  export HOMEBREW_NO_INSTALL_UPGRADE=1
+
+  # MANPATH settings (only needed on macOS for GNU tools)
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    prepend_manpath "$brew_prefix/opt/findutils/share/man"
+    prepend_manpath "$brew_prefix/opt/gawk/share/man"
+    prepend_manpath "$brew_prefix/opt/less/share/man"
+    prepend_manpath "$brew_prefix/opt/erlang/lib/erlang/man"
+  fi
 fi
-
-# Homebrew environment variables
-export HOMEBREW_BREWFILE="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
-export HOMEBREW_BREWFILE_BACKUP="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile.bak"
-export HOMEBREW_BREWFILE_APPSTORE=1
-export HOMEBREW_NO_ENV_HINTS=1
-export HOMEBREW_NO_ANALYTICS=1
-export HOMEBREW_AUTOREMOVE=1
-export HOMEBREW_NO_INSTALL_UPGRADE=1
-
-# MANPATH settings
-prepend_manpath "/opt/homebrew/opt/findutils/share/man"
-prepend_manpath "/opt/homebrew/opt/gawk/share/man"
-prepend_manpath "/opt/homebrew/opt/less/share/man"
-prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 
 # Load Oh-My-Zsh
 source "$ZSH/oh-my-zsh.sh"
@@ -290,17 +316,24 @@ export LC_IDENTIFICATION="en_US.UTF-8"
 export LC_ALL=
 
 # === ASDF VERSION MANAGER ===
-# Initialize ASDF
-if [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
-  . /opt/homebrew/opt/asdf/libexec/asdf.sh
+# Initialize ASDF (platform-aware)
+if command -v brew >/dev/null 2>&1; then
+  local brew_prefix="$(brew --prefix)"
+  if [ -f "$brew_prefix/opt/asdf/libexec/asdf.sh" ]; then
+    . "$brew_prefix/opt/asdf/libexec/asdf.sh"
 
-  # Add asdf completions - needed for zsh
-  if [ -d "${ASDF_DIR}/completions" ]; then
-    fpath=(${ASDF_DIR}/completions $fpath)
-    # Ensure completions are loaded without compiling
-    autoload -Uz compinit
-    compinit -D
+    # Add asdf completions - needed for zsh
+    if [ -d "${ASDF_DIR}/completions" ]; then
+      fpath=(${ASDF_DIR}/completions $fpath)
+      # Ensure completions are loaded without compiling
+      autoload -Uz compinit
+      compinit -D
+    fi
   fi
+elif command -v asdf >/dev/null 2>&1; then
+  # asdf installed via other means (e.g., direct installation on Linux)
+  # Modern asdf 0.17+ should work via shims in PATH
+  true
 fi
 
 # === DEVELOPMENT SETTINGS ===
@@ -318,7 +351,11 @@ export AWS_SDK_LOAD_CONFIG=1
 # Kubernetes
 export KUBECONFIG="$XDG_CONFIG_HOME/kube/config"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
+# KICS queries path (platform-aware)
+if command -v brew >/dev/null 2>&1; then
+  local brew_prefix="$(brew --prefix)"
+  export KICS_QUERIES_PATH="$brew_prefix/opt/kics/share/kics/assets/queries"
+fi
 alias k=kubectl
 
 # Terraform
@@ -403,12 +440,15 @@ if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
   source "$HOME/.sdkman/bin/sdkman-init.sh"
 fi
 
-# Google Cloud SDK - load once
-if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
-  source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
-fi
-if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
-  source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
+# Google Cloud SDK - load once (platform-aware)
+if command -v brew >/dev/null 2>&1; then
+  local brew_prefix="$(brew --prefix)"
+  if [ -f "$brew_prefix/share/google-cloud-sdk/path.zsh.inc" ]; then
+    source "$brew_prefix/share/google-cloud-sdk/path.zsh.inc"
+  fi
+  if [ -f "$brew_prefix/share/google-cloud-sdk/completion.zsh.inc" ]; then
+    source "$brew_prefix/share/google-cloud-sdk/completion.zsh.inc"
+  fi
 fi
 
 # === PERSONAL SETTINGS ===
@@ -418,9 +458,24 @@ export EDITOR=nvim
 export GPG_TTY=$(tty)
 
 # === POWERLEVEL10K ===
-# Source Powerlevel10k theme
-if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
-  source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+# Source Powerlevel10k theme (platform-aware)
+# macOS: /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+# Linux: /home/linuxbrew/.linuxbrew/share/powerlevel10k/powerlevel10k.zsh-theme
+if command -v brew >/dev/null 2>&1; then
+  local brew_prefix="$(brew --prefix)"
+  local p10k_theme="$brew_prefix/share/powerlevel10k/powerlevel10k.zsh-theme"
+  if [[ -f "$p10k_theme" ]]; then
+    source "$p10k_theme"
+  else
+    # Debug: Show where we're looking for the theme
+    echo "Powerlevel10k theme not found at: $p10k_theme" >&2
+  fi
+elif [[ -f "/usr/share/powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+  # Fallback: System-wide installation (e.g., via package manager)
+  source "/usr/share/powerlevel10k/powerlevel10k.zsh-theme"
+elif [[ -f "$HOME/.powerlevel10k/powerlevel10k.zsh-theme" ]]; then
+  # Fallback: User installation
+  source "$HOME/.powerlevel10k/powerlevel10k.zsh-theme"
 fi
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
