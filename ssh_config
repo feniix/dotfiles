@@ -9,6 +9,12 @@ Compression yes
 ForwardX11Trusted yes
 HashKnownHosts no
 
+Host wsl-dev
+    HostName 192.168.1.99
+    User feniix
+    Port 22
+    ForwardAgent yes
+
 Host *
   ServerAliveInterval 60
   ForwardAgent        yes
