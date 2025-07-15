@@ -1,8 +1,8 @@
 golang 1.24.1
-python 3.13.2
+python 3.13.4
 sops 3.9.4
 kfilt 0.0.8
-uv 0.6.11
+uv 0.7.12
 kind 0.27.0
 kubectl 1.32.0
 gradle 8.13
@@ -18,3 +18,7 @@ tflint 0.57.0
 tfsec 1.28.14
 nodejs 22.16.0
 lua-language-server 3.14.0
+opentofu 1.9.1
+awscli 2.27.34
+bun 1.2.8
+terraform 1.10.4

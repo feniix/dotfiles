@@ -9,6 +9,20 @@ Compression yes
 ForwardX11Trusted yes
 HashKnownHosts no
 
+# Default GitHub key
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519
+  IdentitiesOnly yes
+
+# GATX GitHub key
+Host github-gatx
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/id_ed25519_gatx
+  IdentitiesOnly yes
+
 Host wsl-dev
     HostName 192.168.1.99
     User feniix

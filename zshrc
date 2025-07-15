@@ -211,7 +211,7 @@ complete () {
 }
 
 # === HISTORY SETTINGS ===
-# History file configuration 
+# History file configuration
 export HISTFILE="$XDG_STATE_HOME/zsh/history"
 HISTSIZE=1000000
 SAVEHIST=1000000
@@ -419,7 +419,9 @@ export GPG_TTY=$(tty)
 if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
   source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 fi
-
+if [[ -x "$HOME/.asdf/shims/aws_completer" ]]; then
+  complete -C "$HOME/.asdf/shims/aws_completer" aws
+fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 echo "Loading $0"

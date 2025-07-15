@@ -73,7 +73,7 @@
   followRedirects = true
 [difftool "sourcetree"]
   cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-  path = 
+  path =
 [mergetool "sourcetree"]
   cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
   trustExitCode = true
@@ -88,14 +88,13 @@
   process = git-lfs filter-process
 [pull]
   rebase = false
-[url "ssh://git@github.com/tempuslabs/"]
-  insteadOf = https://github.com/tempuslabs/
-[url "git@github.com:feniix/"]
-  insteadOf = https://github.com/feniix/
-[url "git@github.com:spantree/"]
-  insteadOf = https://github.com/spantree/
 
 [init]
   defaultBranch = main
   templateDir = ~/.config/git/template
+
+[url "git@github-gatx:GATX-Corp/"]
+	insteadOf = https://github.com/GATX-Corp/
+[url "git@github-gatx:GATX-Corp/"]
+  insteadOf = git@github.com:GATX-Corp/
 
