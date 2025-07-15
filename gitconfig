@@ -98,3 +98,7 @@
 [url "git@github-gatx:GATX-Corp/"]
   insteadOf = git@github.com:GATX-Corp/
 
+[url "git@github.com:feniix/"]
+  insteadOf = https://github.com/feniix/
+[url "git@github.com:spantree/"]
+  insteadOf = https://github.com/spantree/
