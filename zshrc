@@ -10,6 +10,8 @@ reset_path() {
   local bin="/bin"
   local sbin="/sbin"
 
+  eval $(brew shellenv)
+
   # Add homebrew core utils next (highest priority after base homebrew)
   export PATH="$PATH:/opt/homebrew/opt/curl/bin"
   export PATH="$PATH:/opt/homebrew/opt/make/libexec/gnubin"
@@ -397,11 +399,6 @@ direnv() {
   eval "$(command direnv hook zsh)"
   direnv "$@"
 }
-
-# SDKMAN
-if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
-  source "$HOME/.sdkman/bin/sdkman-init.sh"
-fi
 
 # Google Cloud SDK - load once
 if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
