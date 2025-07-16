@@ -192,6 +192,15 @@ prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 # Load Oh-My-Zsh
 source "$ZSH/oh-my-zsh.sh"
 
+# === POST OH-MY-ZSH CONFIGURATION ===
+# These need to come AFTER oh-my-zsh to avoid being overridden
+
+# History substring search keybindings (must be after oh-my-zsh loads the plugin)
+bindkey '^[[A' history-substring-search-up        # Up arrow
+bindkey '^[[B' history-substring-search-down      # Down arrow
+bindkey '^[OA' history-substring-search-up        # Up arrow (alternative)
+bindkey '^[OB' history-substring-search-down      # Down arrow (alternative)
+
 # === BASH COMPATIBILITY ===
 # Bash completion compatibility
 complete () {
@@ -211,27 +220,46 @@ complete () {
 }
 
 # === HISTORY SETTINGS ===
-# History file configuration
+# Modern zsh history configuration optimized for oh-my-zsh
 export HISTFILE="$XDG_STATE_HOME/zsh/history"
-HISTSIZE=1000000
-SAVEHIST=1000000
+export HISTSIZE=100000        # Large history size in memory
+export SAVEHIST=100000        # Large history size on disk
 
-# History command configuration
-setopt EXTENDED_HISTORY       # Save timestamp and duration
-setopt HIST_EXPIRE_DUPS_FIRST # Delete duplicates first when HISTFILE size exceeds HISTSIZE
-setopt HIST_IGNORE_DUPS       # Don't record if same as previous command
-setopt HIST_IGNORE_ALL_DUPS   # Delete old duplicate entries
-setopt HIST_FIND_NO_DUPS      # Don't display duplicates during searches
-setopt HIST_IGNORE_SPACE      # Don't record commands starting with space
-setopt HIST_REDUCE_BLANKS     # Remove unnecessary blanks
-setopt HIST_SAVE_NO_DUPS      # Don't save duplicates
-setopt HIST_NO_STORE          # Don't store history command itself
-setopt HIST_FCNTL_LOCK        # Better concurrent access
-setopt INC_APPEND_HISTORY     # Add commands as they are typed, not at shell exit
-setopt SHARE_HISTORY          # Share history between different instances
+# Core history behavior - optimized for real-time sharing
+setopt EXTENDED_HISTORY       # Write the history file in the ':start:elapsed;command' format
+setopt SHARE_HISTORY          # Share history between all sessions (includes INC_APPEND_HISTORY functionality)
+setopt HIST_EXPIRE_DUPS_FIRST # Expire duplicate entries first when trimming history
+setopt HIST_IGNORE_DUPS       # Don't record an entry that was just recorded again
+setopt HIST_FIND_NO_DUPS      # Do not display a line previously found
+setopt HIST_IGNORE_SPACE      # Don't record an entry starting with a space
+setopt HIST_REDUCE_BLANKS     # Remove superfluous blanks before recording entry
+setopt HIST_NO_STORE          # Remove the history (fc -l) command from the history list
+setopt HIST_FCNTL_LOCK        # Use fcntl for better concurrent access to history file
 
-# Ignore common commands
-HISTORY_IGNORE="(ls|pwd|exit|clear|history)"
+# Enhanced history sharing - reload on demand, not every prompt
+autoload -U add-zsh-hook
+
+# Function to reload history when needed
+reload_shared_history() {
+  fc -RI
+}
+
+# Reload history periodically (every 10 commands) instead of every prompt
+typeset -g _history_reload_counter=0
+_conditional_history_reload() {
+  (( _history_reload_counter++ ))
+  if (( _history_reload_counter >= 10 )); then
+    fc -RI
+    _history_reload_counter=0
+  fi
+}
+add-zsh-hook precmd _conditional_history_reload
+
+# Manual reload alias for immediate sharing
+alias hr='reload_shared_history'
+
+# Pattern to ignore from history
+export HISTORY_IGNORE="(ls|pwd|exit|clear|history|cd|cd ..|cd..)"
 
 # History search functions
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
@@ -247,9 +275,8 @@ bindkey "\e\e[C" forward-word           # Option+Right
 bindkey "^[b" backward-word             # Option+b - alternative for terminals
 bindkey "^[f" forward-word              # Option+f - alternative for terminals
 
-# History search with Up/Down - search based on what you've typed
-bindkey "^[[A" up-line-or-beginning-search        # Up
-bindkey "^[[B" down-line-or-beginning-search      # Down
+# History search with Up/Down - configured after oh-my-zsh loads
+# (See POST OH-MY-ZSH CONFIGURATION section for actual bindings)
 
 # Line navigation
 bindkey "^[[H" beginning-of-line        # Home (Command+Left on Mac keyboard)
@@ -425,3 +452,4 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 echo "Loading $0"
+
