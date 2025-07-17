@@ -201,6 +201,13 @@ bindkey '^[[B' history-substring-search-down      # Down arrow
 bindkey '^[OA' history-substring-search-up        # Up arrow (alternative)
 bindkey '^[OB' history-substring-search-down      # Down arrow (alternative)
 
+# Additional arrow key fix for iTerm2 reliability
+# These bindings help when the above get reset by other processes
+bindkey -M emacs '^[[A' history-substring-search-up
+bindkey -M emacs '^[[B' history-substring-search-down
+bindkey -M emacs '^[OA' history-substring-search-up
+bindkey -M emacs '^[OB' history-substring-search-down
+
 # === BASH COMPATIBILITY ===
 # Bash completion compatibility
 complete () {
@@ -239,17 +246,27 @@ setopt HIST_FCNTL_LOCK        # Use fcntl for better concurrent access to histor
 # Enhanced history sharing - reload on demand, not every prompt
 autoload -U add-zsh-hook
 
-# Function to reload history when needed
+# Function to reload history when needed - made safer to prevent hanging
 reload_shared_history() {
-  fc -RI
+  # Use timeout to prevent hanging
+  timeout 2s fc -RI 2>/dev/null || {
+    echo "History reload timed out - skipping"
+    return 1
+  }
 }
 
 # Reload history periodically (every 10 commands) instead of every prompt
+# Made safer to prevent hanging that blocks arrow keys
 typeset -g _history_reload_counter=0
 _conditional_history_reload() {
   (( _history_reload_counter++ ))
   if (( _history_reload_counter >= 10 )); then
-    fc -RI
+    # Use timeout to prevent hanging and run in background to avoid blocking terminal input
+    # If fc -RI hangs, it won't block arrow keys or other terminal input
+    {
+      # Set a 1-second timeout for the history reload operation
+      timeout 1s fc -RI 2>/dev/null || true
+    } &
     _history_reload_counter=0
   fi
 }
