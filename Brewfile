@@ -321,7 +321,7 @@ mas 'Keynote (14.4)', id: 409183694
 mas 'Numbers (14.4)', id: 409203825
 mas 'Okta Verify (9.44.0)', id: 490179405
 mas 'Patterns (1.3)', id: 429449079
-mas 'Prime Video (10.83)', id: 545519333
+mas 'Prime Video (10.86.1)', id: 545519333
 mas 'Slack (4.44.65)', id: 803453959
 mas 'Telegram (11.13)', id: 747648890
 mas 'WhatsApp (2.2437.52)', id: 1147396723
