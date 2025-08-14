@@ -154,7 +154,7 @@ install_core_apt_packages() {
         # Core development
         build-essential git curl wget
         # Shell and terminal
-        zsh tmux
+        zsh
         # Modern CLI tools (if available in apt)
         ripgrep fd-find fzf
         # Languages available in apt
@@ -344,7 +344,7 @@ coordinate_macos_packages() {
     # Packages that should ONLY be installed via Homebrew
     local homebrew_only=(
         # System tools and libraries
-        "git" "curl" "wget" "zsh" "tmux"
+        "git" "curl" "wget" "zsh"
         # CLI tools
         "ripgrep" "fd" "fzf" "tree" "htop"
         # Applications
@@ -366,7 +366,7 @@ coordinate_ubuntu_packages() {
     # Packages that should be installed via apt (system integration)
     local apt_preferred=(
         # Core system tools
-        "git" "curl" "wget" "zsh" "tmux"
+        "git" "curl" "wget" "zsh"
         # Build tools
         "build-essential" "python3-pip"
         # Basic CLI tools

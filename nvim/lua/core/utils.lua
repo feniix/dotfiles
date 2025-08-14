@@ -137,7 +137,7 @@ M.platform = {
     caps.undercurl = M.platform.is_iterm2() or
                      (vim.env.TERM and (
                        vim.env.TERM:match("xterm") ~= nil or
-                       vim.env.TERM:match("tmux") ~= nil or
+
                        vim.env.TERM:match("screen") ~= nil
                      )) or false
     
@@ -161,10 +161,8 @@ M.platform = {
     -- Italic support
     caps.italic = vim.fn.has("gui_running") == 1 or
                   M.platform.is_iterm2() or
-                  (vim.env.TERM and (
-                    vim.env.TERM:match("xterm") ~= nil or
-                    vim.env.TERM:match("tmux") ~= nil
-                  )) or false
+                  (vim.env.TERM and 
+                    vim.env.TERM:match("xterm") ~= nil) or false
     
     return caps
   end,

@@ -100,7 +100,7 @@ check_dependencies() {
   done
   
   # Optional but recommended dependencies
-  local opt_deps=("nvim" "tmux")
+  local opt_deps=("nvim")
   
   for dep in "${opt_deps[@]}"; do
     if ! has "$dep"; then
@@ -373,10 +373,8 @@ rollback() {
     local restore_files=(
       "$HOME/.zshenv"
       "$XDG_CONFIG_HOME/zsh/.zshrc"
-      "$XDG_CONFIG_HOME/tmux/tmux.conf"
       "$XDG_CONFIG_HOME/git/config"
       "$XDG_CONFIG_HOME/git/ignore"
-      "$HOME/.tmux.conf"
       "$HOME/.gitconfig"
       "$HOME/.ssh/config"
       "$HOME/.vimrc"
@@ -421,8 +419,7 @@ install_dotfiles() {
   # Back up existing files before creating symlinks
   backup_file "$XDG_CONFIG_HOME/zsh/.zshrc"
   backup_file "$HOME/.zshenv"
-  backup_file "$XDG_CONFIG_HOME/tmux/tmux.conf"
-  backup_file "$HOME/.tmux.conf"
+
   backup_file "$XDG_CONFIG_HOME/git/config"
   backup_file "$XDG_CONFIG_HOME/git/ignore"
   backup_file "$HOME/.gitconfig"
@@ -452,26 +449,7 @@ install_dotfiles() {
     log_success "Linked p10k.zsh → $HOME/.p10k.zsh"
   fi
   
-  # tmux configuration
-  if [ -f "$DOTFILES_DIR/tmux.conf" ]; then
-    mkdir -p "$XDG_CONFIG_HOME/tmux"
-    ln -sf "$DOTFILES_DIR/tmux.conf" "$XDG_CONFIG_HOME/tmux/tmux.conf"
-    log_success "Linked tmux.conf → $XDG_CONFIG_HOME/tmux/tmux.conf"
-    
-    # Optional: Create a minimal .tmux.conf in home that sources the XDG config
-    # Note: This maintains backward compatibility but violates strict XDG compliance
-    read -p "Create legacy ~/.tmux.conf for backward compatibility? [y/N] " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-      if [ ! -f "$HOME/.tmux.conf" ] || ! grep -q "source-file.*tmux\.conf" "$HOME/.tmux.conf"; then
-        echo "# XDG compliant tmux configuration" > "$HOME/.tmux.conf"
-        echo "source-file $XDG_CONFIG_HOME/tmux/tmux.conf" >> "$HOME/.tmux.conf"
-        log_success "Created minimal .tmux.conf that sources the XDG config"
-      fi
-    else
-      log_info "Skipping legacy ~/.tmux.conf creation for strict XDG compliance"
-    fi
-  fi
+
   
   # Git configuration
   if [ -f "$DOTFILES_DIR/gitconfig" ]; then

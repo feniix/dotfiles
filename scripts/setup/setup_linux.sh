@@ -528,7 +528,7 @@ show_installation_summary() {
   
   echo ""
   log_info "Development Tools:"
-  local dev_tools=("git" "curl" "zsh" "nvim" "tmux")
+  local dev_tools=("git" "curl" "zsh" "nvim")
   for tool in "${dev_tools[@]}"; do
     log_info "  • $tool: $(has "$tool" && echo "✓ Installed" || echo "✗ Not found")"
   done

@@ -42,7 +42,7 @@ mkdir -p "$HOME/.local/state"
 
 # Create subdirectories for various tools
 mkdir -p "$HOME/.config/zsh"
-mkdir -p "$HOME/.config/tmux"
+
 mkdir -p "$HOME/.config/nvim"
 mkdir -p "$HOME/.config/nvim/lua"
 mkdir -p "$HOME/.config/git"

@@ -116,7 +116,7 @@ coordinate_ubuntu_packages() {
   # Define package responsibilities for Ubuntu
   APT_PACKAGES=(
     # Core system tools
-    "git" "curl" "wget" "zsh" "tmux"
+    "git" "curl" "wget" "zsh"
     # Build tools
     "build-essential" "cmake" "autoconf" "automake"
     # System libraries

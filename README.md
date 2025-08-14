@@ -10,7 +10,7 @@ A collection of configuration files for a macOS development environment, followi
 - **Terminal**: iTerm2 configuration
 - **Git**: Custom aliases and settings with GitHub integration
 - **Homebrew**: Managed packages via Brewfile with Apple Silicon support
-- **tmux**: Terminal multiplexer with macOS integration
+
 - **macOS**: System defaults for better productivity
 - **Fonts**: Nerd Font installation for better terminal and editor experience
 - **Cross-Platform**: Basic Linux compatibility for shared environments
@@ -50,7 +50,7 @@ After installation, configuration files will be located at:
 
 - **Zsh**: `~/.config/zsh/.zshrc`
 - **Neovim**: `~/.config/nvim/init.lua`
-- **tmux**: `~/.config/tmux/tmux.conf`
+
 - **Git**: `~/.config/git/config`
 - **Homebrew**: `~/.config/homebrew/Brewfile`
 
