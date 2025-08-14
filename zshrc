@@ -192,6 +192,10 @@ prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 # Load Oh-My-Zsh
 source "$ZSH/oh-my-zsh.sh"
 
+# Force prompt options after Oh-My-Zsh loads (it might unset them)
+setopt prompt_subst prompt_percent
+unsetopt xtrace
+
 # === POST OH-MY-ZSH CONFIGURATION ===
 # These need to come AFTER oh-my-zsh to avoid being overridden
 
@@ -246,37 +250,8 @@ setopt HIST_FCNTL_LOCK        # Use fcntl for better concurrent access to histor
 # Enhanced history sharing - reload on demand, not every prompt
 autoload -U add-zsh-hook
 
-# Function to reload history when needed - made safer to prevent hanging
-reload_shared_history() {
-  # Use timeout to prevent hanging
-  timeout 2s fc -RI 2>/dev/null || {
-    echo "History reload timed out - skipping"
-    return 1
-  }
-}
-
-# Reload history periodically (every 10 commands) instead of every prompt
-# Made safer to prevent hanging that blocks arrow keys
-typeset -g _history_reload_counter=0
-_conditional_history_reload() {
-  (( _history_reload_counter++ ))
-  if (( _history_reload_counter >= 10 )); then
-    # Use timeout to prevent hanging and run in background to avoid blocking terminal input
-    # If fc -RI hangs, it won't block arrow keys or other terminal input
-    {
-      # Set a 1-second timeout for the history reload operation
-      timeout 1s fc -RI 2>/dev/null || true
-    } &
-    _history_reload_counter=0
-  fi
-}
-add-zsh-hook precmd _conditional_history_reload
-
-# Manual reload alias for immediate sharing
-alias hr='reload_shared_history'
-
-# Pattern to ignore from history
-export HISTORY_IGNORE="(ls|pwd|exit|clear|history|cd|cd ..|cd..)"
+# Manual re-read of history file if needed
+alias hr='builtin fc -R 2>/dev/null || true'
 
 # History search functions
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
@@ -463,10 +438,32 @@ export GPG_TTY=$(tty)
 if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
   source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 fi
+
+# Force prompt options after Powerlevel10k loads
+setopt prompt_subst prompt_percent
+unsetopt xtrace
 if [[ -x "$HOME/.asdf/shims/aws_completer" ]]; then
   complete -C "$HOME/.asdf/shims/aws_completer" aws
 fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-echo "Loading $0"
+
+# Optional startup notice for interactive login shells
+if [[ -o interactive && -o login && -t 1 ]]; then
+  print -r -- "Loading ${0##*/}"
+fi
+
+# Force prompt options immediately for current session
+setopt prompt_subst prompt_percent
+unsetopt xtrace
+
+# Ensure prompt integrity on every redraw to avoid intermittent raw prompt output
+# This function will be added to precmd hooks later, after all plugins load
+ensure_prompt_integrity() {
+  setopt prompt_subst prompt_percent
+  unsetopt xtrace
+}
+
+# Add prompt integrity hook as the last step to ensure it runs after all other setup
+add-zsh-hook precmd ensure_prompt_integrity
 

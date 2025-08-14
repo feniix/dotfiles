@@ -265,11 +265,13 @@ install_asdf_binary() {
   log_info "Installing asdf via pre-compiled binary..."
   
   # Create temporary directory
-  local temp_dir=$(mktemp -d)
+  local temp_dir
+  temp_dir=$(mktemp -d)
   cd "$temp_dir"
   
   # Detect architecture
-  local arch=$(uname -m)
+  local arch
+  arch=$(uname -m)
   case "$arch" in
     x86_64) arch="amd64" ;;
     aarch64) arch="arm64" ;;
@@ -361,7 +363,8 @@ install_github_tools() {
   fi
   
   # Create temporary directory for downloads
-  local temp_dir=$(mktemp -d)
+  local temp_dir
+  temp_dir=$(mktemp -d)
   local installed_count=0
   
   for tool_spec in "${GITHUB_TOOLS[@]}"; do
@@ -551,7 +554,8 @@ show_installation_summary() {
     log_info "asdf Development Tools:"
     for tool in "${ASDF_TOOLS[@]}"; do
       if has "asdf" && asdf list "$tool" >/dev/null 2>&1; then
-        local version=$(asdf current "$tool" 2>/dev/null | awk '{print $2}' || echo "unknown")
+        local version
+        version=$(asdf current "$tool" 2>/dev/null | awk '{print $2}' || echo "unknown")
         log_info "  • $tool: ✓ $version"
       else
         log_info "  • $tool: ✗ Not installed"
@@ -583,7 +587,8 @@ main() {
   fi
   
   # Detect specific distribution
-  local distro=$(detect_distro)
+  local distro
+  distro=$(detect_distro)
   log_info "Detected Linux distribution: $distro"
   log_info "Platform: $DOTFILES_PLATFORM ($DOTFILES_ARCH)"
   

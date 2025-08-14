@@ -15,3 +15,5 @@ id_*
 known_hosts
 authorized_keys
 __pycache__
+__pycache__/
+*.pyc

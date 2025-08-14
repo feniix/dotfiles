@@ -58,6 +58,7 @@ brew 'gflags'
 brew 'gh'
 brew 'giflib'
 brew 'git'
+brew 'git-delta'
 brew 'git-extras'
 brew 'git-lfs'
 brew 'git-secret'
@@ -72,6 +73,7 @@ brew 'gnupg'
 brew 'gnutls'
 brew 'go-jsonnet'
 brew 'gpgme'
+brew 'gpgmepp'
 brew 'graphite2'
 brew 'grep'
 brew 'grpc'
@@ -277,11 +279,12 @@ cask 'appcleaner'
 cask 'basictex'
 cask 'c0re100-qbittorrent'
 cask 'chatgpt'
-cask 'claude'
 cask 'cursor'
+cask 'cyberduck'
 cask 'diffmerge'
 cask 'discord'
 cask 'disk-inventory-x'
+cask 'dotnet-sdk@8'
 cask 'expressvpn'
 cask 'firefox'
 cask 'google-chrome'
@@ -313,17 +316,17 @@ tap 'romkatv/powerlevel10k'
 # App Store applications
 mas '1Password for Safari (8.10.82)', id: 1569813296
 mas 'Amphetamine (5.3.2)', id: 937984704
-mas 'Developer (10.8.1)', id: 640199958
-mas 'Fantastical (4.0.16)', id: 975937182
+mas 'Developer (10.8.2)', id: 640199958
+mas 'Fantastical (4.0.17)', id: 975937182
 mas 'GoPro Player (3.1.0)', id: 1460836908
 mas 'HP Smart (18.10.1)', id: 1474276998
 mas 'Keynote (14.4)', id: 409183694
 mas 'Numbers (14.4)', id: 409203825
-mas 'Okta Verify (9.44.0)', id: 490179405
+mas 'Okta Verify (9.46.1)', id: 490179405
 mas 'Patterns (1.3)', id: 429449079
 mas 'Prime Video (10.86.1)', id: 545519333
-mas 'Slack (4.44.65)', id: 803453959
-mas 'Telegram (11.13)', id: 747648890
+mas 'Slack (4.45.64)', id: 803453959
+mas 'Telegram (11.15)', id: 747648890
 mas 'WhatsApp (2.2437.52)', id: 1147396723
 mas 'Windows App (11.1.6)', id: 1295203466
 mas 'Xcode (16.4)', id: 497799835

@@ -18,7 +18,7 @@ tflint 0.57.0
 tfsec 1.28.14
 nodejs 22.16.0
 lua-language-server 3.14.0
-opentofu 1.9.1
+opentofu 1.10.5
 awscli 2.27.34
 bun 1.2.8
 terraform 1.10.4

@@ -164,7 +164,7 @@ test_ubuntu_package_coordination() {
       local essential_packages=("git" "curl" "zsh" "build-essential")
       for pkg in "${essential_packages[@]}"; do
         ((tests_total++))
-        if [[ " ${APT_PACKAGES[*]} " =~ " $pkg " ]]; then
+        if [[ " ${APT_PACKAGES[*]} " =~ \ $pkg\  ]]; then
           test_passed "Essential package $pkg is in APT_PACKAGES"
           ((tests_passed++))
         else

@@ -69,7 +69,7 @@ coordinate_macos_packages() {
   
   # Read asdf tools from the actual file
   if [[ -f "$ASDF_TOOL_VERSIONS_PATH" ]]; then
-    ASDF_TOOLS=($(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u))
+    mapfile -t ASDF_TOOLS < <(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u)
   else
     log_warning "asdf-tool-versions file not found at $ASDF_TOOL_VERSIONS_PATH"
     ASDF_TOOLS=()
@@ -149,7 +149,7 @@ coordinate_ubuntu_packages() {
   export ASDF_TOOL_VERSIONS_PATH="${DOTFILES_DIR}/asdf-tool-versions"
   
   if [[ -f "$ASDF_TOOL_VERSIONS_PATH" ]]; then
-    ASDF_TOOLS=($(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u))
+    mapfile -t ASDF_TOOLS < <(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u)
   else
     log_warning "asdf-tool-versions file not found at $ASDF_TOOL_VERSIONS_PATH"
     ASDF_TOOLS=()
@@ -394,9 +394,12 @@ show_coordination_summary() {
       echo ""
       log_info "📦 Homebrew packages: Managed via Brewfile ($BREWFILE_PATH)"
       if [[ -f "$BREWFILE_PATH" ]]; then
-        local brew_count=$(grep -c "^brew " "$BREWFILE_PATH" || echo "0")
-        local cask_count=$(grep -c "^cask " "$BREWFILE_PATH" || echo "0") 
-        local mas_count=$(grep -c "^mas " "$BREWFILE_PATH" || echo "0")
+        local brew_count
+        brew_count=$(grep -c "^brew " "$BREWFILE_PATH" || echo "0")
+        local cask_count
+        cask_count=$(grep -c "^cask " "$BREWFILE_PATH" || echo "0")
+        local mas_count
+        mas_count=$(grep -c "^mas " "$BREWFILE_PATH" || echo "0")
         log_info "  • $brew_count brew packages"
         log_info "  • $cask_count cask applications"
         log_info "  • $mas_count Mac App Store apps"

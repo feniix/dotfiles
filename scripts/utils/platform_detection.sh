@@ -43,7 +43,9 @@ detect_platform() {
   # Platform identification
   if [[ "$OSTYPE" == "darwin"* ]]; then
     export DOTFILES_PLATFORM="macos"
-    export DOTFILES_ARCH=$(uname -m)  # arm64 or x86_64
+    local arch
+    arch=$(uname -m)  # arm64 or x86_64
+    export DOTFILES_ARCH="$arch"
     export PRIMARY_PKG_MANAGER="brew"
     export SECONDARY_PKG_MANAGER=""
     export ASDF_PACKAGE_SOURCE="homebrew"
@@ -75,7 +77,9 @@ detect_platform() {
       export DOTFILES_PLATFORM="linux"
     fi
     
-    export DOTFILES_ARCH=$(uname -m)  # x86_64, aarch64
+    local arch
+    arch=$(uname -m)  # x86_64, aarch64
+    export DOTFILES_ARCH="$arch"
     export PRIMARY_PKG_MANAGER="apt"
     export SECONDARY_PKG_MANAGER="snap"
     export ASDF_PACKAGE_SOURCE="apt"
@@ -87,26 +91,49 @@ detect_platform() {
   fi
   
   # Tool availability detection
-  export HOMEBREW_AVAILABLE=$(has "brew" && echo "true" || echo "false")
-  export SNAP_AVAILABLE=$(has "snap" && echo "true" || echo "false")
-  export ASDF_AVAILABLE=$(has "asdf" && echo "true" || echo "false")
-  export GIT_AVAILABLE=$(has "git" && echo "true" || echo "false")
-  export CURL_AVAILABLE=$(has "curl" && echo "true" || echo "false")
-  export ZSH_AVAILABLE=$(has "zsh" && echo "true" || echo "false")
-  export NVIM_AVAILABLE=$(has "nvim" && echo "true" || echo "false")
+  local homebrew_check
+  homebrew_check=$(has "brew" && echo "true" || echo "false")
+  export HOMEBREW_AVAILABLE="$homebrew_check"
+  
+  local snap_check
+  snap_check=$(has "snap" && echo "true" || echo "false")
+  export SNAP_AVAILABLE="$snap_check"
+  
+  local asdf_check
+  asdf_check=$(has "asdf" && echo "true" || echo "false")
+  export ASDF_AVAILABLE="$asdf_check"
+  
+  local git_check
+  git_check=$(has "git" && echo "true" || echo "false")
+  export GIT_AVAILABLE="$git_check"
+  
+  local curl_check
+  curl_check=$(has "curl" && echo "true" || echo "false")
+  export CURL_AVAILABLE="$curl_check"
+  
+  local zsh_check
+  zsh_check=$(has "zsh" && echo "true" || echo "false")
+  export ZSH_AVAILABLE="$zsh_check"
+  local nvim_check
+  nvim_check=$(has "nvim" && echo "true" || echo "false")
+  export NVIM_AVAILABLE="$nvim_check"
   
   # Package manager specific availability
   if [[ "$DOTFILES_PLATFORM" == "macos" ]]; then
     export APT_AVAILABLE="false"
     export BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
   else
-    export APT_AVAILABLE=$(has "apt" && echo "true" || echo "false")
+    local apt_check
+    apt_check=$(has "apt" && echo "true" || echo "false")
+    export APT_AVAILABLE="$apt_check"
     export BREW_PREFIX=""
   fi
   
   # Version information for key tools
   if [[ "$ASDF_AVAILABLE" == "true" ]]; then
-    export ASDF_VERSION=$(asdf version 2>/dev/null | head -n1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
+    local asdf_ver
+    asdf_ver=$(asdf version 2>/dev/null | head -n1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "unknown")
+    export ASDF_VERSION="$asdf_ver"
   else
     export ASDF_VERSION="not_installed"
   fi
