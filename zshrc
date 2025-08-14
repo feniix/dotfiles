@@ -30,7 +30,7 @@ reset_path() {
   export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
   # Add user directories next
-  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/.local/share/go/bin"
+  export PATH="$PATH:$HOME/bin:$HOME/.local/share/go/bin"
 
   # Add system paths at lowest priority
   export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
