@@ -57,35 +57,8 @@ detect_platform() {
       export HOMEBREW_PREFIX="/usr/local"
     fi
     
-  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Detect Linux distribution
-    if [[ -f /etc/lsb-release ]]; then
-      . /etc/lsb-release
-      if [[ "$DISTRIB_ID" == "Ubuntu" ]]; then
-        export DOTFILES_PLATFORM="ubuntu"
-      else
-        export DOTFILES_PLATFORM="linux"
-      fi
-    elif [[ -f /etc/os-release ]]; then
-      . /etc/os-release
-      if [[ "$ID" == "ubuntu" ]]; then
-        export DOTFILES_PLATFORM="ubuntu"
-      else
-        export DOTFILES_PLATFORM="linux"
-      fi
-    else
-      export DOTFILES_PLATFORM="linux"
-    fi
-    
-    local arch
-    arch=$(uname -m)  # x86_64, aarch64
-    export DOTFILES_ARCH="$arch"
-    export PRIMARY_PKG_MANAGER="apt"
-    export SECONDARY_PKG_MANAGER="snap"
-    export ASDF_PACKAGE_SOURCE="apt"
-    
   else
-    log_error "Unsupported platform: $OSTYPE"
+    log_error "Unsupported platform: $OSTYPE (macOS only)"
     export DOTFILES_PLATFORM="unsupported"
     return 1
   fi
@@ -95,9 +68,6 @@ detect_platform() {
   homebrew_check=$(has "brew" && echo "true" || echo "false")
   export HOMEBREW_AVAILABLE="$homebrew_check"
   
-  local snap_check
-  snap_check=$(has "snap" && echo "true" || echo "false")
-  export SNAP_AVAILABLE="$snap_check"
   
   local asdf_check
   asdf_check=$(has "asdf" && echo "true" || echo "false")
@@ -118,16 +88,10 @@ detect_platform() {
   nvim_check=$(has "nvim" && echo "true" || echo "false")
   export NVIM_AVAILABLE="$nvim_check"
   
-  # Package manager specific availability
-  if [[ "$DOTFILES_PLATFORM" == "macos" ]]; then
-    export APT_AVAILABLE="false"
-    export BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
-  else
-    local apt_check
-    apt_check=$(has "apt" && echo "true" || echo "false")
-    export APT_AVAILABLE="$apt_check"
-    export BREW_PREFIX=""
-  fi
+  # Package manager specific availability (macOS only)
+  export APT_AVAILABLE="false"
+  export SNAP_AVAILABLE="false"
+  export BREW_PREFIX="${HOMEBREW_PREFIX:-/opt/homebrew}"
   
   # Version information for key tools
   if [[ "$ASDF_AVAILABLE" == "true" ]]; then
@@ -153,8 +117,6 @@ detect_platform() {
   # Tool availability summary
   log_info "Tool availability:"
   log_info "  • Homebrew: $HOMEBREW_AVAILABLE"
-  [[ "$DOTFILES_PLATFORM" != "macos" ]] && log_info "  • apt: $APT_AVAILABLE"
-  [[ "$DOTFILES_PLATFORM" != "macos" ]] && log_info "  • snap: $SNAP_AVAILABLE"
   log_info "  • asdf: $ASDF_AVAILABLE"
   [[ "$ASDF_AVAILABLE" == "true" ]] && log_info "  • asdf version: $ASDF_VERSION"
   log_info "  • git: $GIT_AVAILABLE"
@@ -189,13 +151,6 @@ validate_platform_requirements() {
         log_warning "Homebrew not available - will need to install"
       fi
       ;;
-    "ubuntu"|"linux")
-      # apt should be available
-      if [[ "$APT_AVAILABLE" != "true" ]]; then
-        log_error "apt package manager not available"
-        ((errors++))
-      fi
-      ;;
     *)
       log_error "Unsupported platform: $DOTFILES_PLATFORM"
       ((errors++))
@@ -222,13 +177,6 @@ get_package_name() {
         "sed") echo "gnu-sed" ;;
         "tar") echo "gnu-tar" ;;
         "fd") echo "fd" ;;
-        *) echo "$generic_name" ;;
-      esac
-      ;;
-    "ubuntu"|"linux")
-      case "$generic_name" in
-        "fd") echo "fd-find" ;;
-        "bat") echo "batcat" ;;
         *) echo "$generic_name" ;;
       esac
       ;;

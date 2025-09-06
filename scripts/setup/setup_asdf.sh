@@ -74,9 +74,9 @@ configure_asdf_environment() {
         . "$(brew --prefix asdf)/libexec/asdf.sh"
         log_info "Sourced asdf via Homebrew"
       fi
+      log_info "Using modern asdf 0.17+ shims approach"
       ;;
-    "ubuntu"|"linux")
-      # On Linux, asdf 0.17+ should work via shims in PATH
+    *)
       log_info "Using modern asdf 0.17+ shims approach"
       ;;
   esac

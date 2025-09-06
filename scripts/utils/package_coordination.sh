@@ -45,9 +45,6 @@ coordinate_packages() {
     "macos")
       coordinate_macos_packages
       ;;
-    "ubuntu"|"linux")
-      coordinate_ubuntu_packages
-      ;;
     *)
       log_error "Unsupported platform for package coordination: $DOTFILES_PLATFORM"
       return 1
@@ -69,7 +66,13 @@ coordinate_macos_packages() {
   
   # Read asdf tools from the actual file
   if [[ -f "$ASDF_TOOL_VERSIONS_PATH" ]]; then
-    mapfile -t ASDF_TOOLS < <(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u)
+    # Use a bash/zsh compatible approach instead of mapfile
+    ASDF_TOOLS=()
+    while IFS= read -r line; do
+      if [[ -n "$line" ]]; then
+        ASDF_TOOLS+=("$line")
+      fi
+    done < <(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u)
   else
     log_warning "asdf-tool-versions file not found at $ASDF_TOOL_VERSIONS_PATH"
     ASDF_TOOLS=()
@@ -109,71 +112,6 @@ coordinate_macos_packages() {
   check_brewfile_asdf_conflicts
 }
 
-# Ubuntu/Linux package coordination
-coordinate_ubuntu_packages() {
-  log_info "Setting up Ubuntu/Linux package coordination..."
-  
-  # Define package responsibilities for Ubuntu
-  APT_PACKAGES=(
-    # Core system tools
-    "git" "curl" "wget" "zsh"
-    # Build tools
-    "build-essential" "cmake" "autoconf" "automake"
-    # System libraries
-    "libssl-dev" "libreadline-dev" "libsqlite3-dev" "zlib1g-dev"
-    # Python support
-    "python3" "python3-pip" "python3-dev"
-    # Node.js (basic version)
-    "nodejs" "npm"
-    # Basic CLI tools (if available in apt)
-    "tree" "htop" "jq"
-    # Font support
-    "fontconfig" "fonts-powerline"
-    # Clipboard support
-    "xclip"
-    # Modern CLI tools (if available)
-    "ripgrep" "fd-find" "fzf"
-  )
-  
-  SNAP_PACKAGES=(
-    # Development tools not in apt or outdated versions
-    "go:--classic"              # If golang-go is outdated
-    "rust:--classic"            # Alternative to rustup
-    "code:--classic"            # VS Code
-    # Modern CLI tools not in apt
-    "btop"                      # Modern htop alternative
-    "neovim:--classic"          # Latest nvim (if apt version is old)
-  )
-  
-  # Read asdf tools from the actual file (same as macOS)
-  export ASDF_TOOL_VERSIONS_PATH="${DOTFILES_DIR}/asdf-tool-versions"
-  
-  if [[ -f "$ASDF_TOOL_VERSIONS_PATH" ]]; then
-    mapfile -t ASDF_TOOLS < <(awk '{print $1}' "$ASDF_TOOL_VERSIONS_PATH" | sort -u)
-  else
-    log_warning "asdf-tool-versions file not found at $ASDF_TOOL_VERSIONS_PATH"
-    ASDF_TOOLS=()
-  fi
-  
-  # GitHub releases for tools not available elsewhere
-  GITHUB_TOOLS=(
-    "jesseduffield/lazygit:lazygit"
-    "jesseduffield/lazydocker:lazydocker"
-    "mikefarah/yq:yq"
-  )
-  
-  # Export arrays for use by other scripts
-  export APT_PACKAGES
-  export SNAP_PACKAGES
-  export ASDF_TOOLS
-  export GITHUB_TOOLS
-  
-  log_info "Ubuntu coordination: apt for system, asdf for dev runtimes, snap for modern tools"
-  log_info "apt packages: ${#APT_PACKAGES[@]} defined"
-  log_info "snap packages: ${#SNAP_PACKAGES[@]} defined"
-  log_info "asdf tools: ${#ASDF_TOOLS[@]} defined"
-  log_info "GitHub tools: ${#GITHUB_TOOLS[@]} defined"
-}
 
 # Check for conflicts between Brewfile and asdf tools
 check_brewfile_asdf_conflicts() {
@@ -238,11 +176,6 @@ check_package_conflicts() {
         fi
       done
       ;;
-    "ubuntu"|"linux")
-      # For Ubuntu, conflicts are less likely since we use different package managers
-      # for different purposes, but we can still check
-      log_info "Ubuntu: apt (system), asdf (dev tools), snap (modern tools) - conflicts unlikely"
-      ;;
   esac
   
   if [[ $conflicts_found -eq 0 ]]; then
@@ -271,53 +204,18 @@ get_preferred_manager() {
       # Check if it's in Brewfile
       if [[ -f "$BREWFILE_PATH" ]]; then
         # Check for brew packages
-        if grep -q "^brew ['\"]$tool_name['\"]" "$BREWFILE_PATH"; then
+        if grep -q "^brew ['\"]${tool_name}['\"]" "$BREWFILE_PATH"; then
           echo "homebrew"
           return 0
         fi
         # Check for casks
-        if grep -q "^cask ['\"]$tool_name['\"]" "$BREWFILE_PATH"; then
+        if grep -q "^cask ['\"]${tool_name}['\"]" "$BREWFILE_PATH"; then
           echo "homebrew-cask"
           return 0
         fi
       fi
       ;;
       
-    "ubuntu"|"linux")
-      # Check asdf first (for development tools)
-      for asdf_tool in "${ASDF_TOOLS[@]}"; do
-        if [[ "$asdf_tool" == "$tool_name" ]]; then
-          echo "asdf"
-          return 0
-        fi
-      done
-      
-      # Check apt packages
-      for apt_pkg in "${APT_PACKAGES[@]}"; do
-        if [[ "$apt_pkg" == "$tool_name" ]]; then
-          echo "apt"
-          return 0
-        fi
-      done
-      
-      # Check snap packages
-      for snap_pkg in "${SNAP_PACKAGES[@]}"; do
-        local pkg_name="${snap_pkg%%:*}"
-        if [[ "$pkg_name" == "$tool_name" ]]; then
-          echo "snap"
-          return 0
-        fi
-      done
-      
-      # Check GitHub tools
-      for github_tool in "${GITHUB_TOOLS[@]}"; do
-        local tool_part="${github_tool##*:}"
-        if [[ "$tool_part" == "$tool_name" ]]; then
-          echo "github"
-          return 0
-        fi
-      done
-      ;;
   esac
   
   echo "unknown"
@@ -348,32 +246,11 @@ install_via_preferred_manager() {
         fi
       fi
       ;;
-    "apt")
-      log_info "Installing $tool_name via apt..."
-      sudo apt install -y "$tool_name"
-      ;;
-    "snap")
-      # Find the snap package with options
-      for snap_pkg in "${SNAP_PACKAGES[@]}"; do
-        local pkg_name="${snap_pkg%%:*}"
-        if [[ "$pkg_name" == "$tool_name" ]]; then
-          local options="${snap_pkg##*:}"
-          log_info "Installing $tool_name via snap with options: $options..."
-          sudo snap install "$tool_name" $options
-          break
-        fi
-      done
-      ;;
     "asdf")
       log_info "Installing $tool_name via asdf..."
       asdf plugin install "$tool_name" 2>/dev/null || true
       asdf install "$tool_name" latest
       asdf global "$tool_name" latest
-      ;;
-    "github")
-      log_info "Installing $tool_name via GitHub releases..."
-      # This would need to be implemented with a GitHub releases installer
-      log_warning "GitHub releases installation not implemented yet"
       ;;
     *)
       log_warning "No preferred manager found for $tool_name"
@@ -405,13 +282,6 @@ show_coordination_summary() {
         log_info "  • $mas_count Mac App Store apps"
       fi
       log_info "🔧 asdf tools (${#ASDF_TOOLS[@]}): ${ASDF_TOOLS[*]}"
-      ;;
-    "ubuntu"|"linux")
-      echo ""
-      log_info "📦 apt packages (${#APT_PACKAGES[@]}): ${APT_PACKAGES[*]}"
-      log_info "📱 snap packages (${#SNAP_PACKAGES[@]}): ${SNAP_PACKAGES[*]}"
-      log_info "🔧 asdf tools (${#ASDF_TOOLS[@]}): ${ASDF_TOOLS[*]}"
-      log_info "🐙 GitHub tools (${#GITHUB_TOOLS[@]}): ${GITHUB_TOOLS[*]}"
       ;;
   esac
 }

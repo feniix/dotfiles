@@ -38,8 +38,6 @@ log_error() {
 detect_system() {
   if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "macos"
-  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "linux"
   else
     echo "unknown"
   fi
@@ -57,9 +55,9 @@ create_font_dirs() {
   
   if [[ "$system" == "macos" ]]; then
     mkdir -p "$USER_FONTS_DIR"
-  elif [[ "$system" == "linux" ]]; then
-    mkdir -p "$HOME/.local/share/fonts"
-    mkdir -p "$HOME/.fonts"
+  else
+    log_error "Unsupported system: $system (macOS only)"
+    return 1
   fi
   
   log_success "Font directories created successfully."
@@ -144,21 +142,8 @@ install_fonts() {
     
     log_success "Fonts installed successfully on macOS."
   
-  # Install on Linux
-  elif [[ "$system" == "linux" ]]; then
-    # Copy all .ttf and .otf files to the user's font directory
-    find "$extracted_dir" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "$HOME/.local/share/fonts/" \;
-    
-    # Update font cache
-    if command -v fc-cache &> /dev/null; then
-      fc-cache -f -v
-      log_info "Linux font cache updated."
-    fi
-    
-    log_success "Fonts installed successfully on Linux."
-  
   else
-    log_error "Unsupported operating system. Cannot install fonts."
+    log_error "Unsupported operating system: $system (macOS only)"
     return 1
   fi
   

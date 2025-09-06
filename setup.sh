@@ -112,10 +112,8 @@ check_dependencies() {
     log_error "$missing_deps required dependencies are missing."
     if [[ "$OSTYPE" == "darwin"* ]]; then
       log_info "On macOS, install dependencies with: brew install git curl zsh"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-      log_info "On Debian/Ubuntu, install dependencies with: sudo apt install git curl zsh"
-      log_info "On Fedora/RHEL, install dependencies with: sudo dnf install git curl zsh"
-      log_info "On Arch Linux, install dependencies with: sudo pacman -S git curl zsh"
+    else
+      log_error "This dotfiles setup is designed for macOS only."
     fi
     return 1
   fi
@@ -212,23 +210,6 @@ setup_macos() {
   fi
 }
 
-# Setup Linux-specific configurations
-setup_linux() {
-  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    log_info "Setting up Linux-specific configurations..."
-    
-    if [ ! -f "$SCRIPTS_DIR/setup/setup_linux.sh" ]; then
-      log_error "Linux setup script not found at $SCRIPTS_DIR/setup/setup_linux.sh"
-      log_warning "Skipping Linux-specific setup."
-      return 1
-    fi
-    
-    # Run the dedicated Linux setup script
-    bash "$SCRIPTS_DIR/setup/setup_linux.sh"
-  else
-    log_info "Not on Linux - skipping Linux-specific setup."
-  fi
-}
 
 # Setup asdf version manager
 setup_asdf() {
@@ -517,9 +498,8 @@ install_dotfiles() {
   if [[ "$OSTYPE" == "darwin"* ]]; then
     # Run macOS-specific setup if on macOS
     setup_macos
-  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Run Linux-specific setup if on Linux
-    setup_linux
+  else
+    log_info "Non-macOS platform detected - skipping platform-specific setup."
   fi
   
   # Setup oh-my-zsh
@@ -673,7 +653,7 @@ if [ -d "$DOTFILES_DIR" ]; then
     log_info "Choose an option:"
     echo "1. Update existing dotfiles to XDG format"
     echo "2. Run XDG setup only (for migrating existing configs)"
-    echo "3. Run platform-specific setup only (macOS or Linux)"
+    echo "3. Run platform-specific setup only (macOS)"
     echo "4. Run Neovim setup only"
     echo "5. Run comprehensive Neovim setup & health check"
     echo "6. Run Homebrew setup only"
@@ -701,13 +681,10 @@ if [ -d "$DOTFILES_DIR" ]; then
         if [[ "$OSTYPE" == "darwin"* ]]; then
           setup_macos
           log_success "macOS-specific setup complete."
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-          setup_linux
-          log_success "Linux-specific setup complete."
         else
-          log_error "Unsupported operating system: $OSTYPE"
-    exit 1
-fi
+          log_error "Unsupported operating system: $OSTYPE (macOS only)"
+          exit 1
+        fi
         ;;
       4)
         validate_repo_structure
