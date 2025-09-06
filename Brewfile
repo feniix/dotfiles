@@ -9,6 +9,7 @@ brew 'aribb24'
 brew 'asdf'
 brew 'autoconf'
 brew 'automake'
+brew 'avro-tools'
 brew 'bash'
 brew 'bdw-gc'
 brew 'bonnie++'
@@ -27,6 +28,7 @@ brew 'cmake'
 brew 'cmocka'
 brew 'coreutils'
 brew 'curl'
+brew 'cyrus-sasl'
 brew 'dav1d'
 brew 'diff-so-fancy'
 brew 'diffutils'
@@ -138,6 +140,7 @@ brew 'libtermkey'
 brew 'libtiff'
 brew 'libtommath'
 brew 'libtool'
+brew 'libudfread'
 brew 'libunibreak'
 brew 'libunistring'
 brew 'libusb'
@@ -188,6 +191,7 @@ brew 'oniguruma'
 brew 'openblas'
 brew 'opencore-amr'
 brew 'openexr'
+brew 'openjdk'
 brew 'openjpeg'
 brew 'openldap'
 brew 'openssl@3'
@@ -206,7 +210,6 @@ brew 'pkgconf'
 brew 'poetry'
 brew 'poppler'
 brew 'popt'
-brew 'powerlevel10k'
 brew 'pre-commit'
 brew 'proj'
 brew 'protobuf'
@@ -235,7 +238,7 @@ brew 'speex'
 brew 'sqlite'
 brew 'srt'
 brew 'ssh-copy-id'
-brew 'starship'
+brew 'powerlevel10k'
 brew 'stern'
 brew 'svt-av1'
 brew 'tcl-tk'
@@ -279,6 +282,7 @@ cask 'appcleaner'
 cask 'basictex'
 cask 'c0re100-qbittorrent'
 cask 'chatgpt'
+cask 'claude'
 cask 'cursor'
 cask 'cyberduck'
 cask 'diffmerge'
@@ -291,6 +295,7 @@ cask 'google-chrome'
 cask 'handbrake'
 cask 'iina'
 cask 'iterm2'
+cask 'loom'
 cask 'neovide'
 cask 'ngrok'
 cask 'notion'
@@ -313,20 +318,21 @@ brew 'brew-file'
 
 tap 'romkatv/powerlevel10k'
 
+
 # App Store applications
-mas '1Password for Safari (8.10.82)', id: 1569813296
+mas '1Password for Safari (8.11.8)', id: 1569813296
 mas 'Amphetamine (5.3.2)', id: 937984704
-mas 'Developer (10.8.2)', id: 640199958
-mas 'Fantastical (4.0.17)', id: 975937182
+mas 'Developer (10.8.3)', id: 640199958
+mas 'Fantastical (4.0.18)', id: 975937182
 mas 'GoPro Player (3.1.0)', id: 1460836908
 mas 'HP Smart (18.10.1)', id: 1474276998
 mas 'Keynote (14.4)', id: 409183694
 mas 'Numbers (14.4)', id: 409203825
-mas 'Okta Verify (9.46.1)', id: 490179405
+mas 'Okta Verify (9.48.0)', id: 490179405
 mas 'Patterns (1.3)', id: 429449079
-mas 'Prime Video (10.86.1)', id: 545519333
-mas 'Slack (4.45.64)', id: 803453959
-mas 'Telegram (11.15)', id: 747648890
+mas 'Prime Video (10.94)', id: 545519333
+mas 'Slack (4.45.69)', id: 803453959
+mas 'Telegram (11.15.1)', id: 747648890
 mas 'WhatsApp (2.2437.52)', id: 1147396723
 mas 'Windows App (11.1.6)', id: 1295203466
 mas 'Xcode (16.4)', id: 497799835

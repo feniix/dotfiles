@@ -30,7 +30,7 @@ reset_path() {
   export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
   # Add user directories next
-  export PATH="$PATH:$HOME/bin:$HOME/.local/share/go/bin"
+  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/.local/share/go/bin"
 
   # Add system paths at lowest priority
   export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
@@ -189,12 +189,11 @@ prepend_manpath "/opt/homebrew/opt/gawk/share/man"
 prepend_manpath "/opt/homebrew/opt/less/share/man"
 prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 
+# Enable Oh-My-Zsh experimental async prompts (April 2024 feature)
+zstyle ':omz:alpha:lib:git' async-prompt yes
+
 # Load Oh-My-Zsh
 source "$ZSH/oh-my-zsh.sh"
-
-# Force prompt options after Oh-My-Zsh loads (it might unset them)
-setopt prompt_subst prompt_percent
-unsetopt xtrace
 
 # === POST OH-MY-ZSH CONFIGURATION ===
 # These need to come AFTER oh-my-zsh to avoid being overridden
@@ -250,8 +249,51 @@ setopt HIST_FCNTL_LOCK        # Use fcntl for better concurrent access to histor
 # Enhanced history sharing - reload on demand, not every prompt
 autoload -U add-zsh-hook
 
-# Manual re-read of history file if needed
-alias hr='builtin fc -R 2>/dev/null || true'
+# Function to reload history when needed - made safer to prevent hanging
+reload_shared_history() {
+  # Use timeout to prevent hanging
+  timeout 2s fc -RI 2>/dev/null || {
+    echo "History reload timed out - skipping"
+    return 1
+  }
+}
+
+# Async history sharing using Oh-My-Zsh async infrastructure
+# This leverages the experimental async functionality introduced in April 2024
+
+# Counter for periodic async history reloads
+typeset -g _async_history_counter=0
+
+# Async history reload function - uses Oh-My-Zsh's async system
+_async_history_reload() {
+  # Use Oh-My-Zsh's async system if available
+  if (( ${+functions[async_start_worker]} )); then
+    # Oh-My-Zsh async system is available
+    async_start_worker history_worker -u
+    async_job history_worker timeout 1s fc -RI
+  else
+    # Fallback to simple timeout (should not cause prompt corruption with new async system)
+    timeout 1s fc -RI 2>/dev/null || true
+  fi
+}
+
+# Periodic async history check
+_periodic_async_history_reload() {
+  (( _async_history_counter++ ))
+  if (( _async_history_counter >= 5 )); then
+    _async_history_reload
+    _async_history_counter=0
+  fi
+}
+
+# Add to precmd hook - should work safely with Oh-My-Zsh async system
+add-zsh-hook precmd _periodic_async_history_reload
+
+# Manual reload alias for immediate sharing
+alias hr='reload_shared_history'
+
+# Manual async reload alias
+alias ahr='_async_history_reload'
 
 # History search functions
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
@@ -412,12 +454,7 @@ function rm_local_branches() {
 # iTerm2 integration
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
-# direnv - lazy load
-direnv() {
-  unfunction direnv
-  eval "$(command direnv hook zsh)"
-  direnv "$@"
-}
+eval "$(command direnv hook zsh)"
 
 # Google Cloud SDK - load once
 if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
@@ -438,32 +475,10 @@ export GPG_TTY=$(tty)
 if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
   source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 fi
-
-# Force prompt options after Powerlevel10k loads
-setopt prompt_subst prompt_percent
-unsetopt xtrace
 if [[ -x "$HOME/.asdf/shims/aws_completer" ]]; then
   complete -C "$HOME/.asdf/shims/aws_completer" aws
 fi
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-
-# Optional startup notice for interactive login shells
-if [[ -o interactive && -o login && -t 1 ]]; then
-  print -r -- "Loading ${0##*/}"
-fi
-
-# Force prompt options immediately for current session
-setopt prompt_subst prompt_percent
-unsetopt xtrace
-
-# Ensure prompt integrity on every redraw to avoid intermittent raw prompt output
-# This function will be added to precmd hooks later, after all plugins load
-ensure_prompt_integrity() {
-  setopt prompt_subst prompt_percent
-  unsetopt xtrace
-}
-
-# Add prompt integrity hook as the last step to ensure it runs after all other setup
-add-zsh-hook precmd ensure_prompt_integrity
+echo "Loading $0"
 

@@ -111,3 +111,5 @@ DerivedData
 Session.vim
 .netrwhist
 *~
+
+**/.claude/settings.local.json
