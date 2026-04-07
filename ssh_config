@@ -1,40 +1,89 @@
-# SSH Configuration - XDG compliant version
-# This file should be linked to ~/.config/ssh/config
-# Add 'Include ~/.config/ssh/config' to ~/.ssh/config to use it
+# SSH Configuration — XDG compliant
+# Link this file to: ~/.config/ssh/config
+# Add the following to ~/.ssh/config:
+#   Include ~/.config/ssh/config
 
 Include ~/.orbstack/ssh/config
 
-#LogLevel VERBOSE
+# -------------------------------------------------------------------
+# Global defaults (tuned for jittery Wi-Fi + fast reuse)
+# -------------------------------------------------------------------
 Compression yes
 ForwardX11Trusted yes
 HashKnownHosts no
 
-# Default GitHub key
+# Keep NAT/state happy and detect broken links quickly (helps "hangy" sessions)
+ServerAliveInterval 10
+ServerAliveCountMax 3
+TCPKeepAlive yes
+
+# Reduce interactive latency/jitter impact (SSH sends DSCP)
+# If your network mangles DSCP, comment this out.
+IPQoS lowdelay throughput
+
+# Fast connection reuse
+ControlMaster auto
+ControlPersist 10m
+ControlPath ~/.ssh/controlmasters/%C
+
+# Reliability improvements
+ConnectTimeout 5
+ConnectionAttempts 2
+
+# -------------------------------------------------------------------
+# GitHub (default key)
+# -------------------------------------------------------------------
 Host github.com
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_ed25519
   IdentitiesOnly yes
 
-# GATX GitHub key
+# -------------------------------------------------------------------
+# GitHub (GATX key)
+# -------------------------------------------------------------------
 Host github-gatx
   HostName github.com
   User git
   IdentityFile ~/.ssh/id_ed25519_gatx
   IdentitiesOnly yes
 
+# -------------------------------------------------------------------
+# WSL Development Host
+# -------------------------------------------------------------------
 Host wsl-dev
-    HostName 192.168.1.99
-    User feniix
-    Port 22
-    ForwardAgent yes
+  HostName 192.168.1.99
+  User feniix
+  Port 22
+  ForwardAgent yes
 
+# -------------------------------------------------------------------
+# feniixhq (LAN)
+# -------------------------------------------------------------------
+Host feniixhq-lan
+  HostName 192.168.4.67
+  User feniix
+
+  # More aggressive keepalives for your LAN target
+  ServerAliveInterval 5
+  ServerAliveCountMax 2
+
+  # Keep these enabled for interactive feel on jitter
+  TCPKeepAlive yes
+  IPQoS lowdelay throughput
+
+# --- feniixhq (Tailscale) ---
+Host feniixhq
+  HostName 100.113.48.101
+  User feniix
+
+  ServerAliveInterval 10
+  ServerAliveCountMax 3
+  TCPKeepAlive yes
+
+# -------------------------------------------------------------------
+# Catch-all defaults (kept last)
+# -------------------------------------------------------------------
 Host *
-  ServerAliveInterval 60
-  ForwardAgent        yes
-  AddKeysToAgent      yes
-  # ControlPath for some unknown reason breaks port forwarding
-  #ControlPath         "~/.ssh/cms/%C"
-  #ControlMaster       auto
-  #ControlPersist      30s
-  UseRoaming          no
+  ForwardAgent yes
+  AddKeysToAgent yes
