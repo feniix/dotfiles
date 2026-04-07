@@ -44,17 +44,31 @@ return {
     end,
   },
 
-  -- TreeSitter for syntax highlighting
+  -- TreeSitter for syntax highlighting (Neovim 0.12+ native treesitter)
   {
     "nvim-treesitter/nvim-treesitter",
-    event = { "BufReadPost", "BufNewFile" },
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-      "nvim-treesitter/nvim-treesitter-context",
-    },
     config = function()
       require("plugins.config.treesitter").setup()
+    end,
+  },
+  {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    branch = "main",
+    lazy = false,
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function()
+      require("plugins.config.treesitter").setup_textobjects()
+    end,
+  },
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      -- Context setup is handled in treesitter config
     end,
   },
 
@@ -106,4 +120,4 @@ return {
     "AndrewRadev/splitjoin.vim",
     keys = { "gS", "gJ" },
   },
-} 
+}

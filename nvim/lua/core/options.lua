@@ -170,13 +170,9 @@ function M.setup()
   -- Set background
   vim.opt.background = "dark"
 
-  -- Folding (treesitter-aware)
-  if utils.platform.command_available('nvim-treesitter') or pcall(require, 'nvim-treesitter') then
-    vim.opt.foldmethod = "expr"        -- Use expression for folding
-    vim.opt.foldexpr = "nvim_treesitter#foldexpr()" -- Use treesitter for folding
-  else
-    vim.opt.foldmethod = "indent"      -- Fallback to indent-based folding
-  end
+  -- Folding (native treesitter in Neovim 0.12+)
+  vim.opt.foldmethod = "expr"
+  vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
   vim.opt.foldlevel = 99               -- Start with all folds open
   vim.opt.foldlevelstart = 99          -- Start with all folds open
   

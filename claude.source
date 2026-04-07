@@ -1,0 +1,46 @@
+kimi() {
+    (
+        export ANTHROPIC_BASE_URL=https://api.moonshot.ai/anthropic
+        export ANTHROPIC_AUTH_TOKEN=$KIMI_API_KEY
+        export API_TIMEOUT_MS=3000000
+        claude "$@"
+    )
+}
+
+zai() {
+    (
+        export ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
+        export ANTHROPIC_AUTH_TOKEN=$Z_API_KEY
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL=glm-4.5-air
+        export ANTHROPIC_DEFAULT_SONNET_MODELw=glm-4.7
+        export ANTHROPIC_DEFAULT_OPUS_MODELw=glm-4.7
+        export API_TIMEOUT_MS=3000000
+        claude "$@"
+    )
+}
+
+dseek() {
+    (
+        export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
+        export ANTHROPIC_AUTH_TOKEN=${DEEPSEEK_API_KEY}
+        export ANTHROPIC_MODEL=deepseek-chat
+        export ANTHROPIC_SMALL_FAST_MODEL=deepseek-chat
+        export API_TIMEOUT_MS=3000000
+        claude "$@"
+    )
+}
+
+ccmm() {
+    (
+        export ANTHROPIC_BASE_URL=https://api.minimax.io/anthropic
+        export ANTHROPIC_AUTH_TOKEN=$MINIMAX_API_KEY
+        export API_TIMEOUT_MS=3000000
+        export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
+        export ANTHROPIC_MODEL=MiniMax-M2.1
+        export ANTHROPIC_SMALL_FAST_MODEL=MiniMax-M2.1
+        export ANTHROPIC_DEFAULT_SONNET_MODEL=MiniMax-M2.1
+        export ANTHROPIC_DEFAULT_OPUS_MODEL=MiniMax-M2.1
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL=MiniMax-M2.1
+        claude "$@"
+    )
+}

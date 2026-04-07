@@ -17,3 +17,6 @@ authorized_keys
 __pycache__
 __pycache__/
 *.pyc
+
+combined.log
+error.log

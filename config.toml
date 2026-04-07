@@ -1,0 +1,5 @@
+[tool_alias]
+golang = "go"
+nodejs = "node"
+
+[tools]

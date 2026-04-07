@@ -17,16 +17,31 @@ This is a dotfiles repository for a macOS development environment following the 
 
 - `./scripts/setup/setup_xdg.sh` - XDG directory structure setup
 - `./scripts/setup/setup_zsh.sh` - Zsh and Oh-My-Zsh configuration
+- `./scripts/setup/setup_mise.sh` - mise version manager setup
 - `./scripts/setup/setup_nvim.sh` - Neovim configuration
+- `./scripts/setup/setup_nvim_complete.sh` - Complete Neovim setup with health checks
 - `./scripts/setup/setup_homebrew.sh` - Homebrew package management
 - `./scripts/setup/setup_fonts.sh` - Nerd Font installation
 - `./scripts/setup/setup_github.sh` - GitHub integration
 - `./scripts/setup/setup_macos.sh` - macOS-specific setup
 
+### Neovim Management
+
+- `./scripts/nvim/setup_and_check.sh` - Comprehensive Neovim setup and health check
+- `./scripts/nvim/check_plugins.sh` - Check plugin installation status
+- `./scripts/nvim/health_check.sh` - Run Neovim health checks
+- `./scripts/nvim/check_structure.sh` - Validate nvim config structure (prevents circular symlinks)
+
+### Validation and Diagnostics
+
+- `./scripts/utils/check_dotfiles_structure.sh` - Detect and fix circular symlink issues
+- `./scripts/utils/package_coordination.sh` - Check for package conflicts and coordination
+
 ### Package Management
 
 - `brew bundle --file=Brewfile` - Install packages from Brewfile
 - `brew bundle dump --file=Brewfile --force` - Update Brewfile with current packages
+- `mise install` - Install all tools from versions managed by mise (reads `~/.tool-versions`)
 
 ## Architecture
 
@@ -52,10 +67,10 @@ The dotfiles follow XDG Base Directory Specification:
 ~/dotfiles/
 ├── scripts/
 │   ├── setup/          # Main setup scripts
-│   ├── nvim/           # Neovim-related utilities
+│   ├── nvim/           # Neovim management (health, plugin checks, structure validation)
 │   ├── ssh/            # SSH key management
-│   └── utils/          # General utilities
-├── nvim/               # Neovim configuration (Lua-based)
+│   └── utils/          # Platform detection, structure validation, package coordination
+├── nvim/               # Neovim configuration (Lua-based, requires 0.8+)
 ├── zsh_custom/         # Custom ZSH themes and plugins
 ├── fonts/              # Font configuration and management
 ├── Brewfile            # Homebrew packages list
@@ -86,3 +101,24 @@ The dotfiles follow XDG Base Directory Specification:
 - Neovim configuration is Lua-based with plugin management via lazy.nvim
 - ZSH configuration includes custom themes and plugin management
 - Utility scripts are linked to `~/bin` for PATH compatibility
+
+### Version Management with mise
+
+The repository uses [mise](https://mise.jdx.dev/) for version management (replaces asdf). mise reads `~/.tool-versions` automatically and includes:
+
+- Languages: golang, python, rust, nodejs, ruby, lua
+- Kubernetes: kubectl, kind, helm, kustomize, argo
+- Cloud: awscli, gcloud
+- Terraform: terraform, opentofu, terraform-ls, tflint, tfsec, terraform-docs
+- Build tools: gradle, maven, bun, deno
+- Utilities: sops, just, viddy, uv, kfilt
+
+mise is initialized in zshrc and shims are located in `~/.local/share/mise/shims`.
+
+### Structure Validation
+
+The repository has multiple layers of validation to prevent issues:
+- `check_dotfiles_structure.sh` - Detects circular symlinks in the repository
+- `check_structure.sh` (nvim) - Prevents circular symlinks in nvim config specifically
+- `validate_dotfiles.sh` - Tests core functionality and consistency
+- `package_coordination.sh` - Checks for package conflicts between Homebrew and mise

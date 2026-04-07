@@ -1,6 +1,40 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.config/zsh/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # Path to your oh-my-zsh configuration.
 
 # === PATH CONFIGURATION ===
+# Helper functions for PATH management
+# Add to PATH only if directory exists (and only if not already in PATH)
+prepend_path() {
+  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$1:$PATH"
+  fi
+}
+
+append_path() {
+  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
+    export PATH="$PATH:$1"
+  fi
+}
+
+# Add to MANPATH only if directory exists
+prepend_manpath() {
+  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
+    export MANPATH="$1:$MANPATH"
+  fi
+}
+
+append_manpath() {
+  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
+    export MANPATH="$MANPATH:$1"
+  fi
+}
+
 # Reset PATH to ensure proper ordering
 reset_path() {
   # Save important system paths that should be included but at lower priority
@@ -39,32 +73,8 @@ reset_path() {
 # Initialize with proper ordering
 reset_path
 
-# Helper functions for PATH management
-# Add to PATH only if directory exists (and only if not already in PATH)
-prepend_path() {
-  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
-    export PATH="$1:$PATH"
-  fi
-}
-
-append_path() {
-  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
-    export PATH="$PATH:$1"
-  fi
-}
-
-# Add to MANPATH only if directory exists
-prepend_manpath() {
-  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
-    export MANPATH="$1:$MANPATH"
-  fi
-}
-
-append_manpath() {
-  if [[ -d "$1" && ":$MANPATH:" != *":$1:"* ]]; then
-    export MANPATH="$MANPATH:$1"
-  fi
-}
+# Ensure ~/.local/bin is first in PATH if it exists
+prepend_path "$HOME/.local/bin"
 
 # Debug PATH and MANPATH
 debug_path() {
@@ -352,19 +362,37 @@ export LC_MEASUREMENT="en_US.UTF-8"
 export LC_IDENTIFICATION="en_US.UTF-8"
 export LC_ALL=
 
-# === ASDF VERSION MANAGER ===
-# Initialize ASDF
-if [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
-  . /opt/homebrew/opt/asdf/libexec/asdf.sh
 
-  # Add asdf completions - needed for zsh
-  if [ -d "${ASDF_DIR}/completions" ]; then
-    fpath=(${ASDF_DIR}/completions $fpath)
-    # Ensure completions are loaded without compiling
-    autoload -Uz compinit
-    compinit -D
+# === MISE VERSION MANAGER ===
+# Initialize mise (reads ~/.tool-versions automatically)
+if command -v mise &>/dev/null; then
+  eval "$(mise activate zsh)"
+
+  # Add mise completions for zsh
+  if [ -d "${HOME}/.local/share/mise/shims" ]; then
+    fpath=(${HOME}/.local/share/mise $fpath)
   fi
+
+  # Ensure ~/.local/bin stays first after mise modifies PATH
+  prepend_path "$HOME/.local/bin"
 fi
+
+## === ASDF VERSION MANAGER ===
+## Initialize ASDF
+#if [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
+#  . /opt/homebrew/opt/asdf/libexec/asdf.sh
+#
+#  # Add asdf completions - needed for zsh
+#  if [ -d "${ASDF_DIR}/completions" ]; then
+#    fpath=(${ASDF_DIR}/completions $fpath)
+#    # Ensure completions are loaded without compiling
+#    autoload -Uz compinit
+#    compinit -D
+#  fi
+#
+#  # Ensure ~/.local/bin stays first after asdf modifies PATH
+#  prepend_path "$HOME/.local/bin"
+#fi
 
 # === DEVELOPMENT SETTINGS ===
 # Java
@@ -478,7 +506,16 @@ fi
 if [[ -x "$HOME/.asdf/shims/aws_completer" ]]; then
   complete -C "$HOME/.asdf/shims/aws_completer" aws
 fi
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-echo "Loading $0"
 
+if [[ -f "$HOME/dotfiles/claude.source" ]]; then
+  source "$HOME/dotfiles/claude.source"
+fi
+export PATH="/Users/feniix/.cache/.bun/bin:$PATH"
+
+# PAI Configuration (added by Kai Bundle installer)
+export PAI_DIR="$HOME/.config/pai"
+
+# To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
+[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+echo "Loading $0"

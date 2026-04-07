@@ -276,21 +276,16 @@ local function check_plugin_health()
     warn("Telescope is not available")
   end
   
-  -- Check treesitter
+  -- Check treesitter (Neovim 0.12+ native treesitter)
   local ts = safe_require("nvim-treesitter")
   if ts then
     ok("TreeSitter is loaded")
-    
-    -- Check parsers
-    local parsers = safe_require("nvim-treesitter.parsers")
-    if parsers then
-      local installed_parsers = {}
-      for lang, _ in pairs(parsers.get_parser_configs()) do
-        if parsers.has_parser(lang) then
-          table.insert(installed_parsers, lang)
-        end
-      end
-      
+
+    -- Check parsers using new config API
+    local ts_config = safe_require("nvim-treesitter.config")
+    if ts_config then
+      local installed_parsers = ts_config.get_installed()
+
       if #installed_parsers > 0 then
         ok("TreeSitter has " .. #installed_parsers .. " parsers installed")
         info("Sample parsers: " .. table.concat(vim.list_slice(installed_parsers, 1, 5), ", "))

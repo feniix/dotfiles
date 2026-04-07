@@ -380,10 +380,17 @@ local function check_platform()
   end
 end
 
--- Check treesitter setup
+-- Check treesitter setup (Neovim 0.12+ native treesitter)
 local function check_treesitter()
   start("Treesitter Configuration")
-  
+
+  -- Check tree-sitter CLI (required for parser compilation in 0.12+)
+  if has_executable("tree-sitter") then
+    ok("tree-sitter CLI is installed (required for parser compilation)")
+  else
+    error("tree-sitter CLI is not installed. Install with: brew install tree-sitter")
+  end
+
   local has_ts, ts_location = has_plugin("nvim-treesitter")
   if has_ts then
     local ts_ok, _ = pcall(require, "nvim-treesitter")
@@ -395,7 +402,7 @@ local function check_treesitter()
   else
     error("nvim-treesitter is missing, install with :Lazy sync")
   end
-  
+
   -- Check TreeSitter module
   local user_ts_ok, _ = pcall(require, "plugins.config.treesitter")
   if user_ts_ok then
@@ -403,37 +410,24 @@ local function check_treesitter()
   else
     error("Treesitter module could not be loaded")
   end
-  
+
   -- Check some basic treesitter parsers
   local parsers_to_check = {
-    "lua", "vim", "go", "json", "markdown"
+    "lua", "go", "json", "markdown", "yaml"
   }
-  
-  -- Use pcall to protect against any treesitter errors
+
   local parser_installed = function(lang)
-    local parser_ok, parsers = pcall(require, "nvim-treesitter.parsers")
-    if not parser_ok then return false end
-    
-    -- Prefer using the newer treesitter API if available
-    if parsers.has_parser then
-      return parsers.has_parser(lang)
-    else
-      -- Fallback to older method
-      local config_ok, _ = pcall(require, "nvim-treesitter.configs")
-      if not config_ok then return false end
-      
-      return vim.fn.executable(
-        vim.fn.stdpath("data") .. "/lazy/nvim-treesitter/parser/" .. 
-        lang .. ".so"
-      ) == 1
-    end
+    local config_ok, ts_config = pcall(require, "nvim-treesitter.config")
+    if not config_ok then return false end
+    local installed = ts_config.get_installed()
+    return vim.tbl_contains(installed, lang)
   end
-  
+
   for _, lang in ipairs(parsers_to_check) do
     if parser_installed(lang) then
       ok(lang .. " parser is installed")
     else
-      warn(lang .. " parser is not installed")
+      warn(lang .. " parser is not installed. Run :TSInstall " .. lang)
     end
   end
 end

@@ -1,16 +1,13 @@
 [user]
   name = Sebastian Otaegui
   email = feniix@gmail.com
+
 [credential]
   helper = osxkeychain
+
 [push]
-	default = current
-[merge]
-  tool = diffmerge
-  stat = true
-[mergetool "diffmerge"]
-  trustExitCode = true
-  cmd = /opt/homebrew/bin/diffmerge --merge --result=\"$MERGED\" \"$LOCAL\" \"$BASE\" \"$REMOTE\"
+  default = current
+
 [alias]
   s = status
   ci = commit
@@ -21,6 +18,7 @@
   l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   ld = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -p
   append = commit --amend -C HEAD
+
 [core]
   autocrlf = input
   excludesfile = ~/.config/git/ignore
@@ -28,41 +26,52 @@
   quotepath = false
   pager = diff-so-fancy | less --tabs=4 -RFX
   ignorecase = false
+
 [rebase]
   autosquash = true
+
 [branch]
   autosetupmerge = always
+
 [diff]
   renames = copies
   mnemonicprefix = true
+
 [color]
   ui = true
+
 [color "branch"]
   current = yellow black
   local = yellow
   remote = magenta
+
 [color "diff"]
   meta = yellow bold
   frag = magenta bold
   old = red reverse
   new = green reverse
   whitespace = white reverse
+
 [color "status"]
   added = green
   changed = yellow
   untracked = cyan reverse
   branch = magenta
+
 [github]
   user = feniix
+
 [color "diff-highlight"]
   oldNormal = red bold
   oldHighlight = red bold 52
   newNormal = green bold
   newHighlight = green bold 22
+
 [pager]
   log = diff-so-fancy | less
   show = diff-so-fancy | less
   diff = diff-so-fancy | less
+
 [interactive]
   added = green
   changed = yellow
@@ -71,21 +80,19 @@
 
 [http "https://gopkg.in"]
   followRedirects = true
-[difftool "sourcetree"]
-  cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-  path =
-[mergetool "sourcetree"]
-  cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
-  trustExitCode = true
+
 [commit]
-	gpgsign = true
+  gpgsign = true
+
 [diff "sopsdiffer"]
   textconv = sops -d
+
 [filter "lfs"]
   required = true
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
   process = git-lfs filter-process
+
 [pull]
   rebase = false
 
@@ -94,11 +101,13 @@
   templateDir = ~/.config/git/template
 
 [url "git@github-gatx:GATX-Corp/"]
-	insteadOf = https://github.com/GATX-Corp/
+  insteadOf = https://github.com/GATX-Corp/
+
 [url "git@github-gatx:GATX-Corp/"]
   insteadOf = git@github.com:GATX-Corp/
 
 [url "git@github.com:feniix/"]
   insteadOf = https://github.com/feniix/
+
 [url "git@github.com:spantree/"]
   insteadOf = https://github.com/spantree/

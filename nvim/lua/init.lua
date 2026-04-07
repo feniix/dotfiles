@@ -8,7 +8,6 @@ end
 
 -- Permanently disable components that were causing issues
 vim.g.skip_ts_tools = true   -- Disable TypeScript
-vim.g.skip_treesitter_setup = false
 vim.g.skip_plugin_installer = false  -- Enable the plugin installer
 
 -- Add our lua directory to package.path
@@ -63,21 +62,17 @@ pcall(function()
   health.setup()
 end)
 
--- Clear cache directory on startup
+-- One-time cleanup: remove old treesitter cache from pre-0.12
 vim.api.nvim_create_autocmd("VimEnter", {
+  once = true,
   callback = function()
     vim.defer_fn(function()
-      -- Clean treesitter cache directory to prevent issues
-      local treesitter_cache = vim.fn.stdpath('cache') .. '/treesitter-vim'
-      if vim.fn.isdirectory(treesitter_cache) == 1 then
-        local ok, err = pcall(vim.fn.delete, treesitter_cache, 'rf')
-        if not ok then
-          vim.notify("Failed to clean treesitter cache: " .. tostring(err), vim.log.levels.WARN)
-        end
+      local old_cache = vim.fn.stdpath('cache') .. '/treesitter-vim'
+      if vim.fn.isdirectory(old_cache) == 1 then
+        pcall(vim.fn.delete, old_cache, 'rf')
       end
     end, 1000)
   end,
-  pattern = "*"
 })
 
 -- Make safe_require globally available
