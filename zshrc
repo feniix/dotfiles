@@ -515,6 +515,10 @@ export PATH="/Users/feniix/.cache/.bun/bin:$PATH"
 # PAI Configuration (added by Kai Bundle installer)
 export PAI_DIR="$HOME/.config/pai"
 
+[[ -f ~/dotfiles/completion ]] && source ~/dotfiles/completion
+
+export PATH=$PATH:$HOME/.dotnet/tools
+
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
