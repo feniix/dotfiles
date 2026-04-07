@@ -1,6 +1,7 @@
 [user]
   name = Sebastian Otaegui
   email = feniix@gmail.com
+	signingkey = /Users/feniix/.ssh/id_ed25519
 
 [credential]
   helper = osxkeychain
@@ -87,12 +88,6 @@
 [diff "sopsdiffer"]
   textconv = sops -d
 
-[filter "lfs"]
-  required = true
-  clean = git-lfs clean -- %f
-  smudge = git-lfs smudge -- %f
-  process = git-lfs filter-process
-
 [pull]
   rebase = false
 
@@ -111,3 +106,10 @@
 
 [url "git@github.com:spantree/"]
   insteadOf = https://github.com/spantree/
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[gpg]
+	format = ssh
