@@ -63,14 +63,6 @@ EOF
   log_success "Created macOS DefaultKeyBinding.dict"
 fi
 
-# Copy fonts if available
-if [ -d "$DOTFILES_DIR/fonts" ]; then
-  log_info "Installing custom fonts..."
-  mkdir -p "$HOME/Library/Fonts/"
-  cp "$DOTFILES_DIR/fonts/"*.ttf "$HOME/Library/Fonts/" 2>/dev/null || true
-  log_success "Fonts installed."
-fi
-
 # Apply iTerm2 preferences if available
 if [ -f "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" ]; then
   log_info "Installing iTerm2 preferences..."
@@ -81,12 +73,12 @@ if [ -f "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" ]; then
 fi
 
 # Apply macOS system defaults if available
-if [ -f "$DOTFILES_DIR/osx-defaults" ]; then
+if [ -f "$DOTFILES_DIR/scripts/macos/osx-defaults" ]; then
   read -p "Would you like to apply custom macOS system defaults? [y/N] " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "Applying saner defaults to macOS, you may be asked for your password..."
-    sh "$DOTFILES_DIR/osx-defaults"
+    bash "$DOTFILES_DIR/scripts/macos/osx-defaults"
     log_success "macOS defaults applied."
   else
     log_info "Skipping macOS defaults."

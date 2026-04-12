@@ -94,20 +94,5 @@ echo "  Lua modules: $XDG_CONFIG_HOME/nvim/lua/"
 echo ""
 echo "To install plugins, run: nvim and execute :Lazy sync"
 
-# Show available nvim management scripts
 echo ""
-echo "Neovim management scripts are available:"
-if [ -f "$DOTFILES_DIR/scripts/nvim/setup_and_check.sh" ]; then
-  echo "  • Complete setup & check: $DOTFILES_DIR/scripts/nvim/setup_and_check.sh"
-fi
-if [ -f "$DOTFILES_DIR/scripts/nvim/health_check.sh" ]; then
-  echo "  • Health check: $DOTFILES_DIR/scripts/nvim/health_check.sh"
-fi
-if [ -f "$DOTFILES_DIR/scripts/nvim/check_plugins.sh" ]; then
-  echo "  • Plugin status: $DOTFILES_DIR/scripts/nvim/check_plugins.sh"
-fi
-if [ -f "$DOTFILES_DIR/scripts/nvim/nvim_help.sh" ]; then
-  echo "  • Quick help: $DOTFILES_DIR/scripts/nvim/nvim_help.sh"
-fi
-echo ""
-echo "For help: $DOTFILES_DIR/scripts/nvim/nvim_help.sh" 
+echo "Run $DOTFILES_DIR/scripts/nvim/check_nvim.sh to verify the setup." 
