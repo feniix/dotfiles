@@ -29,9 +29,9 @@ function M.setup()
   end
 
   -- Provider settings (platform-aware)
-  local python_path = vim.fn.expand('$HOME/.asdf/shims/python3')
-  if vim.fn.executable(python_path) == 1 then
-    vim.g.python3_host_prog = python_path
+  local mise_python = vim.fn.expand('$HOME/.local/share/mise/shims/python3')
+  if vim.fn.executable(mise_python) == 1 then
+    vim.g.python3_host_prog = mise_python
   elseif utils.platform.command_available('python3') then
     vim.g.python3_host_prog = vim.fn.exepath('python3')
   end

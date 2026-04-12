@@ -89,7 +89,7 @@ local function check_installer()
         end
       else
         warn(lang .. " runtime not found")
-        info("Install " .. lang .. " via asdf: asdf install " .. lang .. " latest")
+        info("Install " .. lang .. " via mise: mise install " .. lang .. "@latest")
       end
     end
     
@@ -100,21 +100,21 @@ local function check_installer()
         ok("rust-analyzer is installed")
       else
         warn("rust-analyzer is missing")
-        info("Install via asdf: asdf install rust-analyzer latest")
+        info("Install via: rustup component add rust-analyzer")
       end
     else
       warn("rust runtime not found")
-      info("Install rust via asdf: asdf install rust latest")
+      info("Install rust via mise: mise install rust@latest")
     end
     
-    -- Check asdf itself
-    if has_executable("asdf") then
-      ok("asdf version manager is available")
-      local asdf_version = vim.fn.trim(vim.fn.system("asdf --version"))
-      info("asdf version: " .. asdf_version)
+    -- Check mise itself
+    if has_executable("mise") then
+      ok("mise version manager is available")
+      local mise_version = vim.fn.trim(vim.fn.system("mise --version"))
+      info("mise version: " .. mise_version)
     else
-      warn("asdf version manager not found")
-      info("Install asdf: https://asdf-vm.com/guide/getting-started.html")
+      warn("mise version manager not found")
+      info("Install mise: https://mise.jdx.dev/getting-started.html")
     end
     
   else
@@ -482,7 +482,7 @@ local function check_plugin_compatibility()
       ok("Git-dependent plugins will load (git is available)")
     else
       warn("Git-dependent plugins will be disabled (git not found)")
-      info("Install git via package manager or asdf")
+      info("Install git via package manager")
     end
     
     -- Check build tools for native extensions

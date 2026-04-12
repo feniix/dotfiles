@@ -4,7 +4,7 @@
 local utils = require('core.utils')
 local M = {}
 
--- Language ecosystem tools (not core runtimes - those are asdf-managed)
+-- Language ecosystem tools (not core runtimes - those are mise-managed)
 M.tools = {
   go_tools = {
     goimports = { cmd = 'go install golang.org/x/tools/cmd/goimports@latest' },
@@ -17,7 +17,7 @@ M.tools = {
     gorename = { cmd = 'go install golang.org/x/tools/cmd/gorename@latest' }
   },
   rust_tools = {
-    -- Most Rust tools managed by asdf/rustup, minimal additional tools needed
+    -- Most Rust tools managed by mise/rustup, minimal additional tools needed
   },
   node_tools = {
     typescript_language_server = { cmd = 'npm install -g typescript-language-server typescript' },
@@ -89,9 +89,9 @@ function M.install_language_tools(lang)
     return false
   end
   
-  -- Check if language runtime is available (asdf-managed)
+  -- Check if language runtime is available (mise-managed)
   if not utils.platform.command_available(lang) then
-    vim.notify(lang .. ' runtime not found. Install via asdf first.', vim.log.levels.ERROR)
+    vim.notify(lang .. ' runtime not found. Install via mise first.', vim.log.levels.ERROR)
     return false
   end
   
