@@ -64,13 +64,13 @@ EOF
   log_success "Created macOS DefaultKeyBinding.dict"
 fi
 
-# Apply iTerm2 preferences if available
-if [ -f "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" ]; then
-  log_info "Installing iTerm2 preferences..."
-  state_mkdir "$HOME/Library/Preferences"
-  state_copy_file "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/com.googlecode.iterm2.plist"
-  log_success "iTerm2 preferences installed."
-  log_warning "For iTerm2 preferences to take effect, the OS needs to be restarted."
+# Point iTerm2 to load preferences from dotfiles directory
+if [ -d "$DOTFILES_DIR/iterm2" ]; then
+  log_info "Configuring iTerm2 to load preferences from dotfiles..."
+  defaults write com.googlecode.iterm2 PrefsCustomFolder -string "$DOTFILES_DIR/iterm2"
+  defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+  state_record "ITERM2_PREFS" "$DOTFILES_DIR/iterm2"
+  log_success "iTerm2 will load preferences from $DOTFILES_DIR/iterm2"
 fi
 
 # Apply macOS system defaults if available

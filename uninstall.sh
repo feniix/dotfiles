@@ -185,6 +185,12 @@ for (( i=${#entries[@]}-1; i>=0; i-- )); do
       fi
       ;;
 
+    ITERM2_PREFS)
+      log_info "Removing iTerm2 custom preferences folder setting..."
+      run defaults delete com.googlecode.iterm2 PrefsCustomFolder 2>/dev/null || true
+      run defaults delete com.googlecode.iterm2 LoadPrefsFromCustomFolder 2>/dev/null || true
+      ;;
+
     DIR_EXISTED)
       # We didn't create it — leave it alone
       ;;
