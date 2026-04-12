@@ -1,7 +1,7 @@
 [user]
   name = Sebastian Otaegui
   email = feniix@gmail.com
-	signingkey = /Users/feniix/.ssh/id_ed25519
+	signingkey = ~/.ssh/id_ed25519
 
 [credential]
   helper = osxkeychain
@@ -93,7 +93,6 @@
 
 [init]
   defaultBranch = main
-  templateDir = ~/.config/git/template
 
 [url "git@github-gatx:GATX-Corp/"]
   insteadOf = https://github.com/GATX-Corp/

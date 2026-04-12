@@ -9,7 +9,6 @@ Include ~/.orbstack/ssh/config
 # Global defaults (tuned for jittery Wi-Fi + fast reuse)
 # -------------------------------------------------------------------
 Compression yes
-ForwardX11Trusted yes
 HashKnownHosts no
 
 # Keep NAT/state happy and detect broken links quickly (helps "hangy" sessions)
