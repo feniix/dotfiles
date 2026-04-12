@@ -5,7 +5,9 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 ## Setup
 
 - `./setup.sh` — straight-line install: XDG dirs, symlinks, Homebrew, oh-my-zsh, nvim, macOS, GitHub, SSH, mise
-- Each script in `scripts/setup/` can also be run independently
+- `./uninstall.sh` — reverse setup using state manifest (supports `--software`, `--defaults`, `--dry-run`)
+- All side effects tracked in `~/.local/share/dotfiles-state/` with file backups
+- Safe to re-run: idempotent install, first run on existing install does an "adopt"
 
 ## Key Files
 
@@ -23,11 +25,14 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 - SSH uses `Include ~/.config/ssh/config` (SSH doesn't support XDG)
 - Powerlevel10k and zsh-completions installed via Homebrew, not git clones
 - mise manages dev tools via `~/.config/mise/config.toml`
+- `scripts/lib/state.sh` — shared state tracking library (sourced by all setup scripts)
 
 ## Scripts
 
 ```
 scripts/
+├── lib/
+│   └── state.sh             # State tracking library (manifest + backups)
 ├── setup/
 │   ├── setup_xdg.sh        # XDG directory structure
 │   ├── setup_zsh.sh         # Oh-My-Zsh + verify Homebrew packages

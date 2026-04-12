@@ -12,6 +12,20 @@ cd ~/dotfiles
 
 The setup script runs straight through: XDG dirs, symlinks, Homebrew packages, oh-my-zsh, neovim, macOS defaults, GitHub CLI, SSH permissions, and mise tools.
 
+All changes are tracked in `~/.local/share/dotfiles-state/` with backups of any overwritten files.
+
+## Uninstall
+
+```bash
+./uninstall.sh              # Remove symlinks, files, created directories
+./uninstall.sh --software   # Also uninstall Homebrew packages, Oh-My-Zsh, mise
+./uninstall.sh --defaults   # Also restore macOS defaults from backup
+./uninstall.sh --everything # All of the above
+./uninstall.sh --dry-run    # Preview what would be done
+```
+
+Uninstall reads the state manifest in reverse order, restores backed-up files, removes symlinks, and cleans up empty directories we created.
+
 ## What's Included
 
 - **Shell**: Zsh + Oh-My-Zsh + Powerlevel10k (via Homebrew)
@@ -38,6 +52,7 @@ The setup script runs straight through: XDG dirs, symlinks, Homebrew packages, o
 ```
 ~/dotfiles/
 ├── scripts/
+│   ├── lib/             # state.sh (state tracking library)
 │   ├── setup/           # Setup scripts (zsh, nvim, homebrew, mise, github, macos, xdg)
 │   ├── macos/           # osx-defaults (system preferences)
 │   ├── nvim/            # check_nvim.sh (structure + plugin check)
@@ -51,7 +66,8 @@ The setup script runs straight through: XDG dirs, symlinks, Homebrew packages, o
 ├── gitconfig            # Git configuration
 ├── gitignore_global     # Global gitignore
 ├── ssh_config           # SSH configuration
-└── setup.sh             # Main setup script
+├── setup.sh             # Main setup script
+└── uninstall.sh         # Reverse setup (state-tracked)
 ```
 
 ## Individual Scripts
