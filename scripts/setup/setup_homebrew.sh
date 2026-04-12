@@ -71,6 +71,7 @@ install_packages() {
   log_info "Installing packages (this may take a while)..."
   brew bundle install --file="$BREWFILE" --verbose
 
+  state_record "SOFTWARE" "brew" "$BREWFILE"
   log_success "All packages installed successfully!"
 }
 
@@ -80,7 +81,7 @@ setup_homebrew() {
 
   install_homebrew
 
-  read -p "Install all packages from Brewfile? This may take a while. [y/N] " -n 1 -r
+  read -p "Install all packages from Brewfile? This may take a while. [y/N] " -n 1 -r || true
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     install_packages

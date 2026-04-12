@@ -76,6 +76,7 @@ setup_mise() {
 
     log_info "Installing tool versions from config.toml..."
     if mise install; then
+      state_record "SOFTWARE" "mise" "$mise_config"
       log_success "All tool versions installed successfully"
     else
       log_warning "Some tool versions failed to install"

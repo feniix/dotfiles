@@ -30,7 +30,9 @@ fi
 
 # Configure editor
 gh config set editor nvim
+state_record "GH_CONFIG" "editor" "nvim"
 gh config set pager disabled
+state_record "GH_CONFIG" "pager" "disabled"
 
 # Authenticate if needed
 if gh auth status &>/dev/null; then

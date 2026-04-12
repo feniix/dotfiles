@@ -43,8 +43,9 @@ fi
 
 # Create a basic DefaultKeyBinding.dict for macOS text editing
 log_info "Setting up macOS key bindings..."
-mkdir -p "$HOME/Library/KeyBindings"
+state_mkdir "$HOME/Library/KeyBindings"
 if [ ! -f "$HOME/Library/KeyBindings/DefaultKeyBinding.dict" ]; then
+  state_write_file "$HOME/Library/KeyBindings/DefaultKeyBinding.dict"
   cat > "$HOME/Library/KeyBindings/DefaultKeyBinding.dict" << 'EOF'
 {
     /* Remap Home / End to be correct */
@@ -66,19 +67,24 @@ fi
 # Apply iTerm2 preferences if available
 if [ -f "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" ]; then
   log_info "Installing iTerm2 preferences..."
-  mkdir -p "$HOME/Library/Preferences/"
-  cp "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/" 2>/dev/null || true
+  state_mkdir "$HOME/Library/Preferences"
+  state_copy_file "$DOTFILES_DIR/iterm2/com.googlecode.iterm2.plist" "$HOME/Library/Preferences/com.googlecode.iterm2.plist"
   log_success "iTerm2 preferences installed."
   log_warning "For iTerm2 preferences to take effect, the OS needs to be restarted."
 fi
 
 # Apply macOS system defaults if available
 if [ -f "$DOTFILES_DIR/scripts/macos/osx-defaults" ]; then
-  read -p "Would you like to apply custom macOS system defaults? [y/N] " -n 1 -r
+  read -p "Would you like to apply custom macOS system defaults? [y/N] " -n 1 -r || true
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "Applying saner defaults to macOS, you may be asked for your password..."
     bash "$DOTFILES_DIR/scripts/macos/osx-defaults"
+    # Record the backup created by osx-defaults
+    defaults_backup="$(ls -t "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles_backup"/defaults-*.plist 2>/dev/null | head -1)"
+    if [[ -n "$defaults_backup" ]]; then
+      state_record "DEFAULTS_BACKUP" "$defaults_backup"
+    fi
     log_success "macOS defaults applied."
   else
     log_info "Skipping macOS defaults."

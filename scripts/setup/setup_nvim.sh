@@ -40,23 +40,17 @@ log_info "Setting up Neovim with XDG compliance..."
 # Create necessary runtime directories (separate from config)
 # Note: ~/.config/nvim will be a symlink to $DOTFILES_DIR/nvim
 # These directories are for Neovim's runtime data, not configuration files
-mkdir -p "$XDG_DATA_HOME/nvim"        # Plugin data, site packages
-mkdir -p "$XDG_STATE_HOME/nvim/undo"  # Persistent undo files  
-mkdir -p "$XDG_CACHE_HOME/nvim"       # Cache files, compiled plugins
+state_mkdir "$XDG_DATA_HOME/nvim"        # Plugin data, site packages
+state_mkdir "$XDG_STATE_HOME/nvim/undo"  # Persistent undo files
+state_mkdir "$XDG_CACHE_HOME/nvim"       # Cache files, compiled plugins
 
 # Also create directories for regular Vim
-mkdir -p "$XDG_CONFIG_HOME/vim"
+state_mkdir "$XDG_CONFIG_HOME/vim"
 
 # Link Neovim configuration
 if [ -d "$DOTFILES_DIR/nvim" ]; then
-  # Remove existing nvim config directory if it exists and is not a symlink
-  if [ -d "$XDG_CONFIG_HOME/nvim" ] && [ ! -L "$XDG_CONFIG_HOME/nvim" ]; then
-    log_warning "Backing up existing Neovim configuration..."
-    mv "$XDG_CONFIG_HOME/nvim" "$XDG_CONFIG_HOME/nvim.backup.$(date +%Y%m%d_%H%M%S)"
-  fi
-  
-  # Create the symlink to the entire nvim directory
-  ln -sf "$DOTFILES_DIR/nvim" "$XDG_CONFIG_HOME/nvim"
+  # Create the symlink to the entire nvim directory (state_symlink handles backup)
+  state_symlink "$DOTFILES_DIR/nvim" "$XDG_CONFIG_HOME/nvim"
   log_success "Linked nvim/ → $XDG_CONFIG_HOME/nvim"
   
   # Install plugins if nvim is available and --install-plugins flag is passed
@@ -74,11 +68,11 @@ fi
 # Set up .vimrc for Vim compatibility
 if [ -f "$DOTFILES_DIR/.vimrc" ]; then
   # Link .vimrc to home directory
-  ln -sf "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
+  state_symlink "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
   log_success "Linked .vimrc → $HOME/.vimrc"
-  
+
   # Link .vimrc to XDG config directory for Vim
-  ln -sf "$DOTFILES_DIR/.vimrc" "$XDG_CONFIG_HOME/vim/vimrc"
+  state_symlink "$DOTFILES_DIR/.vimrc" "$XDG_CONFIG_HOME/vim/vimrc"
   log_success "Linked .vimrc → $XDG_CONFIG_HOME/vim/vimrc"
 else
   log_warning "Vim configuration file not found at $DOTFILES_DIR/.vimrc"

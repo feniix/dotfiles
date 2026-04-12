@@ -35,14 +35,14 @@ log_error() {
 
 # Create XDG Base Directories if they don't exist
 log_info "Creating XDG Base Directories..."
-mkdir -p "$HOME/.config"
-mkdir -p "$HOME/.local/share"
-mkdir -p "$HOME/.cache"
-mkdir -p "$HOME/.local/state"
+state_mkdir "$HOME/.config"
+state_mkdir "$HOME/.local/share"
+state_mkdir "$HOME/.cache"
+state_mkdir "$HOME/.local/state"
 
 # Create subdirectories for various tools
-mkdir -p "$HOME/.config/zsh"
-mkdir -p "$HOME/.config/git"
+state_mkdir "$HOME/.config/zsh"
+state_mkdir "$HOME/.config/git"
 
 log_success "XDG Base Directories created successfully."
 
@@ -62,7 +62,7 @@ log_info "by the main setup.sh script. This script only sets up the directory st
 
 # Setting up SSH
 log_info "Setting up SSH with XDG compliance..."
-mkdir -p "$HOME/.config/ssh"
+state_mkdir "$HOME/.config/ssh"
 if [ -d "$HOME/.ssh" ]; then
   log_info "For SSH, we recommend adding the following to your ~/.ssh/config file:"
   echo "Include ~/.config/ssh/config"

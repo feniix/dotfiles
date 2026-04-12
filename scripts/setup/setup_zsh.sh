@@ -60,7 +60,7 @@ if [ -d "$HOME/.oh-my-zsh" ]; then
 
   # Ask if the user wants to update
   if [ "$CHECK_ONLY" = false ]; then
-    read -p "Do you want to update oh-my-zsh? [y/N] " -n 1 -r
+    read -p "Do you want to update oh-my-zsh? [y/N] " -n 1 -r || true
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       log_info "Updating oh-my-zsh..."
@@ -88,6 +88,7 @@ else
   fi
 
   if RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"; then
+    state_record "SOFTWARE" "omz" "$HOME/.oh-my-zsh"
     log_success "Oh My Zsh has been installed successfully."
   else
     log_error "Failed to install Oh My Zsh."
