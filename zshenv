@@ -49,4 +49,3 @@ export AWS_WEB_IDENTITY_TOKEN_FILE="$XDG_DATA_HOME/aws/token"
 if [ -z "$HOMEBREW_PREFIX" ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
-export ASDF_HASHICORP_SKIP_VERIFY=0

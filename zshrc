@@ -59,12 +59,10 @@ reset_path() {
 
   # Tool-specific paths
   export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
-  export PATH="$PATH:$HOME/.linkerd2/bin"
-  export PATH="$PATH:$HOME/.docker/bin"
   export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
   # Add user directories next
-  export PATH="$PATH:$HOME/bin:$HOME/sbin:$HOME/.local/share/go/bin"
+  export PATH="$PATH:$HOME/bin:$HOME/.local/share/go/bin"
 
   # Add system paths at lowest priority
   export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
@@ -142,7 +140,6 @@ plugins=(
   # Essentials
   history-substring-search
   colored-man-pages
-  command-not-found
   zsh-completions
 
   # Movement and navigation
@@ -173,21 +170,9 @@ plugins=(
   mvn
 )
 
-# Plugin configurations
-# SSH Agent configuration
-zstyle :omz:plugins:ssh-agent agent-forwarding on
-zstyle :omz:plugins:ssh-agent identities id_rsa
-
 # === HOMEBREW CONFIGURATION ===
-# Homebrew wrapper if available
-if [ -f /opt/homebrew/etc/brew-wrap ]; then
-  source /opt/homebrew/etc/brew-wrap
-fi
-
 # Homebrew environment variables
 export HOMEBREW_BREWFILE="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
-export HOMEBREW_BREWFILE_BACKUP="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile.bak"
-export HOMEBREW_BREWFILE_APPSTORE=1
 export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_AUTOREMOVE=1
@@ -197,7 +182,6 @@ export HOMEBREW_NO_INSTALL_UPGRADE=1
 prepend_manpath "/opt/homebrew/opt/findutils/share/man"
 prepend_manpath "/opt/homebrew/opt/gawk/share/man"
 prepend_manpath "/opt/homebrew/opt/less/share/man"
-prepend_manpath "/opt/homebrew/opt/erlang/lib/erlang/man"
 
 # Enable Oh-My-Zsh experimental async prompts (April 2024 feature)
 zstyle ':omz:alpha:lib:git' async-prompt yes
@@ -364,7 +348,7 @@ export LC_ALL=
 
 
 # === MISE VERSION MANAGER ===
-# Initialize mise (reads ~/.tool-versions automatically)
+# Initialize mise (reads ~/.config/mise/config.toml)
 if command -v mise &>/dev/null; then
   eval "$(mise activate zsh)"
 
@@ -376,23 +360,6 @@ if command -v mise &>/dev/null; then
   # Ensure ~/.local/bin stays first after mise modifies PATH
   prepend_path "$HOME/.local/bin"
 fi
-
-## === ASDF VERSION MANAGER ===
-## Initialize ASDF
-#if [ -f "/opt/homebrew/opt/asdf/libexec/asdf.sh" ]; then
-#  . /opt/homebrew/opt/asdf/libexec/asdf.sh
-#
-#  # Add asdf completions - needed for zsh
-#  if [ -d "${ASDF_DIR}/completions" ]; then
-#    fpath=(${ASDF_DIR}/completions $fpath)
-#    # Ensure completions are loaded without compiling
-#    autoload -Uz compinit
-#    compinit -D
-#  fi
-#
-#  # Ensure ~/.local/bin stays first after asdf modifies PATH
-#  prepend_path "$HOME/.local/bin"
-#fi
 
 # === DEVELOPMENT SETTINGS ===
 # Java
@@ -409,17 +376,10 @@ export AWS_SDK_LOAD_CONFIG=1
 # Kubernetes
 export KUBECONFIG="$XDG_CONFIG_HOME/kube/config"
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-export KICS_QUERIES_PATH="/opt/homebrew/opt/kics/share/kics/assets/queries"
 alias k=kubectl
 
 # Terraform
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
-export TFENV_ARCH=arm64
-
-# Other dev tools
-export JMETER_HOME=/usr/local/opt/jmeter
-export VAGRANT_DEFAULT_PROVIDER=virtualbox
-
 # === ALIASES ===
 alias mtr="mtr --curses"
 alias vim=nvim
@@ -476,25 +436,10 @@ function rm_local_branches() {
   fi
 }
 
-# === SSH AGENT CONFIGURATION ===
-
 # === EXTERNAL TOOLS INTEGRATION ===
-# iTerm2 integration
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
 eval "$(command direnv hook zsh)"
 
-# Google Cloud SDK - load once
-if [ -f /opt/homebrew/share/google-cloud-sdk/path.zsh.inc ]; then
-  source /opt/homebrew/share/google-cloud-sdk/path.zsh.inc
-fi
-if [ -f /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc ]; then
-  source /opt/homebrew/share/google-cloud-sdk/completion.zsh.inc
-fi
-
 # === PERSONAL SETTINGS ===
-export DEBFULLNAME="Sebastian Otaegui"
-export DEBEMAIL="feniix@gmail.com"
 export EDITOR=nvim
 export GPG_TTY=$(tty)
 
@@ -503,23 +448,15 @@ export GPG_TTY=$(tty)
 if [[ -f /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme ]]; then
   source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 fi
-if [[ -x "$HOME/.asdf/shims/aws_completer" ]]; then
-  complete -C "$HOME/.asdf/shims/aws_completer" aws
+if command -v aws_completer &>/dev/null; then
+  complete -C aws_completer aws
 fi
 
-if [[ -f "$HOME/dotfiles/claude.source" ]]; then
-  source "$HOME/dotfiles/claude.source"
+if [[ -f "${DOTFILES_DIR:-$HOME/dotfiles}/claude.source" ]]; then
+  source "${DOTFILES_DIR:-$HOME/dotfiles}/claude.source"
 fi
-export PATH="/Users/feniix/.cache/.bun/bin:$PATH"
-
-# PAI Configuration (added by Kai Bundle installer)
-export PAI_DIR="$HOME/.config/pai"
-
-[[ -f ~/dotfiles/completion ]] && source ~/dotfiles/completion
-
-export PATH=$PATH:$HOME/.dotnet/tools
+[[ -f "${DOTFILES_DIR:-$HOME/dotfiles}/completion" ]] && source "${DOTFILES_DIR:-$HOME/dotfiles}/completion"
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
-echo "Loading $0"

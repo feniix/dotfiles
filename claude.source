@@ -5,8 +5,8 @@ kimi() {
         export ENABLE_TOOL_SEARCH=false
         export API_TIMEOUT_MS=3000000
         export ANTHROPIC_DEFAULT_HAIKU_MODEL=k2p5
-        export ANTHROPIC_DEFAULT_SONNET_MODELw=k2p5
-        export ANTHROPIC_DEFAULT_OPUS_MODELw=k2p5
+        export ANTHROPIC_DEFAULT_SONNET_MODEL=k2p5
+        export ANTHROPIC_DEFAULT_OPUS_MODEL=k2p5
         export ANTHROPIC_MODEL=k2p5
         claude "$@"
     )
@@ -15,10 +15,10 @@ kimi() {
 zai() {
     (
         export ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
-        export ANTHROPIC_AUTH_TOKEN=$Z_API_KEY
+        export ANTHROPIC_AUTH_TOKEN=$ZAI_API_KEY
         export ANTHROPIC_DEFAULT_HAIKU_MODEL=glm-4.7
-        export ANTHROPIC_DEFAULT_SONNET_MODELw=glm-5
-        export ANTHROPIC_DEFAULT_OPUS_MODELw=glm-5
+        export ANTHROPIC_DEFAULT_SONNET_MODEL=glm-5
+        export ANTHROPIC_DEFAULT_OPUS_MODEL=glm-5
         export ANTHROPIC_MODEL=glm-5
         export API_TIMEOUT_MS=3000000
         claude "$@"
