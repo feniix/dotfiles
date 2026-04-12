@@ -1,447 +1,503 @@
 #!/bin/bash
 #
 # macOS System Preferences Configuration
+# Targeted at macOS 14+ (Sonoma, Sequoia, Tahoe) on Apple Silicon
+#
 # Originally inspired by @mathiasbynens
 # https://github.com/mathiasbynens/dotfiles/blob/master/.osx
 #
-# Updated for modern macOS versions (10.14+)
+# Usage:
+#   ./osx-defaults              Apply all settings
+#   ./osx-defaults --dry-run    Show what would be changed without applying
+#   ./osx-defaults --only dock,finder   Apply specific sections only
+#   ./osx-defaults --backup     Save current defaults to a file
 
-# Exit if any command fails
 set -e
 
-# Get macOS version (10.14, 10.15, 11.0, etc.)
-os_version=$(sw_vers -productVersion)
-major_version=$(echo $os_version | cut -d. -f1)
-minor_version=$(echo $os_version | cut -d. -f2)
+DRY_RUN=false
+ONLY_SECTIONS=""
+BACKUP_ONLY=false
 
-echo "📱 Configuring macOS $os_version preferences..."
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --only)
+      ONLY_SECTIONS="$2"
+      shift 2
+      ;;
+    --backup)
+      BACKUP_ONLY=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [--dry-run] [--only section1,section2] [--backup]"
+      echo "Sections: system,sound,energy,input,accessibility,hotcorners,finder,dock,screenshot,safari,terminal,browser,activity,appstore,privacy,bluetooth,timemachine"
+      exit 1
+      ;;
+  esac
+done
 
-# Verify minimum OS version
-if [[ $major_version -lt 10 || ($major_version -eq 10 && $minor_version -lt 14) ]]; then
-  echo "❌ Error: This script requires macOS 10.14 (Mojave) or newer"
-  exit 1
+# Check if a section should run
+should_run() {
+  local section="$1"
+  if [[ -z "$ONLY_SECTIONS" ]]; then
+    return 0
+  fi
+  echo ",$ONLY_SECTIONS," | grep -q ",$section,"
+}
+
+# Wrapper that respects dry-run mode
+run() {
+  if [[ "$DRY_RUN" == true ]]; then
+    echo "  [dry-run] $*"
+  else
+    "$@"
+  fi
+}
+
+# Backup current defaults
+backup_defaults() {
+  local backup_dir="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles_backup"
+  local backup_file="$backup_dir/defaults-$(date +%Y%m%d_%H%M%S).plist"
+  mkdir -p "$backup_dir"
+  echo "Saving current defaults to $backup_file..."
+  defaults read > "$backup_file"
+  echo "Backup saved."
+}
+
+echo "Configuring macOS $(sw_vers -productVersion) preferences..."
+
+# Always create a backup before making changes
+backup_defaults
+
+if [[ "$BACKUP_ONLY" == true ]]; then
+  echo "Backup complete. No changes applied."
+  exit 0
 fi
 
-# Request sudo privileges upfront
-echo "👮 Requesting administrator privileges (for system settings)..."
-sudo -v
+if [[ "$DRY_RUN" == true ]]; then
+  echo "(Dry-run mode: no changes will be applied)"
+fi
 
-# Keep sudo alive until script finishes
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+# Request sudo privileges upfront (skip in dry-run)
+if [[ "$DRY_RUN" != true ]]; then
+  echo "Requesting administrator privileges (for system settings)..."
+  sudo -v
+
+  # Keep sudo alive until script finishes
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+  SUDO_PID=$!
+  trap 'kill $SUDO_PID 2>/dev/null' EXIT
+fi
 
 #====================================================================
 # System-wide preferences
 #====================================================================
-echo "⚙️  Configuring system-wide preferences..."
+if should_run "system"; then
+  echo "Configuring system-wide preferences..."
 
-# Disable chime sound on boot (for macOS 11+)
-if [[ $major_version -ge 11 ]]; then
-  sudo nvram StartupMute=%01
-  echo "  → Disabled startup chime"
+  # Disable chime sound on boot
+  run sudo nvram StartupMute=%01
+
+  # Set standby delay to 24 hours (default is 1 hour)
+  run sudo pmset -a standbydelay 86400
+
+  # Expand save/print panels by default
+  run defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+  run defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+  run defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
+
+  # Save to disk (not to iCloud) by default
+  run defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
+
+  # Disable automatic capitalization, smart quotes/dashes, auto-correct, and period substitution
+  run defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+  run defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+  run defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+  run defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+  run defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
 fi
-
-# Set standby delay to 24 hours (default is 1 hour)
-sudo pmset -a standbydelay 84600
-
-# Disable menu bar transparency
-defaults write NSGlobalDomain AppleEnableMenuBarTransparency -bool false
-
-# Expand save/print panels by default
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
-defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
-defaults write NSGlobalDomain PMPrintingExpandedStateForPrint2 -bool true
-
-# Save to disk (not to iCloud) by default
-defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
-
-# Disable automatic capitalization and smart quotes/dashes
-defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
-defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
-defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
-
-# Disable auto-correct
-defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
-
-# Increase window resize speed for Cocoa applications
-defaults write NSGlobalDomain NSWindowResizeTime -float 0.001
-
-# Disable automatic period substitution
-defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
-
-# Disable window animations
-defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
 
 #====================================================================
 # Sound preferences
 #====================================================================
-echo "🔊 Configuring sound preferences..."
+if should_run "sound"; then
+  echo "Configuring sound preferences..."
 
-# Disable user interface sound effects
-defaults write NSGlobalDomain com.apple.sound.uiaudio.enabled -bool false
+  # Set alert volume (0.5 = moderate)
+  run defaults write NSGlobalDomain com.apple.sound.beep.volume -float 0.5
 
-# Disable feedback when volume is changed
-defaults write NSGlobalDomain com.apple.sound.beep.feedback -bool false
-
-# Set alert volume
-defaults write NSGlobalDomain com.apple.sound.beep.volume -float 0.5
+  # Disable feedback sound when volume is changed
+  run defaults write NSGlobalDomain com.apple.sound.beep.feedback -bool false
+fi
 
 #====================================================================
 # Energy saver preferences
 #====================================================================
-echo "🔋 Configuring energy saver preferences..."
+if should_run "energy"; then
+  echo "Configuring energy saver preferences..."
 
-# Sleep the display after 15 minutes while charging
-sudo pmset -c displaysleep 15
+  # Sleep the display after 15 minutes while charging
+  run sudo pmset -c displaysleep 15
 
-# Sleep the display after 5 minutes on battery
-sudo pmset -b displaysleep 5
+  # Sleep the display after 5 minutes on battery
+  run sudo pmset -b displaysleep 5
 
-# Set machine sleep to 15 minutes on battery
-sudo pmset -b sleep 15
+  # Set machine sleep to 15 minutes on battery
+  run sudo pmset -b sleep 15
 
-# Disable machine sleep while charging
-sudo pmset -c sleep 0
-
-# Hibernation mode
-# 0: Disable hibernation (speeds up entering sleep mode)
-# 3: Copy RAM to disk so the system state can still be restored in case of a
-#    power failure.
-sudo pmset -a hibernatemode 0
+  # Sleep after 78 minutes while charging
+  run sudo pmset -c sleep 78
+fi
 
 #====================================================================
 # Trackpad, mouse, keyboard, and input
 #====================================================================
-echo "🖱️  Configuring input devices..."
+if should_run "input"; then
+  echo "Configuring input devices..."
 
-# Enable tap to click (Trackpad)
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+  # Enable tap to click (Trackpad)
+  run defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+  run defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+  run defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
-# Increase tracking speed
-defaults write NSGlobalDomain com.apple.trackpad.scaling -float 2.0
-defaults write NSGlobalDomain com.apple.mouse.scaling -float 2.5
+  # Disable "natural" scrolling
+  run defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
 
-# Disable "natural" scrolling
-defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+  # Set fast key repeat rate and short delay
+  run defaults write NSGlobalDomain KeyRepeat -int 2
+  run defaults write NSGlobalDomain InitialKeyRepeat -int 15
 
-# Set key repeat rate and delay
-defaults write NSGlobalDomain KeyRepeat -int 2
-defaults write NSGlobalDomain InitialKeyRepeat -int 15
+  # Disable press-and-hold for keys in favor of key repeat
+  run defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 
-# Disable press-and-hold for keys in favor of key repeat
-defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
+  # Enable full keyboard access for all controls (e.g. Tab in modal dialogs)
+  run defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
-# Enable full keyboard access for all controls
-# (e.g. enable Tab in modal dialogs)
-defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+  # Make Fn key do nothing (prevents accidental emoji popup)
+  run defaults write com.apple.HIToolbox AppleFnUsageType -int 0
+fi
 
 #====================================================================
 # Accessibility preferences
 #====================================================================
-echo "♿ Configuring accessibility preferences..."
+if should_run "accessibility"; then
+  echo "Configuring accessibility preferences..."
 
-# Enable three finger drag
-defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
+  # Enable three finger drag
+  run defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerDrag -bool true
+  run defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
 
-# Increase contrast
-defaults write com.apple.universalaccess increaseContrast -bool true
-
-# Reduce transparency
-defaults write com.apple.universalaccess reduceTransparency -bool true
-
-# Enable cursor shake to locate
-defaults write NSGlobalDomain CGDisableCursorLocationMagnification -bool false
+  # Reduce transparency
+  run defaults write com.apple.universalaccess reduceTransparency -bool true
+fi
 
 #====================================================================
 # Hot corners
 #====================================================================
-echo "🔥 Configuring hot corners..."
+if should_run "hotcorners"; then
+  echo "Configuring hot corners..."
 
-# Hot corners
-# Possible values:
-#  0: no-op
-#  2: Mission Control
-#  3: Show application windows
-#  4: Desktop
-#  5: Start screen saver
-#  6: Disable screen saver
-#  7: Dashboard
-# 10: Put display to sleep
-# 11: Launchpad
-# 12: Notification Center
-# 13: Lock Screen (macOS 10.14+)
+  # Possible values:
+  #  0: no-op        2: Mission Control   3: Application Windows
+  #  4: Desktop      5: Screen Saver      6: Disable Screen Saver
+  # 10: Display Sleep  11: Launchpad  12: Notification Center  13: Lock Screen
 
-# Top left screen corner → Mission Control
-defaults write com.apple.dock wvous-tl-corner -int 2
-defaults write com.apple.dock wvous-tl-modifier -int 0
+  # Top left     -> Mission Control
+  run defaults write com.apple.dock wvous-tl-corner -int 2
+  run defaults write com.apple.dock wvous-tl-modifier -int 0
 
-# Top right screen corner → Desktop
-defaults write com.apple.dock wvous-tr-corner -int 4
-defaults write com.apple.dock wvous-tr-modifier -int 0
+  # Top right    -> Desktop
+  run defaults write com.apple.dock wvous-tr-corner -int 4
+  run defaults write com.apple.dock wvous-tr-modifier -int 0
 
-# Bottom left screen corner → Start screen saver
-defaults write com.apple.dock wvous-bl-corner -int 5
-defaults write com.apple.dock wvous-bl-modifier -int 0
+  # Bottom left  -> Screen Saver
+  run defaults write com.apple.dock wvous-bl-corner -int 5
+  run defaults write com.apple.dock wvous-bl-modifier -int 0
 
-# Bottom right screen corner → Lock screen
-defaults write com.apple.dock wvous-br-corner -int 13
-defaults write com.apple.dock wvous-br-modifier -int 0
-
-#====================================================================
-# Night Shift settings (macOS 10.14+)
-#====================================================================
-echo "🌙 Configuring Night Shift..."
-
-# These settings work differently across different macOS versions
-# For more consistent behavior, use System Preferences GUI
-
-# Enable Night Shift from sunset to sunrise
-# Note: CoreBrightness settings may require SIP to be disabled on newer macOS versions
-if [[ $major_version -le 10 || ($major_version -eq 11 && $minor_version -le 0) ]]; then
-  defaults write com.apple.CoreBrightness CBBlueReductionStatus -dict AutoBlueReductionEnabled 1
-  echo "  → Configured Night Shift via defaults (older macOS)"
-else
-  echo "  → Night Shift must be configured manually on newer macOS versions"
+  # Bottom right -> Lock Screen
+  run defaults write com.apple.dock wvous-br-corner -int 13
+  run defaults write com.apple.dock wvous-br-modifier -int 0
 fi
 
 #====================================================================
 # Finder preferences
 #====================================================================
-echo "🔍 Configuring Finder preferences..."
+if should_run "finder"; then
+  echo "Configuring Finder preferences..."
 
-# Allow quitting Finder via ⌘ + Q
-defaults write com.apple.finder QuitMenuItem -bool true
+  # Allow quitting Finder via Cmd+Q
+  run defaults write com.apple.finder QuitMenuItem -bool true
 
-# Disable window and Get Info animations
-defaults write com.apple.finder DisableAllAnimations -bool true
+  # Show all filename extensions
+  run defaults write NSGlobalDomain AppleShowAllExtensions -bool true
 
-# Show all filename extensions
-defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+  # Show hidden files (dotfiles)
+  run defaults write com.apple.finder AppleShowAllFiles -bool true
 
-# Show path bar
-defaults write com.apple.finder ShowPathbar -bool true
+  # Show path bar and status bar
+  run defaults write com.apple.finder ShowPathbar -bool true
+  run defaults write com.apple.finder ShowStatusBar -bool true
 
-# Show status bar
-defaults write com.apple.finder ShowStatusBar -bool true
+  # Display full POSIX path as Finder window title
+  run defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
 
-# Allow text selection in Quick Look
-# Note: On newer macOS versions this setting may have no effect
-defaults write com.apple.finder QLEnableTextSelection -bool true
+  # Always open in list view
+  run defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
-# Display full POSIX path as Finder window title
-defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
+  # Search results in list view too
+  run defaults write com.apple.finder SearchRecentsSavedViewStyle -string "Nlsv"
 
-# Always open everything in Finder's list view
-defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+  # Keep folders on top when sorting by name
+  run defaults write com.apple.finder _FXSortFoldersFirst -bool true
 
-# Show external drives on the desktop
-defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
-defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
+  # Disable the warning when changing a file extension
+  run defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-# Show hidden files
-defaults write com.apple.finder AppleShowAllFiles -bool true
+  # New Finder windows open Home instead of Recents
+  run defaults write com.apple.finder NewWindowTarget -string "PfHm"
 
-# Avoid creating .DS_Store files on network or USB volumes
-defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
-defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
+  # Show external drives and removable media on the desktop
+  run defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
+  run defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 
-# Enable AirDrop over Ethernet
-defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
+  # Avoid creating .DS_Store files on network or USB volumes
+  run defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+  run defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
-# Keep folders on top when sorting by name
-defaults write com.apple.finder _FXSortFoldersFirst -bool true
+  # Enable AirDrop over Ethernet
+  run defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true
 
-# Show the ~/Library folder
-chflags nohidden ~/Library
+  # Auto-delete Trash items after 30 days
+  run defaults write com.apple.finder FXRemoveOldTrashItems -bool true
 
-# Show the /Volumes folder
-sudo chflags nohidden /Volumes
+  # Show the ~/Library folder
+  run chflags nohidden ~/Library
+
+  # Show the /Volumes folder
+  run sudo chflags nohidden /Volumes
+fi
 
 #====================================================================
 # Dock preferences
 #====================================================================
-echo "🚢 Configuring Dock preferences..."
+if should_run "dock"; then
+  echo "Configuring Dock preferences..."
 
-# Enable highlight hover effect for the grid view of a stack
-defaults write com.apple.dock mouse-over-hilite-stack -bool true
+  # Set the icon size of Dock items
+  run defaults write com.apple.dock tilesize -int 42
 
-# Set the icon size of Dock items
-defaults write com.apple.dock tilesize -int 42
+  # Change minimize/maximize window effect to scale
+  run defaults write com.apple.dock mineffect -string "scale"
 
-# Change minimize/maximize window effect
-defaults write com.apple.dock mineffect -string "scale"
+  # Minimize windows into their application icon
+  run defaults write com.apple.dock minimize-to-application -bool true
 
-# Don't animate opening applications from the Dock
-defaults write com.apple.dock launchanim -bool false
+  # Remove the auto-hiding Dock delay
+  run defaults write com.apple.dock autohide-delay -float 0
 
-# Remove the auto-hiding Dock delay
-defaults write com.apple.Dock autohide-delay -float 0
+  # Speed up the animation when hiding/showing the Dock
+  run defaults write com.apple.dock autohide-time-modifier -float 0.15
 
-# Speed up the animation when hiding/showing the Dock
-defaults write com.apple.dock autohide-time-modifier -float 0.15
+  # Don't automatically rearrange Spaces based on most recent use
+  run defaults write com.apple.dock mru-spaces -bool false
 
-# Disable Dashboard (removed entirely in macOS 10.15+)
-if [[ $major_version -le 10 && $minor_version -le 14 ]]; then
-  defaults write com.apple.dashboard mcx-disabled -bool true
-  echo "  → Disabled Dashboard (Mojave)"
+  # Auto-hide the Dock
+  run defaults write com.apple.dock autohide -bool true
+
+  # Make Dock icons of hidden applications translucent
+  run defaults write com.apple.dock showhidden -bool true
+
+  # Don't show recent applications in Dock
+  run defaults write com.apple.dock show-recents -bool false
+
+  # Speed up Mission Control animations
+  run defaults write com.apple.dock expose-animation-duration -float 0.15
+
+  # Disable click-on-wallpaper to show desktop (macOS 14+)
+  run defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool false
 fi
-
-# Don't automatically rearrange spaces
-defaults write com.apple.dock mru-spaces -bool false
-
-# Auto-hide the Dock
-defaults write com.apple.dock autohide -bool true
-
-# Make Dock icons of hidden applications translucent
-defaults write com.apple.dock showhidden -bool true
-
-# Speed up Mission Control animations
-defaults write com.apple.dock expose-animation-duration -float 0.1
 
 #====================================================================
 # Screenshot preferences
 #====================================================================
-echo "📸 Configuring screenshot preferences..."
+if should_run "screenshot"; then
+  echo "Configuring screenshot preferences..."
 
-# Disable shadow in screenshots
-defaults write com.apple.screencapture disable-shadow -bool true
+  # Save screenshots in PNG format
+  run defaults write com.apple.screencapture type -string "png"
 
-# Save screenshots in PNG format
-defaults write com.apple.screencapture type -string "png"
+  # Save screenshots to Downloads folder
+  run defaults write com.apple.screencapture location -string "${HOME}/Downloads"
 
-# Save screenshots to Downloads folder
-defaults write com.apple.screencapture location -string "${HOME}/Downloads"
+  # Include date in screenshot filenames
+  run defaults write com.apple.screencapture include-date -bool true
 
-# Include date in screenshot filenames
-defaults write com.apple.screencapture include-date -bool true
+  # Disable shadow in screenshots
+  run defaults write com.apple.screencapture disable-shadow -bool true
+fi
 
 #====================================================================
 # Safari preferences
 #====================================================================
-echo "🧭 Configuring Safari preferences..."
+if should_run "safari"; then
+  echo "Configuring Safari preferences..."
 
-# Privacy: don't send search queries to Apple
-defaults write com.apple.Safari UniversalSearchEnabled -bool false
-defaults write com.apple.Safari SuppressSearchSuggestions -bool true
+  # Don't send search queries to Apple
+  run defaults write com.apple.Safari UniversalSearchEnabled -bool false
+  run defaults write com.apple.Safari SuppressSearchSuggestions -bool true
 
-# Enable Safari's debug menu
-defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+  # Make search banners default to Contains instead of Starts With
+  run defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
-# Make Safari's search banners default to Contains instead of Starts With
-defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
-
-# Set up Safari for development
-defaults write com.apple.Safari IncludeDevelopMenu -bool true
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-defaults write com.apple.Safari "com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled" -bool true
-defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
-
-# Enable "Do Not Track"
-defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+  # Enable the Develop menu
+  run defaults write com.apple.Safari IncludeDevelopMenu -bool true
+fi
 
 #====================================================================
-# Terminal & iTerm2 preferences
+# Terminal preferences
 #====================================================================
-echo "🖥️  Configuring Terminal preferences..."
+if should_run "terminal"; then
+  echo "Configuring Terminal preferences..."
 
-# Only use UTF-8 in Terminal.app
-defaults write com.apple.terminal StringEncodings -array 4
-
-# Use the Pro theme by default
-defaults write com.apple.Terminal "Default Window Settings" -string "Pro"
-defaults write com.apple.Terminal "Startup Window Settings" -string "Pro"
-
-# Enable Secure Keyboard Entry in Terminal.app
-defaults write com.apple.terminal SecureKeyboardEntry -bool true
-
-# Set terminal window size
-defaults write com.apple.Terminal "Window Settings" -dict-add "Pro" '{ColumnCount = 120; RowCount = 36; }'
+  # Enable Secure Keyboard Entry in Terminal.app
+  run defaults write com.apple.terminal SecureKeyboardEntry -bool true
+fi
 
 #====================================================================
 # Browser preferences
 #====================================================================
-echo "🌐 Configuring browser preferences..."
+if should_run "browser"; then
+  echo "Configuring browser preferences..."
 
-# Disable Swipe controls for Google Chrome
-defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
-defaults write com.google.Chrome.canary AppleEnableSwipeNavigateWithScrolls -bool false
+  # Disable swipe navigation in Chrome
+  run defaults write com.google.Chrome AppleEnableSwipeNavigateWithScrolls -bool false
 
-# Use the system print dialog in Chrome
-defaults write com.google.Chrome DisablePrintPreview -bool true
-defaults write com.google.Chrome.canary DisablePrintPreview -bool true
+  # Use the system print dialog in Chrome
+  run defaults write com.google.Chrome DisablePrintPreview -bool true
 
-# Expand the print dialog by default in Chrome
-defaults write com.google.Chrome PMPrintingExpandedStateForPrint2 -bool true
-defaults write com.google.Chrome.canary PMPrintingExpandedStateForPrint2 -bool true
-
-#====================================================================
-# SSD-specific tweaks
-#====================================================================
-echo "💾 Configuring SSD-specific settings..."
-
-# Disable local Time Machine snapshots if older than Catalina
-if [[ $major_version -lt 11 ]]; then
-  sudo tmutil disablelocal
+  # Expand the print dialog by default in Chrome
+  run defaults write com.google.Chrome PMPrintingExpandedStateForPrint2 -bool true
 fi
-
-# Disable the sudden motion sensor as it's not useful for SSDs
-sudo pmset -a sms 0
 
 #====================================================================
 # Activity Monitor preferences
 #====================================================================
-echo "📊 Configuring Activity Monitor preferences..."
+if should_run "activity"; then
+  echo "Configuring Activity Monitor preferences..."
 
-# Show the main window when launching Activity Monitor
-defaults write com.apple.ActivityMonitor OpenMainWindow -bool true
+  # Show the main window when launching
+  run defaults write com.apple.ActivityMonitor OpenMainWindow -bool true
 
-# Visualize CPU usage in the Activity Monitor Dock icon
-defaults write com.apple.ActivityMonitor IconType -int 5
+  # Visualize CPU usage in the Dock icon
+  run defaults write com.apple.ActivityMonitor IconType -int 5
 
-# Show all processes in Activity Monitor
-defaults write com.apple.ActivityMonitor ShowCategory -int 0
+  # Show all processes
+  run defaults write com.apple.ActivityMonitor ShowCategory -int 0
 
-# Sort Activity Monitor results by CPU usage
-defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
-defaults write com.apple.ActivityMonitor SortDirection -int 0
+  # Sort by CPU usage
+  run defaults write com.apple.ActivityMonitor SortColumn -string "CPUUsage"
+  run defaults write com.apple.ActivityMonitor SortDirection -int 0
 
-# Update Frequency: Often (2 sec)
-defaults write com.apple.ActivityMonitor UpdatePeriod -int 2
+  # Update frequency: every 2 seconds
+  run defaults write com.apple.ActivityMonitor UpdatePeriod -int 2
+fi
 
 #====================================================================
 # App Store preferences
 #====================================================================
-echo "🛒 Configuring App Store preferences..."
+if should_run "appstore"; then
+  echo "Configuring App Store preferences..."
 
-# Enable the WebKit Developer Tools in the Mac App Store
-defaults write com.apple.appstore WebKitDeveloperExtras -bool true
+  # Enable automatic updates
+  run defaults write com.apple.commerce AutoUpdate -bool true
 
-# Enable Debug Menu in the Mac App Store
-defaults write com.apple.appstore ShowDebugMenu -bool true
+  # Check for software updates daily
+  run defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 
-# Enable automatic updates
-defaults write com.apple.commerce AutoUpdate -bool true
+  # Download newly available updates in background
+  run defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1
 
-# Check for software updates daily, not just once per week
-defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+  # Install system data files and security updates
+  run defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
+fi
 
-# Download newly available updates in background
-defaults write com.apple.SoftwareUpdate AutomaticDownload -int 1
+#====================================================================
+# Privacy
+#====================================================================
+if should_run "privacy"; then
+  echo "Configuring privacy preferences..."
 
-# Install System data files & security updates
-defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
+  # Disable personalized ads
+  run defaults write com.apple.AdLib allowApplePersonalizedAdvertising -bool false
+fi
+
+#====================================================================
+# Bluetooth
+#====================================================================
+if should_run "bluetooth"; then
+  echo "Configuring Bluetooth preferences..."
+
+  # Improve Bluetooth audio quality (higher min bitpool)
+  run defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
+fi
+
+#====================================================================
+# Time Machine
+#====================================================================
+if should_run "timemachine"; then
+  echo "Configuring Time Machine preferences..."
+
+  # Don't prompt to use new disks for backup
+  run defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+fi
 
 #====================================================================
 # Restart affected applications
 #====================================================================
-echo "🔄 Restarting affected applications..."
+if [[ "$DRY_RUN" != true ]]; then
+  echo "Restarting affected applications..."
 
-for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
-  "Dock" "Finder" "Mail" "Messages" "Photos" "Safari" "SystemUIServer" "Terminal"; do
-  killall "${app}" &> /dev/null || true
-done
+  for app in "Activity Monitor" "cfprefsd" "Dock" "Finder" "Safari" "SystemUIServer"; do
+    killall "${app}" &> /dev/null || true
+  done
 
-echo "✅ Done! Some changes require a logout/restart to take effect."
+  # Verify key settings
+  echo ""
+  echo "Verifying key settings..."
+  verify_pass=0
+  verify_fail=0
 
+  check_setting() {
+    local domain="$1"
+    local key="$2"
+    local expected="$3"
+    local label="$4"
+    local actual
+    actual=$(defaults read "$domain" "$key" 2>/dev/null || echo "UNSET")
+    if [[ "$actual" == "$expected" ]]; then
+      echo "  OK: $label"
+      verify_pass=$((verify_pass + 1))
+    else
+      echo "  FAILED: $label (expected $expected, got $actual)"
+      verify_fail=$((verify_fail + 1))
+    fi
+  }
+
+  check_setting "com.apple.dock" "autohide" "1" "Dock autohide"
+  check_setting "com.apple.dock" "show-recents" "0" "Dock hide recents"
+  check_setting "com.apple.finder" "AppleShowAllFiles" "1" "Finder show hidden files"
+  check_setting "com.apple.finder" "ShowPathbar" "1" "Finder path bar"
+  check_setting "NSGlobalDomain" "ApplePressAndHoldEnabled" "0" "Key repeat enabled"
+  check_setting "com.apple.AdLib" "allowApplePersonalizedAdvertising" "0" "Personalized ads disabled"
+
+  echo ""
+  echo "Verified: $verify_pass passed, $verify_fail failed"
+fi
+
+echo "Done! Some changes require a logout/restart to take effect."
