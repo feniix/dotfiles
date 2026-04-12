@@ -105,10 +105,11 @@
 
 [url "git@github.com:spantree/"]
   insteadOf = https://github.com/spantree/
-[filter "lfs"]
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
 [gpg]
 	format = ssh
+
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
