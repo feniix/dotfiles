@@ -140,7 +140,6 @@ plugins=(
   # Essentials
   history-substring-search
   colored-man-pages
-  zsh-completions
 
   # Movement and navigation
   last-working-dir
@@ -381,6 +380,12 @@ alias k=kubectl
 # Terraform
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 # === ALIASES ===
+# eza (modern ls replacement)
+alias ls='eza --group-directories-first'
+alias ll='eza -l --group-directories-first --git'
+alias la='eza -la --group-directories-first --git'
+alias lt='eza --tree --level=2 --group-directories-first'
+
 alias mtr="mtr --curses"
 alias vim=nvim
 alias vi=nvim
@@ -442,6 +447,7 @@ eval "$(command direnv hook zsh)"
 # === PERSONAL SETTINGS ===
 export EDITOR=nvim
 export GPG_TTY=$(tty)
+export NOTION_MCP_AUTH_FILE="$HOME/.config/pi/secrets/notion-mcp-auth.json"
 
 # === POWERLEVEL10K ===
 # Source Powerlevel10k theme
