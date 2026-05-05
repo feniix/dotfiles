@@ -1,1 +1,9 @@
 command -v just &>/dev/null && eval "$(just --completions zsh)"
+
+# gcloud completion — resolved via mise so it tracks version upgrades automatically
+() {
+  local sdk_root
+  sdk_root=$(mise which gcloud 2>/dev/null) || return
+  local completion="${sdk_root:h:h}/completion.zsh.inc"
+  [[ -f $completion ]] && source $completion
+}
