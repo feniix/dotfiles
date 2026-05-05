@@ -108,6 +108,9 @@
 [gpg]
 	format = ssh
 
+[gpg "ssh"]
+	allowedSignersFile = ~/.config/git/allowed_signers
+
 [filter "lfs"]
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f

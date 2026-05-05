@@ -50,8 +50,9 @@ log_success "zshrc, zshenv, p10k.zsh"
 state_mkdir "$XDG_CONFIG_HOME/git"
 state_symlink "$DOTFILES_DIR/gitconfig" "$XDG_CONFIG_HOME/git/config"
 state_symlink "$DOTFILES_DIR/gitignore_global" "$XDG_CONFIG_HOME/git/ignore"
+state_symlink "$DOTFILES_DIR/git_allowed_signers" "$XDG_CONFIG_HOME/git/allowed_signers"
 state_delete_file "$HOME/.gitconfig"
-log_success "git config, git ignore"
+log_success "git config, git ignore, allowed signers"
 
 # ssh (doesn't support XDG — use Include)
 state_mkdir "$XDG_CONFIG_HOME/ssh"
