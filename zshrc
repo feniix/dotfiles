@@ -444,6 +444,11 @@ function rm_local_branches() {
 # === EXTERNAL TOOLS INTEGRATION ===
 eval "$(command direnv hook zsh)"
 
+# === BUN BIN PATH ===
+if [[ -d "$HOME/.cache/.bun/bin" ]]; then
+  export PATH="/Users/feniix/.cache/.bun/bin:$PATH"
+fi
+
 # === PERSONAL SETTINGS ===
 export EDITOR=nvim
 export GPG_TTY=$(tty)
