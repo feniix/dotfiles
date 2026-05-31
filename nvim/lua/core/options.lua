@@ -24,7 +24,10 @@ function M.setup()
 
   for _, dir in ipairs(directories) do
     if vim.fn.isdirectory(dir) == 0 then
-      vim.fn.mkdir(dir, 'p', 0700)
+      -- Lua has no octal literals — 0700 is decimal 700 (=0o1274), which
+      -- mkdir treats as a broken mode. Use string-form octal or just rely
+      -- on the default (0o755).
+      vim.fn.mkdir(dir, 'p', tonumber('700', 8))
     end
   end
 
