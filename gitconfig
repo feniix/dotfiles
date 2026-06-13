@@ -1,7 +1,7 @@
 [user]
   name = Sebastian Otaegui
   email = feniix@gmail.com
-	signingkey = ~/.ssh/id_ed25519
+  signingkey = ~/.ssh/id_ed25519
 
 [credential]
   helper = osxkeychain
@@ -105,11 +105,12 @@
 
 [url "git@github.com:spantree/"]
   insteadOf = https://github.com/spantree/
+
 [gpg]
-	format = ssh
+  format = ssh
 
 [gpg "ssh"]
-	allowedSignersFile = ~/.config/git/allowed_signers
+  allowedSignersFile = ~/.config/git/allowed_signers
 
 [filter "lfs"]
   clean = git-lfs clean -- %f
