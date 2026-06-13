@@ -471,3 +471,6 @@ fi
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+
+# bun completions
+[ -s "/Users/feniix/.bun/_bun" ] && source "/Users/feniix/.bun/_bun"
