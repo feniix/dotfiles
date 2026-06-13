@@ -1,0 +1,55 @@
+{
+  "providers": {
+    "ollama": {
+      "api": "openai-completions",
+      "apiKey": "ollama",
+      "baseUrl": "http://127.0.0.1:11434/v1",
+      "models": [
+        {
+          "_launch": true,
+          "contextWindow": 262144,
+          "id": "batiai/qwen3.6-35b:q6",
+          "input": [
+            "text"
+          ],
+          "reasoning": true
+        }
+      ]
+    },
+    "openai-codex": {
+      "modelOverrides": {
+        "gpt-5.3-codex-spark": {
+          "contextWindow": 128000,
+          "maxTokens": 128000
+        },
+        "gpt-5.5": {
+          "contextWindow": 400000,
+          "maxTokens": 128000
+        },
+        "gpt-5.4": {
+          "contextWindow": 1000000,
+          "maxTokens": 128000
+        },
+        "gpt-5.4-mini": {
+          "contextWindow": 400000,
+          "maxTokens": 128000
+        }
+      }
+    },
+    "minimax": {
+      "modelOverrides": {
+        "MiniMax-M2.7-highspeed": {
+          "contextWindow": 204800,
+          "maxTokens": 131072
+        },
+        "MiniMax-M3": {
+          "contextWindow": 1000000,
+          "input": [
+            "text",
+            "image"
+          ]
+        }
+      }
+    }
+  }
+}

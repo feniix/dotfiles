@@ -1,0 +1,49 @@
+{
+  "defaultModel": "MiniMax-M3",
+  "defaultProvider": "minimax",
+  "enabledModels": [
+    "openai-codex/gpt-5.3-codex-spark",
+    "openai-codex/gpt-5.5",
+    "openai-codex/gpt-5.4",
+    "openai-codex/gpt-5.4-mini",
+    "minimax/MiniMax-M2.7-highspeed",
+    "minimax/MiniMax-M3"
+  ],
+  "lastChangelogVersion": "0.79.3",
+  "packages": [
+    "npm:@feniix/pi-notion",
+    "npm:@feniix/pi-devtools",
+    "npm:@feniix/pi-exa",
+    "npm:@feniix/pi-ref-tools",
+    "npm:@feniix/pi-sequential-thinking",
+    "npm:@feniix/pi-specdocs",
+    "npm:pi-ask-user",
+    "npm:pi-subagents",
+    "npm:@ollama/pi-web-search",
+    "npm:@feniix/pi-statusline",
+    "npm:@feniix/pi-code-reasoning",
+    "npm:@alasano/pi-linear"
+  ],
+  "pi-code-reasoning": {
+    "maxBytes": 51200,
+    "maxLines": 2000
+  },
+  "pi-exa": {
+    "advancedEnabled": false,
+    "enabledTools": [],
+    "researchEnabled": false
+  },
+  "pi-ref-tools": {
+    "maxBytes": 51200,
+    "maxLines": 2000,
+    "protocolVersion": "2025-06-18",
+    "timeoutMs": 30000,
+    "url": "https://api.ref.tools/mcp"
+  },
+  "pi-sequential-thinking": {
+    "maxBytes": 51200,
+    "maxLines": 2000,
+    "storageDir": null
+  },
+  "defaultThinkingLevel": "high"
+}
