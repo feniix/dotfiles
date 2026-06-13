@@ -103,5 +103,11 @@ fi
 log_info "Setting up mise..."
 source "$SCRIPTS_DIR/setup/setup_mise.sh"
 
+# --- pi user config ---
+if [ -f "$SCRIPTS_DIR/setup/setup_pi.sh" ]; then
+  log_info "Linking pi user config..."
+  source "$SCRIPTS_DIR/setup/setup_pi.sh"
+fi
+
 echo ""
 log_success "Dotfiles setup complete! Restart your terminal to apply changes."
