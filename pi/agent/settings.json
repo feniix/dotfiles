@@ -1,6 +1,6 @@
 {
-  "defaultModel": "MiniMax-M3",
-  "defaultProvider": "minimax",
+  "defaultModel": "gpt-5.5",
+  "defaultProvider": "openai-codex",
   "enabledModels": [
     "openai-codex/gpt-5.3-codex-spark",
     "openai-codex/gpt-5.5",

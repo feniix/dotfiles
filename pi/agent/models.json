@@ -19,20 +19,51 @@
     "openai-codex": {
       "modelOverrides": {
         "gpt-5.3-codex-spark": {
-          "contextWindow": 128000,
-          "maxTokens": 128000
+          "contextWindow": 121600,
+          "maxTokens": 128000,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh"
+          }
         },
         "gpt-5.5": {
-          "contextWindow": 400000,
-          "maxTokens": 128000
+          "contextWindow": 258400,
+          "maxTokens": 128000,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh"
+          }
         },
         "gpt-5.4": {
-          "contextWindow": 1000000,
-          "maxTokens": 128000
+          "contextWindow": 258400,
+          "maxTokens": 128000,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": "low",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh"
+          }
         },
         "gpt-5.4-mini": {
-          "contextWindow": 400000,
-          "maxTokens": 128000
+          "contextWindow": 258400,
+          "maxTokens": 128000,
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": "minimal",
+            "low": "low",
+            "medium": "medium",
+            "high": "high"
+          }
         }
       }
     },
@@ -40,14 +71,24 @@
       "modelOverrides": {
         "MiniMax-M2.7-highspeed": {
           "contextWindow": 204800,
-          "maxTokens": 131072
+          "maxTokens": 65536,
+          "thinkingLevelMap": {
+            "off": null
+          }
         },
         "MiniMax-M3": {
-          "contextWindow": 1000000,
+          "contextWindow": 512000,
+          "maxTokens": 128000,
           "input": [
             "text",
             "image"
-          ]
+          ],
+          "thinkingLevelMap": {
+            "off": "disabled"
+          },
+          "compat": {
+            "forceAdaptiveThinking": true
+          }
         }
       }
     }
