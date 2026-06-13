@@ -17,6 +17,7 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 - `ssh_config` — multiplexing, GitHub multi-key setup, LAN/Tailscale hosts
 - `Brewfile` — Homebrew packages (source of truth for system tools)
 - `claude.source` — Claude Code wrapper functions for alternative providers
+- `pi/` — pi user config (settings.json, models.json, AGENTS.md, agents/, skills/, compound-engineering manifest). Symlinked into `~/.pi/agent/`. See `pi/README.md`.
 
 ## Architecture
 
@@ -40,6 +41,7 @@ scripts/
 │   ├── setup_homebrew.sh    # Homebrew + Brewfile
 │   ├── setup_mise.sh        # mise tools from config.toml
 │   ├── setup_github.sh      # GitHub CLI install + auth
+│   ├── setup_pi.sh          # pi user config symlinks (settings, models, agents, skills)
 │   └── setup_macos.sh       # macOS fonts, iTerm2, key bindings
 ├── macos/
 │   └── osx-defaults         # macOS system defaults (supports --dry-run, --only, --backup)

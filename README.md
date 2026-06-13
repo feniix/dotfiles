@@ -75,6 +75,7 @@ Uninstall reads the state manifest in reverse order, restores backed-up files, r
 ```bash
 ./scripts/setup/setup_zsh.sh        # Oh-My-Zsh + verify p10k/zsh-completions
 ./scripts/setup/setup_nvim.sh       # Neovim symlink + plugin install
+./scripts/setup/setup_pi.sh         # pi user config symlinks (settings, models, agents, skills)
 ./scripts/setup/setup_homebrew.sh   # Homebrew + Brewfile
 ./scripts/setup/setup_mise.sh       # mise tools from config.toml
 ./scripts/setup/setup_github.sh     # GitHub CLI + auth
