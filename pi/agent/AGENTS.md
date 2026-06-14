@@ -11,3 +11,7 @@ Install with:
   pi install npm:pi-subagents
   pi install npm:pi-ask-user
 <!-- END COMPOUND PI TOOL MAP -->
+
+## Git identity safety
+
+Do not change or override `git user.name` or `git user.email` without explicit user approval. This includes persistent config changes (`git config user.name ...`, `git config user.email ...`) and command-local overrides (`git -c user.name=...`, `git -c user.email=...`). Use the existing repository/user Git identity by default.
