@@ -15,7 +15,8 @@
   br = branch
   co = checkout
   d = diff
-  lg = log
+  dhead = diff HEAD --
+  dlast = diff HEAD~1 --
   l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
   ld = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit -p
   append = commit --amend -C HEAD
