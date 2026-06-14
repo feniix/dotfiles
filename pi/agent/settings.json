@@ -1,6 +1,6 @@
 {
-  "defaultModel": "gpt-5.5",
-  "defaultProvider": "openai-codex",
+  "defaultModel": "MiniMax-M3",
+  "defaultProvider": "minimax",
   "compaction": {
     "reserveTokens": 16384,
     "keepRecentTokens": 24000
