@@ -13,7 +13,7 @@
     "minimax/MiniMax-M2.7-highspeed",
     "minimax/MiniMax-M3"
   ],
-  "lastChangelogVersion": "0.79.3",
+  "lastChangelogVersion": "0.80.3",
   "packages": [
     "npm:@feniix/pi-notion",
     "npm:@feniix/pi-devtools",
@@ -26,7 +26,8 @@
     "npm:@ollama/pi-web-search",
     "npm:@feniix/pi-statusline",
     "npm:@feniix/pi-code-reasoning",
-    "npm:@alasano/pi-linear"
+    "npm:@alasano/pi-linear",
+    "git:github.com/EveryInc/compound-engineering-plugin"
   ],
   "pi-code-reasoning": {
     "maxBytes": 51200,
@@ -49,5 +50,6 @@
     "maxLines": 2000,
     "storageDir": null
   },
-  "defaultThinkingLevel": "high"
+  "defaultThinkingLevel": "high",
+  "theme": "dark"
 }
