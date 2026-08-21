@@ -84,3 +84,9 @@ Uninstall reads the state manifest in reverse order, restores backed-up files, r
 ./scripts/nvim/check_nvim.sh        # Neovim structure + plugin check
 ./scripts/ssh/manage_ssh_keys.sh    # SSH key permissions, backup, passphrase
 ```
+
+## License
+
+Code authored for this repository is available under the
+[MIT License](LICENSE). Vendored third-party material keeps its original
+license; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
