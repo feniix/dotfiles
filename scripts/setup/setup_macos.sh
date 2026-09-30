@@ -61,6 +61,7 @@ if [ ! -f "$HOME/Library/KeyBindings/DefaultKeyBinding.dict" ]; then
     "~$\UF703" = "moveWordRightAndModifySelection:";        /* Shift + Option + Right */
 }
 EOF
+  state_finish_file "$HOME/Library/KeyBindings/DefaultKeyBinding.dict"
   log_success "Created macOS DefaultKeyBinding.dict"
 fi
 
@@ -91,4 +92,4 @@ if [ -f "$DOTFILES_DIR/scripts/macos/osx-defaults" ]; then
   fi
 fi
 
-log_success "macOS-specific setup complete!" 
+log_success "macOS-specific setup complete!"

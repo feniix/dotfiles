@@ -86,7 +86,7 @@ run() {
 
 SKILLS_SRC="$DOTFILES_DIR/agents/skills"
 PROMPTS_SRC="$DOTFILES_DIR/agents/prompts"
-CONFLICTS_DIR="$STATE_BACKUPS/agent-skills-conflicts/$(date -u +%Y%m%dT%H%M%SZ)"
+CONFLICTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts/agent-skills/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 CONFLICTS=0
 MOVED=0
 LINKED=0
@@ -252,6 +252,7 @@ add_pi_exclusion() {
     state_write_file "$f"
     jq --indent 2 --argjson want "$PI_EXCLUDES" '.skills = ((.skills // []) + $want | unique)' "$f" > "$tmp"
     mv "$tmp" "$f"
+    state_finish_file "$f"
   fi
 }
 if command -v jq >/dev/null 2>&1; then

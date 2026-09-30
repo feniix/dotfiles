@@ -65,6 +65,7 @@ cat > "$HOME/.ssh/config" <<'EOF'
 Include ~/.config/ssh/config
 EOF
 chmod 600 "$HOME/.ssh/config"
+state_finish_file "$HOME/.ssh/config"
 log_success "ssh config"
 
 # vim
