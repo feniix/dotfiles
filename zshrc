@@ -390,7 +390,7 @@ alias mtr="mtr --curses"
 alias vim=nvim
 alias vi=nvim
 alias t="top -ocpu -R -F -s 2 -n30"
-alias gist='gist -p'
+alias gist='gh gist create'
 alias h='fc -li 1'
 alias hs='history | grep'
 
@@ -494,3 +494,4 @@ alias claude-p="CLAUDE_CONFIG_DIR=/Users/feniix/.claude-personal claude"
 
 # bun completions
 [ -s "/Users/feniix/.bun/_bun" ] && source "/Users/feniix/.bun/_bun"
+
