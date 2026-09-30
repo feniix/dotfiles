@@ -57,6 +57,7 @@ Uninstall reads the state manifest in reverse order, restores backed-up files, r
 │   ├── macos/           # osx-defaults (system preferences)
 │   ├── nvim/            # check_nvim.sh (structure + plugin check)
 │   └── ssh/             # manage_ssh_keys.sh
+├── agents/              # Shared agent skills + prompts (pi, Codex, Claude Code)
 ├── nvim/                # Neovim config (Lua, lazy.nvim)
 ├── iterm2/              # iTerm2 preferences
 ├── Brewfile             # Homebrew packages
@@ -75,7 +76,9 @@ Uninstall reads the state manifest in reverse order, restores backed-up files, r
 ```bash
 ./scripts/setup/setup_zsh.sh        # Oh-My-Zsh + verify p10k/zsh-completions
 ./scripts/setup/setup_nvim.sh       # Neovim symlink + plugin install
-./scripts/setup/setup_pi.sh         # pi user config symlinks (settings, models, agents, skills)
+./scripts/setup/setup_pi.sh         # pi user config symlinks (settings, models, agents)
+./scripts/setup/setup_agent_skills.sh  # agents/skills + agents/prompts linked per item into pi, Codex, Claude Code (--dry-run)
+./scripts/agents/vendor_skills.sh     # pull third-party skill bundles (agents/skills.vendor) into agents/skills; --dry-run, --frozen
 ./scripts/setup/setup_homebrew.sh   # Homebrew + Brewfile
 ./scripts/setup/setup_mise.sh       # mise tools from config.toml
 ./scripts/setup/setup_github.sh     # GitHub CLI + auth

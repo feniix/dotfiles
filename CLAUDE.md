@@ -17,7 +17,8 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 - `ssh_config` — multiplexing, GitHub multi-key setup, LAN/Tailscale hosts
 - `Brewfile` — Homebrew packages (source of truth for system tools)
 - `claude.source` — Claude Code wrapper functions for alternative providers
-- `pi/` — pi user config (settings.json, models.json, AGENTS.md, agents/, skills/, compound-engineering manifest). Symlinked into `~/.pi/agent/`. See `pi/README.md`.
+- `pi/` — pi user config (settings.json, models.json, AGENTS.md, agents/, compound-engineering manifest). Symlinked into `~/.pi/agent/`. See `pi/README.md`.
+- `agents/` — tool-neutral skills and prompts shared by pi, Codex and Claude Code (skills/, prompts/, skills.vendor, skills.lock). Linked item-by-item into each tool by `scripts/setup/setup_agent_skills.sh`.
 
 ## Architecture
 
@@ -41,7 +42,8 @@ scripts/
 │   ├── setup_homebrew.sh    # Homebrew + Brewfile
 │   ├── setup_mise.sh        # mise tools from config.toml
 │   ├── setup_github.sh      # GitHub CLI install + auth
-│   ├── setup_pi.sh          # pi user config symlinks (settings, models, agents, skills)
+│   ├── setup_pi.sh          # pi user config symlinks (settings, models, agents)
+│   ├── setup_agent_skills.sh # agents/skills + agents/prompts linked per item into pi, Codex, all Claude profiles
 │   └── setup_macos.sh       # macOS fonts, iTerm2, key bindings
 ├── macos/
 │   └── osx-defaults         # macOS system defaults (supports --dry-run, --only, --backup)
@@ -56,3 +58,10 @@ scripts/
 - `brew bundle --file=Brewfile` — install/update Homebrew packages
 - `brew bundle dump --file=Brewfile --force` — update Brewfile from current state
 - `mise install` — install all tools from `~/.config/mise/config.toml`
+
+## Agent skills
+
+- `agents/skills/<name>/` and `agents/prompts/<name>.md` are the single copy of user-level skills and prompts/commands for pi (`~/.pi/agent/`), Codex (`~/.agents/skills`, `~/.codex/prompts`) and every Claude Code profile (`~/.claude*/skills`, `~/.claude*/commands`).
+- Each tool keeps a real directory whose entries are symlinks to the canonical items (per skill, not per directory). `scripts/setup/setup_agent_skills.sh` creates the links and also absorbs anything a tool installed into its own directory: run it after installing a skill anywhere, then commit. `--dry-run` shows the plan.
+- Third-party skill bundles are vendored, not installed as Claude plugins: declare them in `agents/skills.vendor`, run `scripts/agents/vendor_skills.sh`, commit. `agents/skills.lock` pins the upstream commits. Vendored dirs are overwritten on each run — put local changes in the manifest (`rename`/`skip`), not in the files.
+- Claude plugins are only for things dotfiles cannot express for the other tools: LSP servers, hooks, MCP servers, Claude-format commands/agents.

@@ -1,6 +1,6 @@
 {
-  "defaultModel": "MiniMax-M3",
-  "defaultProvider": "minimax",
+  "defaultModel": "gpt-5.6-sol",
+  "defaultProvider": "openai-codex",
   "compaction": {
     "reserveTokens": 16384,
     "keepRecentTokens": 24000
@@ -11,23 +11,22 @@
     "openai-codex/gpt-5.4",
     "openai-codex/gpt-5.4-mini",
     "minimax/MiniMax-M2.7-highspeed",
-    "minimax/MiniMax-M3"
+    "minimax/MiniMax-M3",
+    "openai-codex/gpt-5.6-sol",
+    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-5.6-terra"
   ],
-  "lastChangelogVersion": "0.80.3",
+  "lastChangelogVersion": "0.84.1",
   "packages": [
-    "npm:@feniix/pi-notion",
-    "npm:@feniix/pi-devtools",
-    "npm:@feniix/pi-exa",
-    "npm:@feniix/pi-ref-tools",
-    "npm:@feniix/pi-sequential-thinking",
-    "npm:@feniix/pi-specdocs",
     "npm:pi-ask-user",
     "npm:pi-subagents",
-    "npm:@ollama/pi-web-search",
-    "npm:@feniix/pi-statusline",
-    "npm:@feniix/pi-code-reasoning",
     "npm:@alasano/pi-linear",
-    "git:github.com/EveryInc/compound-engineering-plugin"
+    "npm:@feniix/pi-exa",
+    "npm:@feniix/pi-devtools",
+    "npm:@feniix/pi-ref-tools",
+    "npm:@feniix/pi-statusline",
+    "npm:pi-codex-tools",
+    "npm:@ff-labs/pi-fff"
   ],
   "pi-code-reasoning": {
     "maxBytes": 51200,
@@ -51,5 +50,9 @@
     "storageDir": null
   },
   "defaultThinkingLevel": "high",
-  "theme": "dark"
+  "theme": "dark",
+  "skills": [
+    "!**/.agents/skills/**",
+    "!**/synced/**"
+  ]
 }

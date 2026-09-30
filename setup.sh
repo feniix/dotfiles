@@ -109,5 +109,11 @@ if [ -f "$SCRIPTS_DIR/setup/setup_pi.sh" ]; then
   source "$SCRIPTS_DIR/setup/setup_pi.sh"
 fi
 
+# --- shared agent skills + prompts (pi, Codex, Claude Code profiles) ---
+if [ -f "$SCRIPTS_DIR/setup/setup_agent_skills.sh" ]; then
+  log_info "Linking shared agent skills and prompts..."
+  source "$SCRIPTS_DIR/setup/setup_agent_skills.sh"
+fi
+
 echo ""
 log_success "Dotfiles setup complete! Restart your terminal to apply changes."

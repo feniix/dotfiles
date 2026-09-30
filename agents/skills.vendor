@@ -1,0 +1,39 @@
+# Third-party skill bundles vendored into agents/skills.
+# Applied by scripts/agents/vendor_skills.sh; pins recorded in skills.lock.
+#
+# Directives (whitespace separated, # comments allowed):
+#   source <id> <git-url> <ref>          a repo to pull from
+#   skill  <id> <path-glob-in-repo>       skill dirs to copy (glob, may match many)
+#   skip   <id> <skill-name>              never copy this skill from that source
+#   rename <id> <old-name> <new-name>     copy under a new name; rewrite the
+#                                         frontmatter name and /old or `old`
+#                                         references inside that source's skills
+#
+# A skill dir is copied verbatim (minus .DS_Store) and REPLACES the existing
+# dir of that name in agents/skills. Local edits to vendored skills are
+# therefore lost on the next run: express them as rename/skip here, or as a
+# patch in scripts/agents/vendor_skills.sh.
+
+# Matt Pocock's engineering skills (was the mattpocock-skills Claude plugin)
+source mattpocock https://github.com/mattpocock/skills.git main
+skill  mattpocock skills/engineering/*
+skill  mattpocock skills/productivity/*
+skill  mattpocock skills/in-progress/*
+skill  mattpocock skills/misc/*
+# `teach` in agents/skills is the Entire skill; keep Matt's out of the way
+skip   mattpocock teach
+# `code-review` would shadow Claude Code's built-in /code-review (ultra mode)
+rename mattpocock code-review mp-code-review
+
+# Anthropic's official single-skill plugins
+source anthropic https://github.com/anthropics/claude-plugins-official.git main
+skill  anthropic plugins/frontend-design/skills/frontend-design
+skill  anthropic plugins/skill-creator/skills/skill-creator
+
+# TypeSafe
+source typesafe https://github.com/typesafe-ai/skills.git main
+skill  typesafe skills/typesafe-ai
+
+# i-have-adhd
+source adhd https://github.com/ayghri/i-have-adhd.git main
+skill  adhd skills/i-have-adhd

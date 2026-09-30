@@ -9,7 +9,6 @@
 #   agent/models.json
 #   agent/AGENTS.md
 #   agent/agents/                (directory — written to by `pi install`)
-#   agent/skills/                (directory — written to by `pi install`)
 #   agent/compound-engineering/install-manifest.json
 #
 # What stays as a real file/dir in ~/.pi:
@@ -22,9 +21,11 @@
 #   ~/.pi/models/                (extension-managed)
 #   ~/.pi/pi-session-manager/    (extension-managed)
 #
+# Skills and prompts are NOT handled here: agents/skills and agents/prompts
+# are linked item-by-item into ~/.pi/agent/ by setup_agent_skills.sh.
+#
 # Trade-off: when you run `pi install` or `pi update`, files under
-# agent/agents/ and agent/skills/ change inside the dotfiles repo.
-# Commit those changes after each install/update.
+# agent/agents/ change inside the dotfiles repo. Commit those changes.
 
 set -e
 
@@ -47,9 +48,8 @@ log_info "Linking pi user config from $PI_DOTFILES_DIR to $PI_AGENT_DIR..."
 state_mkdir "$HOME/.pi"
 state_mkdir "$PI_AGENT_DIR"
 
-# agent/agents and agent/skills are always real dirs in the dotfiles
-# (we copied content into them above), and pi will write into them
-# through the symlinks. No separate dir create needed in ~/.pi.
+# agent/agents is a real dir in the dotfiles and pi writes into it
+# through the symlink. No separate dir create needed in ~/.pi.
 
 # compound-engineering/ is a subdir under agent/. On a fresh install it
 # may not exist yet, but we need the parent before symlinking the
@@ -74,16 +74,12 @@ state_symlink "$PI_DOTFILES_DIR/agent/compound-engineering/install-manifest.json
               "$PI_AGENT_DIR/compound-engineering/install-manifest.json"
 log_success "agent/compound-engineering/install-manifest.json"
 
-# --- Agent and skill directories ---
-# These are symlinked as a whole. pi will write *.md files into
-# agent/agents/ and skill dirs into agent/skills/ on `pi install`,
-# which through the symlink lands in the dotfiles repo.
+# --- Agents directory ---
+# Symlinked as a whole. pi writes *.md files into agent/agents/ on
+# `pi install`, which through the symlink lands in the dotfiles repo.
 state_symlink "$PI_DOTFILES_DIR/agent/agents" \
               "$PI_AGENT_DIR/agents"
 log_success "agent/agents/"
 
-state_symlink "$PI_DOTFILES_DIR/agent/skills" \
-              "$PI_AGENT_DIR/skills"
-log_success "agent/skills/"
 
 log_success "pi user config linked. Run 'pi' to verify."
