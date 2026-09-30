@@ -104,9 +104,9 @@ checkout_source() {
   local id="$1" url="${SRC_URL[$1]}" ref="${SRC_REF[$1]}" dir="$CACHE/$1" want
   if [[ ! -d "$dir/.git" ]]; then
     log_info "cloning $url"
-    git clone --quiet "$url" "$dir"
+    git clone --quiet "$url" "$dir" || return 1
   else
-    git -C "$dir" fetch --quiet --tags origin
+    git -C "$dir" fetch --quiet --tags origin || return 1
   fi
   if [[ "$FROZEN" == 1 && -n "${LOCKED[$id]:-}" ]]; then
     want="${LOCKED[$id]}"
@@ -114,8 +114,8 @@ checkout_source() {
     want="$(git -C "$dir" rev-parse --verify --quiet "origin/$ref" || git -C "$dir" rev-parse --verify --quiet "$ref")" \
       || { log_warning "$id: cannot resolve ref '$ref'"; return 1; }
   fi
-  git -C "$dir" checkout --quiet --detach "$want"
-  RESOLVED[$id]="$(git -C "$dir" rev-parse HEAD)"
+  git -C "$dir" checkout --quiet --detach "$want" || return 1
+  RESOLVED[$id]="$(git -C "$dir" rev-parse HEAD)" || return 1
 }
 
 # --- Rewrite references after a rename --------------------------------------
@@ -142,7 +142,7 @@ CHANGED=0
 for id in "${SRC_IDS[@]}"; do
   [[ -n "$ONLY" && "$ONLY" != "$id" ]] && continue
   log_info "source $id (${SRC_URL[$id]} @ ${SRC_REF[$id]})"
-  checkout_source "$id" || continue
+  checkout_source "$id" || exit 1
   dir="$CACHE/$id"
   short="${RESOLVED[$id]:0:12}"
   [[ -n "${LOCKED[$id]:-}" && "${LOCKED[$id]}" != "${RESOLVED[$id]}" ]] \
@@ -156,7 +156,12 @@ for id in "${SRC_IDS[@]}"; do
       picked+=("$p")
     done
   done
-  [[ ${#picked[@]} -eq 0 ]] && { log_warning "  no skills matched for $id"; continue; }
+  if [[ ${#picked[@]} -eq 0 && -n "${SRC_GLOBS[$id]:-}" ]]; then
+    log_warning "  no skills matched for $id; refusing to change ownership or the lock"
+    exit 1
+  fi
+  # No skill directives (or skipping all matches below) explicitly selects
+  # nothing. Process that empty result so old owned entries are removed.
 
   # Stage this source's skills in a temp dir, apply renames there, then diff the
   # staged result against the canonical dir. Comparing against raw upstream would

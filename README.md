@@ -75,10 +75,14 @@ globally.
 Skill reconciliation preserves original tool-side entries for uninstall;
 conflicting copies also remain available in the conflicts directory.
 Skill setup's `--dry-run` does not create installation state.
+Vendoring fails without replacing the lock when configured globs match no
+skills. To intentionally remove all of a source's skills, remove its `skill`
+directives or explicitly skip every match.
 
 ## Regression tests
 
-Requires Python 3, Neovim, jq, and macOS's Bash/Zsh. The AWS credential-selection
+Requires Python 3, Neovim, jq, and macOS's Bash/Zsh. Vendoring tests
+additionally require Bash 4+ (Homebrew). The AWS credential-selection
 test additionally runs when the AWS CLI is available.
 
 ```bash
