@@ -240,36 +240,17 @@ in
         setopt HIST_NO_STORE
         setopt HIST_FCNTL_LOCK
 
-        # === Async history sharing ===
+        # === History sharing (SHARE_HISTORY handles automatic imports) ===
         autoload -U add-zsh-hook
 
         reload_shared_history() {
-          timeout 2s fc -RI 2>/dev/null || {
-            echo "History reload timed out - skipping"
-            return 1
-          }
+          [[ -r "$HISTFILE" ]] || return 0
+          builtin fc -RI "$HISTFILE"
         }
-
-        typeset -g _async_history_counter=0
 
         _async_history_reload() {
-          if (( ''${+functions[async_start_worker]} )); then
-            async_start_worker history_worker -u
-            async_job history_worker timeout 1s fc -RI
-          else
-            timeout 1s fc -RI 2>/dev/null || true
-          fi
+          reload_shared_history
         }
-
-        _periodic_async_history_reload() {
-          (( _async_history_counter++ ))
-          if (( _async_history_counter >= 5 )); then
-            _async_history_reload
-            _async_history_counter=0
-          fi
-        }
-
-        add-zsh-hook precmd _periodic_async_history_reload
 
         autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
         zle -N up-line-or-beginning-search

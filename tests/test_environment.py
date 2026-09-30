@@ -68,6 +68,28 @@ class EnvironmentTests(Sandbox):
         self.assertEqual(result.stdout.splitlines(),
                          ["/explicit/credentials", "/explicit/config"])
 
+    def test_history_reload_updates_current_shell(self):
+        source = (REPO / "zshrc").read_text()
+        block = source.split("reload_shared_history() {", 1)[1].split(
+            "# History search functions", 1
+        )[0]
+        history = self.home / "history"
+        self.command([
+            "/bin/zsh", "-dfc",
+            'autoload -Uz add-zsh-hook; '
+            f'export HISTFILE="{history}"; HISTSIZE=1000; SAVEHIST=1000; '
+            "reload_shared_history() {" + block +
+            'print -r -- "echo shared-marker" > "$HISTFILE"; '
+            'reload_shared_history; fc -l -1',
+        ])
+        result = self.command([
+            "/bin/zsh", "-dfc",
+            'autoload -Uz add-zsh-hook; '
+            f'export HISTFILE="{history}"; HISTSIZE=1000; SAVEHIST=1000; '
+            "reload_shared_history() {" + block +
+            'reload_shared_history; fc -l -1',
+        ])
+        self.assertIn("shared-marker", result.stdout)
 
     def test_setup_prompt_link_matches_shell_source_path(self):
         setup = (REPO / "setup.sh").read_text().split("# --- Homebrew", 1)[0]

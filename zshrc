@@ -242,45 +242,16 @@ setopt HIST_FCNTL_LOCK        # Use fcntl for better concurrent access to histor
 # Enhanced history sharing - reload on demand, not every prompt
 autoload -U add-zsh-hook
 
-# Function to reload history when needed - made safer to prevent hanging
+# Explicit imports must run in this shell; a subprocess cannot update its history.
 reload_shared_history() {
-  # Use timeout to prevent hanging
-  timeout 2s fc -RI 2>/dev/null || {
-    echo "History reload timed out - skipping"
-    return 1
-  }
+  [[ -r "$HISTFILE" ]] || return 0
+  builtin fc -RI "$HISTFILE"
 }
 
-# Async history sharing using Oh-My-Zsh async infrastructure
-# This leverages the experimental async functionality introduced in April 2024
-
-# Counter for periodic async history reloads
-typeset -g _async_history_counter=0
-
-# Async history reload function - uses Oh-My-Zsh's async system
+# Compatibility alias: SHARE_HISTORY already handles automatic imports.
 _async_history_reload() {
-  # Use Oh-My-Zsh's async system if available
-  if (( ${+functions[async_start_worker]} )); then
-    # Oh-My-Zsh async system is available
-    async_start_worker history_worker -u
-    async_job history_worker timeout 1s fc -RI
-  else
-    # Fallback to simple timeout (should not cause prompt corruption with new async system)
-    timeout 1s fc -RI 2>/dev/null || true
-  fi
+  reload_shared_history
 }
-
-# Periodic async history check
-_periodic_async_history_reload() {
-  (( _async_history_counter++ ))
-  if (( _async_history_counter >= 5 )); then
-    _async_history_reload
-    _async_history_counter=0
-  fi
-}
-
-# Add to precmd hook - should work safely with Oh-My-Zsh async system
-add-zsh-hook precmd _periodic_async_history_reload
 
 # Manual reload alias for immediate sharing
 alias hr='reload_shared_history'
@@ -494,4 +465,3 @@ alias claude-p="CLAUDE_CONFIG_DIR=/Users/feniix/.claude-personal claude"
 
 # bun completions
 [ -s "/Users/feniix/.bun/_bun" ] && source "/Users/feniix/.bun/_bun"
-
