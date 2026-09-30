@@ -9,7 +9,6 @@
 #   agent/models.json
 #   agent/AGENTS.md
 #   agent/agents/                (directory — written to by `pi install`)
-#   agent/compound-engineering/install-manifest.json
 #
 # What stays as a real file/dir in ~/.pi:
 #   ~/.pi/                       (own git repo, managed by extensions)
@@ -51,11 +50,6 @@ state_mkdir "$PI_AGENT_DIR"
 # agent/agents is a real dir in the dotfiles and pi writes into it
 # through the symlink. No separate dir create needed in ~/.pi.
 
-# compound-engineering/ is a subdir under agent/. On a fresh install it
-# may not exist yet, but we need the parent before symlinking the
-# install-manifest.json file inside it.
-state_mkdir "$PI_AGENT_DIR/compound-engineering"
-
 # --- Top-level files ---
 state_symlink "$PI_DOTFILES_DIR/agent/settings.json" \
               "$PI_AGENT_DIR/settings.json"
@@ -68,11 +62,6 @@ log_success "agent/models.json"
 state_symlink "$PI_DOTFILES_DIR/agent/AGENTS.md" \
               "$PI_AGENT_DIR/AGENTS.md"
 log_success "agent/AGENTS.md"
-
-# --- Compound engineering install manifest ---
-state_symlink "$PI_DOTFILES_DIR/agent/compound-engineering/install-manifest.json" \
-              "$PI_AGENT_DIR/compound-engineering/install-manifest.json"
-log_success "agent/compound-engineering/install-manifest.json"
 
 # --- Agents directory ---
 # Symlinked as a whole. pi writes *.md files into agent/agents/ on
