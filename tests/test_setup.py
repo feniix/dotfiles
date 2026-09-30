@@ -1,5 +1,6 @@
 """Standalone setup entry points run against temporary homes and CLI mocks."""
 
+import json
 import shutil
 
 from test_rollback import REPO, Sandbox
@@ -45,3 +46,56 @@ class SetupTests(Sandbox):
             "/bin/bash", str(REPO / "scripts/setup/setup_zsh.sh"), "--check-only",
         ])
         self.assertFalse((self.home / "data").exists())
+
+    def github_setup(self):
+        self.env["GH_CONFIG_DIR"] = str(self.home / "gh")
+        config = self.home / "gh/config.yml"
+        self.mock("brew", 'case "$1" in list) exit 0;; *) exit 0;; esac\n')
+        self.mock("gh", f"""exec python3 - "$@" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path({str(config)!r})
+args = sys.argv[1:]
+if args[0] == '--version':
+    print('gh fixture')
+elif args[0] == 'config':
+    data = json.loads(path.read_text()) if path.exists() and path.read_text().strip() else {{}}
+    data[args[2]] = args[3]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data))
+elif args[0] != 'auth':
+    raise RuntimeError(args)
+PY
+""")
+        return config
+
+    def test_github_config_restores_existing_values(self):
+        config = self.github_setup()
+        config.parent.mkdir()
+        original = '{"editor":"original","pager":"less","other":"keep"}'
+        config.write_text(original)
+        for _ in range(2):
+            self.command(["/bin/bash", str(REPO / "scripts/setup/setup_github.sh")])
+        self.assertEqual(json.loads(config.read_text())["pager"], "")
+        self.uninstall()
+        self.assertEqual(config.read_text(), original)
+
+    def test_github_config_removes_created_file_but_preserves_user_edits(self):
+        config = self.github_setup()
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_github.sh")])
+        config.write_text('{"editor":"user replacement"}')
+        self.uninstall()
+        self.assertEqual(json.loads(config.read_text())["editor"], "user replacement")
+        config.unlink()
+        self.uninstall()
+        self.assertFalse(config.exists())
+
+    def test_github_config_detaches_and_restores_original_symlink(self):
+        config = self.github_setup()
+        config.parent.mkdir()
+        target = self.home / "original-gh-config"
+        target.write_text('{"editor":"original"}')
+        config.symlink_to(target)
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_github.sh")])
+        self.assertEqual(target.read_text(), '{"editor":"original"}')
+        self.uninstall()
+        self.assertTrue(config.is_symlink())

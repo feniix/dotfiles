@@ -34,11 +34,24 @@ else
   log_success "GitHub CLI installed"
 fi
 
-# Configure editor
+# Track the configuration file, not just its new values. Stage a copy before
+# detaching an original symlink so gh never writes through to its target.
+GH_SETTINGS_DIR="${GH_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/gh}"
+GH_SETTINGS_FILE="$GH_SETTINGS_DIR/config.yml"
+state_mkdir "$GH_SETTINGS_DIR"
+GH_SETTINGS_STAGE="$(mktemp "$STATE_DIR/gh-config.XXXXXX")"
+if [[ -f "$GH_SETTINGS_FILE" ]]; then
+  cp "$GH_SETTINGS_FILE" "$GH_SETTINGS_STAGE"
+fi
+state_write_file "$GH_SETTINGS_FILE"
+cp "$GH_SETTINGS_STAGE" "$GH_SETTINGS_FILE"
+rm "$GH_SETTINGS_STAGE"
+state_finish_file "$GH_SETTINGS_FILE"
 gh config set editor nvim
-state_record "GH_CONFIG" "editor" "nvim"
-gh config set pager disabled
-state_record "GH_CONFIG" "pager" "disabled"
+state_finish_file "$GH_SETTINGS_FILE"
+# An empty pager disables paging; "disabled" would be an executable name.
+gh config set pager ""
+state_finish_file "$GH_SETTINGS_FILE"
 
 # Authenticate if needed
 if gh auth status &>/dev/null; then
