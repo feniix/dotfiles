@@ -116,7 +116,7 @@ end
 -- Run terraform commands in terminal
 function M.run_terraform_command(cmd)
   local current_dir = vim.fn.expand('%:p:h')
-  local full_cmd = string.format('cd %s && terraform %s', current_dir, cmd)
+  local full_cmd = string.format('cd %s && terraform %s', vim.fn.shellescape(current_dir), cmd)
   
   -- Open terminal and run command
   vim.cmd('botright split')
@@ -127,18 +127,11 @@ end
 
 -- Format current Terraform file
 function M.format_terraform()
-  local file = vim.fn.expand('%')
   if vim.fn.executable('terraform') == 1 then
-    local result = vim.fn.system('terraform fmt -write=false ' .. vim.fn.shellescape(file))
-    if vim.v.shell_error == 0 then
-      -- Apply the formatting result
-      local lines = vim.split(result, '\n')
-      if #lines > 1 then
-        vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
-        vim.notify("Terraform file formatted", vim.log.levels.INFO)
-      end
-    else
-      vim.notify("Terraform format failed: " .. result, vim.log.levels.ERROR)
+    if require('plugins.config.format').buffer(
+      { 'terraform', 'fmt', '-no-color', '-' }, 'Terraform'
+    ) then
+      vim.notify("Terraform file formatted", vim.log.levels.INFO)
     end
   else
     vim.notify("terraform command not found", vim.log.levels.ERROR)
