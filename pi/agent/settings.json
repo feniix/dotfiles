@@ -1,32 +1,37 @@
 {
-  "defaultModel": "gpt-5.6-sol",
-  "defaultProvider": "openai-codex",
   "compaction": {
-    "reserveTokens": 16384,
-    "keepRecentTokens": 24000
+    "keepRecentTokens": 24000,
+    "reserveTokens": 16384
   },
+  "defaultModel": "gpt-6.1-sol",
+  "defaultProvider": "openai-codex",
+  "defaultThinkingLevel": "medium",
   "enabledModels": [
     "openai-codex/gpt-5.3-codex-spark",
     "openai-codex/gpt-5.5",
-    "openai-codex/gpt-5.4",
-    "openai-codex/gpt-5.4-mini",
-    "minimax/MiniMax-M2.7-highspeed",
-    "minimax/MiniMax-M3",
     "openai-codex/gpt-5.6-sol",
     "openai-codex/gpt-5.6-luna",
-    "openai-codex/gpt-5.6-terra"
+    "openai-codex/gpt-5.6-terra",
+    "openai-codex/gpt-6-astra",
+    "openai-codex/gpt-6-luna",
+    "openai-codex/gpt-6-sol",
+    "openai-codex/gpt-6.1-sol"
   ],
-  "lastChangelogVersion": "0.84.1",
+  "lastChangelogVersion": "0.99.1",
   "packages": [
     "npm:pi-ask-user",
     "npm:pi-subagents",
-    "npm:@alasano/pi-linear",
-    "npm:@feniix/pi-exa",
     "npm:@feniix/pi-devtools",
     "npm:@feniix/pi-ref-tools",
     "npm:@feniix/pi-statusline",
     "npm:pi-codex-tools",
-    "npm:@ff-labs/pi-fff"
+    "npm:@ff-labs/pi-fff",
+    "npm:pi-smart-fetch",
+    "npm:pi-worktree-extension",
+    "npm:pi-chrome",
+    "npm:pi-web-access",
+    "npm:pi-mcporter",
+    "npm:@feniix/pi-exa"
   ],
   "pi-code-reasoning": {
     "maxBytes": 51200,
@@ -49,8 +54,10 @@
     "maxLines": 2000,
     "storageDir": null
   },
-  "defaultThinkingLevel": "high",
   "theme": "dark",
+  "extensions": [
+    "/Users/feniix/.hindsight/coding-agents/dist/pi.js"
+  ],
   "skills": [
     "!**/.agents/skills/**",
     "!**/synced/**"

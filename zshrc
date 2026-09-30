@@ -420,6 +420,24 @@ setjdk() {
 # Set default Java version to 21
 setjdk 21
 
+# Keep pi off .agents/skills (codex-only) in the current project.
+# Creates or merges .pi/settings.json with a skills exclusion pattern.
+pi-no-agents() {
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || root=$PWD
+  local f="$root/.pi/settings.json"
+  local pat='!**/.agents/skills/**'
+  mkdir -p "$root/.pi"
+  if [ -f "$f" ]; then
+    jq --arg p "$pat" '.skills = ((.skills // []) + [$p] | unique)' "$f" > "$f.tmp" \
+      && mv "$f.tmp" "$f" || { rm -f "$f.tmp"; echo "pi-no-agents: failed to update $f" >&2; return 1; }
+  else
+    printf '{\n  "skills": ["%s"]\n}\n' "$pat" > "$f"
+  fi
+  echo "pi-no-agents: $f"
+  jq .skills "$f"
+}
+
 # List GCP projects
 function list() {
   case $1 in
