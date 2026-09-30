@@ -56,6 +56,7 @@ PY
 
     def mise_fixture(self, fail_install=False):
         inventory = self.home / "mise.json"
+        trust = self.home / "trusted-config"
         inventory.write_text(json.dumps({"node": [{"version": "old"}]}))
         self.mock("mise", f"""exec python3 - "$@" <<'PY'
 import json, pathlib, sys
@@ -65,9 +66,13 @@ args = sys.argv[1:]
 status = 0
 if args[0] == 'version':
     print('fixture')
+elif args[0] == 'trust':
+    pathlib.Path({str(trust)!r}).write_text(args[-1])
 elif args[0] == 'ls':
+    if not pathlib.Path({str(trust)!r}).exists(): sys.exit(1)
     print(json.dumps(data))
 elif args[0] == 'install':
+    if not pathlib.Path({str(trust)!r}).exists(): sys.exit(1)
     if not any(v['version'] == 'new' for v in data['node']):
         data['node'].append({{'version': 'new'}})
     status = {1 if fail_install else 0}

@@ -76,6 +76,9 @@ setup_mise() {
   local mise_config="$XDG_CONFIG_HOME/mise/config.toml"
   state_mkdir "$XDG_CONFIG_HOME/mise"
   state_symlink "$DOTFILES_DIR/mise/config.toml" "$mise_config"
+  # mise resolves symlinks before trust checks. Trust our explicitly installed
+  # configuration, not an unrelated project tree.
+  mise trust "$mise_config" || { log_error "Cannot trust the installed mise configuration."; return 1; }
   if [ -f "$mise_config" ]; then
     log_info "Found mise configuration at $mise_config"
 

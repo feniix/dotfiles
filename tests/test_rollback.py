@@ -162,6 +162,26 @@ class RollbackTests(Sandbox):
         conflicts = list((self.home / "data/dotfiles-conflicts").rglob("SKILL.md"))
         self.assertEqual([path.read_text() for path in conflicts], ["custom"])
 
+    def test_skill_reconciliation_can_update_symlinked_settings_safely(self):
+        fake_repo = self.home / "repo"
+        (fake_repo / "agents/skills").mkdir(parents=True)
+        library = fake_repo / "scripts/lib"
+        library.mkdir(parents=True)
+        for name in ("state.sh", "defaults.sh"):
+            (library / name).write_text((REPO / "scripts/lib" / name).read_text())
+        directory = fake_repo / "pi/agent"
+        directory.mkdir(parents=True)
+        original = self.home / "original-settings.json"
+        original.write_text('{"skills":[]}\n')
+        settings = directory / "settings.json"
+        settings.symlink_to(original)
+        self.env["DOTFILES_DIR"] = str(fake_repo)
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh")])
+        self.assertIn("!**/.agents/skills/**", settings.read_text())
+        self.assertEqual(original.read_text(), '{"skills":[]}\n')
+        self.uninstall()
+        self.assertTrue(settings.is_symlink())
+
 
 if __name__ == "__main__":
     unittest.main()

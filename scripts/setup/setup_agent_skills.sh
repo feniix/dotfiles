@@ -249,8 +249,8 @@ add_pi_exclusion() {
   log_info "adding skills exclusions $PI_EXCLUDES to $f"
   if [[ "$DRY_RUN" != 1 ]]; then
     local tmp="$f.tmp.$$"
-    state_write_file "$f"
     jq --indent 2 --argjson want "$PI_EXCLUDES" '.skills = ((.skills // []) + $want | unique)' "$f" > "$tmp"
+    state_write_file "$f"
     mv "$tmp" "$f"
     state_finish_file "$f"
   fi
