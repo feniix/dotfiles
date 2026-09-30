@@ -41,6 +41,10 @@ if [[ "$OSTYPE" != "darwin"* ]]; then
   log_error "This script is only meant to be run on macOS systems."
   exit 1
 fi
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+state_init
 
 # Create a basic DefaultKeyBinding.dict for macOS text editing
 log_info "Setting up macOS key bindings..."

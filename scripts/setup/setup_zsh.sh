@@ -53,6 +53,12 @@ CHECK_ONLY=false
 if [[ "$1" == "--check-only" ]]; then
   CHECK_ONLY=true
 fi
+if [[ "$CHECK_ONLY" != true ]]; then
+  if ! declare -F state_init >/dev/null; then
+    source "$DOTFILES_DIR/scripts/lib/state.sh"
+  fi
+  state_init
+fi
 
 # Check if oh-my-zsh is already installed
 if [ -d "$HOME/.oh-my-zsh" ]; then

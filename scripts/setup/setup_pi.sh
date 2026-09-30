@@ -36,6 +36,11 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
+log_warning() { echo -e "${BLUE}[WARN]${NC} $1"; }
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+state_init
 PI_DOTFILES_DIR="$DOTFILES_DIR/pi"
 PI_AGENT_DIR="$HOME/.pi/agent"
 
@@ -66,6 +71,7 @@ log_success "agent/AGENTS.md"
 # --- Agents directory ---
 # Symlinked as a whole. pi writes *.md files into agent/agents/ on
 # `pi install`, which through the symlink lands in the dotfiles repo.
+state_mkdir "$PI_DOTFILES_DIR/agent/agents"
 state_symlink "$PI_DOTFILES_DIR/agent/agents" \
               "$PI_AGENT_DIR/agents"
 log_success "agent/agents/"

@@ -33,6 +33,11 @@ log_error() {
   echo -e "${RED}[ERROR]${NC} $1"
 }
 
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+state_init
+
 # Create XDG Base Directories if they don't exist
 log_info "Creating XDG Base Directories..."
 state_mkdir "$HOME/.config"
@@ -70,4 +75,4 @@ if [ -d "$HOME/.ssh" ]; then
   log_info "SSH configuration remains in the standard location until you update it."
 fi
 
-log_success "XDG Base Directory setup complete!" 
+log_success "XDG Base Directory setup complete!"

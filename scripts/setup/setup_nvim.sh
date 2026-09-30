@@ -35,6 +35,12 @@ log_error() {
   echo -e "${RED}[ERROR]${NC} $1"
 }
 
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+state_init
+state_mkdir "$XDG_CONFIG_HOME"
+
 log_info "Setting up Neovim with XDG compliance..."
 
 # Create necessary runtime directories (separate from config)
@@ -89,4 +95,4 @@ echo ""
 echo "To install plugins, run: nvim and execute :Lazy sync"
 
 echo ""
-echo "Run $DOTFILES_DIR/scripts/nvim/check_nvim.sh to verify the setup." 
+echo "Run $DOTFILES_DIR/scripts/nvim/check_nvim.sh to verify the setup."

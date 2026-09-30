@@ -6,6 +6,15 @@ from test_rollback import REPO, Sandbox
 
 
 class DefaultsTests(Sandbox):
+    def test_standalone_macos_setup(self):
+        self.command(
+            ["/bin/bash", str(REPO / "scripts/setup/setup_macos.sh")], input="n\n"
+        )
+        path = self.home / "Library/KeyBindings/DefaultKeyBinding.dict"
+        self.assertTrue(path.exists())
+        self.uninstall("--defaults")
+        self.assertFalse(path.exists())
+
     def setUp(self):
         super().setUp()
         self.preferences = self.home / "preferences.json"
