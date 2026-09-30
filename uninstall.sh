@@ -5,6 +5,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$SCRIPT_DIR}"
 source "$DOTFILES_DIR/scripts/lib/state.sh"
+source "$DOTFILES_DIR/scripts/lib/defaults.sh"
 
 log_info()    { printf '[INFO] %s\n' "$1"; }
 log_success() { printf '[OK] %s\n' "$1"; }
@@ -114,6 +115,14 @@ undo_entry() {
       [[ ! -d "$path" ]] || run rmdir "$path"
       ;;
     DIR_EXISTED) return 0 ;;
+    DEFAULTS_DOMAIN)
+      [[ "$RESTORE_DEFAULTS" == true ]] || return 1
+      defaults_restore_domain "$path" "$extra"
+      ;;
+    DEFAULTS_BACKUP)
+      log_warning "Legacy all-domain dump at $path cannot be safely imported. Keeping it for manual recovery."
+      return 1
+      ;;
     BREW_FORMULA|BREW_CASK)
       [[ "$REMOVE_SOFTWARE" == true ]] || return 1
       command -v brew >/dev/null || return 1

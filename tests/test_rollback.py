@@ -152,6 +152,7 @@ class RollbackTests(Sandbox):
         library = fake_repo / "scripts/lib"
         library.mkdir(parents=True)
         (library / "state.sh").write_text((REPO / "scripts/lib/state.sh").read_text())
+        (library / "defaults.sh").write_text((REPO / "scripts/lib/defaults.sh").read_text())
         target = self.home / ".pi/agent/skills/demo"
         target.mkdir(parents=True)
         (target / "SKILL.md").write_text("custom")

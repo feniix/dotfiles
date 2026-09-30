@@ -15,6 +15,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+source "$DOTFILES_DIR/scripts/lib/defaults.sh"
 
 # Helper functions
 log_info() {
@@ -68,9 +69,9 @@ fi
 # Point iTerm2 to load preferences from dotfiles directory
 if [ -d "$DOTFILES_DIR/iterm2" ]; then
   log_info "Configuring iTerm2 to load preferences from dotfiles..."
+  defaults_backup_domain com.googlecode.iterm2
   defaults write com.googlecode.iterm2 PrefsCustomFolder -string "$DOTFILES_DIR/iterm2"
   defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
-  state_record "ITERM2_PREFS" "$DOTFILES_DIR/iterm2"
   log_success "iTerm2 will load preferences from $DOTFILES_DIR/iterm2"
 fi
 
@@ -81,11 +82,6 @@ if [ -f "$DOTFILES_DIR/scripts/macos/osx-defaults" ]; then
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "Applying saner defaults to macOS, you may be asked for your password..."
     bash "$DOTFILES_DIR/scripts/macos/osx-defaults"
-    # Record the backup created by osx-defaults
-    defaults_backup="$(ls -t "${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles_backup"/defaults-*.plist 2>/dev/null | head -1)"
-    if [[ -n "$defaults_backup" ]]; then
-      state_record "DEFAULTS_BACKUP" "$defaults_backup"
-    fi
     log_success "macOS defaults applied."
   else
     log_info "Skipping macOS defaults."

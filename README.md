@@ -12,19 +12,40 @@ cd ~/dotfiles
 
 The setup script runs straight through: XDG dirs, symlinks, Homebrew packages, oh-my-zsh, neovim, macOS defaults, GitHub CLI, SSH permissions, and mise tools.
 
-All changes are tracked in `~/.local/share/dotfiles-state/` with backups of any overwritten files.
+Managed filesystem changes are tracked in `~/.local/share/dotfiles-state/`.
+The first original state of each path is preserved across reruns. Writes detach
+existing symlinks before replacing content, and completed file writes are
+fingerprinted so uninstall can recognize later user changes.
 
 ## Uninstall
 
 ```bash
 ./uninstall.sh              # Remove symlinks, files, created directories
-./uninstall.sh --software   # Also uninstall Homebrew packages, Oh-My-Zsh, mise
-./uninstall.sh --defaults   # Also restore macOS defaults from backup
+./uninstall.sh --software   # Also remove software additions owned by setup
+./uninstall.sh --defaults   # Also restore snapshotted defaults domains
 ./uninstall.sh --everything # All of the above
 ./uninstall.sh --dry-run    # Preview what would be done
 ```
 
-Uninstall reads the state manifest in reverse order, restores backed-up files, removes symlinks, and cleans up empty directories we created.
+Uninstall reads the state manifest in reverse order, restores backed-up files,
+removes owned symlinks/files, and cleans up empty directories we created.
+Changed user files, unresolved entries, and unselected optional operations retain
+their records and backups for a later retry. Ambiguous legacy manifests are never
+silently migrated or discarded.
+
+`--software` removes only newly installed Homebrew formulae/casks, mise tool
+versions, and an Oh-My-Zsh directory installed by setup. Pre-existing software is
+left alone. Legacy Brewfile-wide/mise-wide records lack ownership information
+and require manual cleanup. App Store apps and VS Code extensions are not removed.
+
+`--defaults` imports each domain into its original user/current-host scope.
+The first snapshot is kept across setup reruns; failed imports remain retryable.
+Legacy all-domain dumps are preserved for manual recovery, not imported into
+`NSGlobalDomain`. Power settings (`pmset`), firmware settings (`nvram`), and file
+visibility flags are not automatically restored.
+
+Agent skill conflicts are retained separately under
+`~/.local/share/dotfiles-conflicts/`, outside disposable uninstall state.
 
 ## What's Included
 
@@ -45,7 +66,25 @@ Uninstall reads the state manifest in reverse order, restores backed-up files, r
 | Git | `~/.config/git/config` -> `~/dotfiles/gitconfig` |
 | SSH | `~/.ssh/config` includes `~/.config/ssh/config` -> `~/dotfiles/ssh_config` |
 | Neovim | `~/.config/nvim` -> `~/dotfiles/nvim` |
-| mise | `~/.config/mise/config.toml` |
+| mise | `~/.config/mise/config.toml` -> `~/dotfiles/mise/config.toml` |
+
+The shell setup and Home Manager read the same `mise/config.toml` tool declarations.
+Web-identity AWS authentication must be configured in its project/profile, not
+globally.
+
+## Regression tests
+
+Requires Python 3, Neovim, jq, and macOS's Bash/Zsh. The AWS credential-selection
+test additionally runs when the AWS CLI is available.
+
+```bash
+python3 -m unittest discover -s tests -v
+shellcheck -S warning setup.sh uninstall.sh scripts/lib/*.sh scripts/setup/*.sh scripts/macos/osx-defaults
+```
+
+Tests use temporary homes and mocked package managers/defaults/formatters.
+They do not install or remove real software, alter macOS preferences, or load
+your Neovim plugins.
 
 ## Structure
 

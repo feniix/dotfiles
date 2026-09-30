@@ -10,7 +10,7 @@
 #   ./osx-defaults              Apply all settings
 #   ./osx-defaults --dry-run    Show what would be changed without applying
 #   ./osx-defaults --only dock,finder   Apply specific sections only
-#   ./osx-defaults --backup     Save current defaults to a file
+#   ./osx-defaults --backup     Snapshot affected domains without applying
 
 set -e
 
@@ -56,28 +56,27 @@ run() {
   if [[ "$DRY_RUN" == true ]]; then
     echo "  [dry-run] $*"
   else
-    "$@"
+    if [[ "$1" == defaults ]]; then
+      local domain scope=user
+      if [[ "$2" == -currentHost ]]; then
+        scope=host
+        domain="$4"
+      else
+        domain="$3"
+      fi
+      defaults_backup_domain "$domain" "$scope" || return 1
+    fi
+    [[ "$BACKUP_ONLY" == true ]] || "$@"
   fi
 }
 
-# Backup current defaults
-backup_defaults() {
-  local backup_dir="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles_backup"
-  local backup_file="$backup_dir/defaults-$(date +%Y%m%d_%H%M%S).plist"
-  mkdir -p "$backup_dir"
-  echo "Saving current defaults to $backup_file..."
-  defaults read > "$backup_file"
-  echo "Backup saved."
-}
-
 echo "Configuring macOS $(sw_vers -productVersion) preferences..."
-
-# Always create a backup before making changes
-backup_defaults
-
-if [[ "$BACKUP_ONLY" == true ]]; then
-  echo "Backup complete. No changes applied."
-  exit 0
+if [[ "$DRY_RUN" != true ]]; then
+  DEFAULTS_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  source "$DEFAULTS_SCRIPT_DIR/../lib/state.sh"
+  source "$DEFAULTS_SCRIPT_DIR/../lib/defaults.sh"
+  log_warning() { printf '[WARN] %s\n' "$1" >&2; }
+  state_init
 fi
 
 if [[ "$DRY_RUN" == true ]]; then
@@ -85,7 +84,7 @@ if [[ "$DRY_RUN" == true ]]; then
 fi
 
 # Request sudo privileges upfront (skip in dry-run)
-if [[ "$DRY_RUN" != true ]]; then
+if [[ "$DRY_RUN" != true && "$BACKUP_ONLY" != true ]]; then
   echo "Requesting administrator privileges (for system settings)..."
   sudo -v
 
@@ -460,7 +459,7 @@ fi
 #====================================================================
 # Restart affected applications
 #====================================================================
-if [[ "$DRY_RUN" != true ]]; then
+if [[ "$DRY_RUN" != true && "$BACKUP_ONLY" != true ]]; then
   echo "Restarting affected applications..."
 
   for app in "Activity Monitor" "cfprefsd" "Dock" "Finder" "Safari" "SystemUIServer"; do
@@ -501,3 +500,8 @@ if [[ "$DRY_RUN" != true ]]; then
 fi
 
 echo "Done! Some changes require a logout/restart to take effect."
+if [[ "$BACKUP_ONLY" == true ]]; then
+  echo "Affected domains backed up; no settings applied."
+elif [[ "$DRY_RUN" != true ]]; then
+  echo "Only defaults domains are automatically restorable; pmset, nvram and file flags are not."
+fi
