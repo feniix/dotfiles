@@ -9,11 +9,11 @@ if vim.fn.has('nvim') == 0 then
   return
 end
 
--- Check Neovim version (require 0.8+)
+-- Native treesitter configuration and process APIs require Neovim 0.12+.
 local nvim_version = vim.version()
-if nvim_version.major == 0 and nvim_version.minor < 8 then
+if nvim_version.major == 0 and nvim_version.minor < 12 then
   local version_str = string.format("%d.%d.%d", nvim_version.major, nvim_version.minor, nvim_version.patch)
-  local error_msg = "This configuration requires Neovim 0.8 or higher. Current version: " .. version_str
+  local error_msg = "This configuration requires Neovim 0.12 or higher. Current version: " .. version_str
   
   -- Use vim.notify if available, otherwise fallback to print
   if vim.notify then

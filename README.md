@@ -81,9 +81,12 @@ Vendoring fails without replacing the lock when configured globs match no
 skills. To intentionally remove all of a source's skills, remove its `skill`
 directives or explicitly skip every match.
 
+Neovim formatters consume unsaved buffer content and separate diagnostics from
+formatted output.
+
 ## Regression tests
 
-Requires Python 3, Neovim, jq, and macOS's Bash/Zsh. Vendoring tests
+Requires Python 3, Neovim 0.12+, jq, and macOS's Bash/Zsh. Vendoring tests
 additionally require Bash 4+ (Homebrew). The AWS credential-selection
 test additionally runs when the AWS CLI is available.
 

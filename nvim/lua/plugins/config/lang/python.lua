@@ -146,16 +146,10 @@ end
 function M.format_python()
   local file = vim.fn.expand('%')
   if vim.fn.executable('black') == 1 then
-    local result = vim.fn.system('black --stdin-filename ' .. vim.fn.shellescape(file) .. ' -', vim.api.nvim_buf_get_lines(0, 0, -1, false))
-    if vim.v.shell_error == 0 then
-      local lines = vim.split(result, '\n')
-      if lines[#lines] == '' then
-        table.remove(lines)  -- Remove trailing empty line
-      end
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    if require('plugins.config.format').buffer(
+      { 'black', '--stdin-filename', file, '-' }, 'Black'
+    ) then
       vim.notify("Python file formatted with Black", vim.log.levels.INFO)
-    else
-      vim.notify("Black formatting failed: " .. result, vim.log.levels.ERROR)
     end
   else
     vim.notify("black not found. Install with: pip install black", vim.log.levels.ERROR)
