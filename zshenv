@@ -49,3 +49,11 @@ export AWS_WEB_IDENTITY_TOKEN_FILE="$XDG_DATA_HOME/aws/token"
 if [ -z "$HOMEBREW_PREFIX" ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
+
+# Claude Code: keep the default profile entirely inside ~/.claude.
+# Without this, the default profile's account state lives at ~/.claude.json;
+# with it, every profile (default and ~/.claude-* via aliases) has the same
+# layout: <dir>/.claude.json next to <dir>/settings.json. Exported here rather
+# than aliased so hooks, scripts and IDE-spawned processes inherit it too.
+# Dock/Spotlight-launched apps do not read zshenv and will not see it.
+export CLAUDE_CONFIG_DIR="$HOME/.claude"
