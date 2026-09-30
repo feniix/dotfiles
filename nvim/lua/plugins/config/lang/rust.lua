@@ -156,10 +156,59 @@ function M.cargo_command(cmd)
 end
 
 -- Format Rust file with rustfmt
+local function rust_format_context()
+  local filename = vim.api.nvim_buf_get_name(0)
+  local directory = filename ~= '' and vim.fs.dirname(filename) or vim.fn.getcwd()
+  local manifest = vim.fs.find('Cargo.toml', { path = directory, upward = true })[1]
+  if not manifest then
+    -- Standalone buffers have no Cargo edition; allow modern Rust syntax.
+    return directory, '2021'
+  end
+  if vim.fn.executable('cargo') == 1 then
+    local ok, metadata = pcall(function()
+      local result = vim.system({
+        'cargo', 'metadata', '--no-deps', '--offline', '--format-version', '1',
+        '--manifest-path', manifest,
+      }, { text = true, cwd = directory }):wait()
+      if result.code ~= 0 then return nil end
+      return vim.json.decode(result.stdout)
+    end)
+    if ok and metadata then
+      local edition, longest = nil, 0
+      local file = vim.uv.fs_realpath(filename) or filename
+      if file == '' then file = directory .. '/untitled.rs' end
+      for _, package in ipairs(metadata.packages or {}) do
+        local package_dir = vim.fs.dirname(package.manifest_path)
+        local root = (vim.uv.fs_realpath(package_dir) or package_dir) .. '/'
+        if file:sub(1, #root) == root and #root > longest then
+          edition, longest = package.edition, #root
+        end
+      end
+      if edition then return directory, edition end
+    end
+  end
+  -- Do not guess when Cargo cannot resolve an inherited edition. Keep the
+  -- buffer untouched and explain the failure instead of parsing TOML loosely.
+  vim.notify('Cannot resolve Rust edition from ' .. manifest .. ' (cargo metadata failed)',
+    vim.log.levels.ERROR)
+  return nil
+end
+
 function M.format_rust()
   if vim.fn.executable('rustfmt') == 1 then
+    local directory, edition = rust_format_context()
+    if not directory then return end
+    local command = { 'rustfmt', '--emit', 'stdout', '--edition', edition }
+    local config = vim.fs.find({ '.rustfmt.toml', 'rustfmt.toml' }, {
+      path = directory, upward = true,
+    })[1]
+    -- --config-path must name an existing config; a directory without one
+    -- is an error, and rustfmt does not search its ancestors for this flag.
+    if config then
+      vim.list_extend(command, { '--config-path', config })
+    end
     if require('plugins.config.format').buffer(
-      { 'rustfmt', '--emit', 'stdout' }, 'rustfmt'
+      command, 'rustfmt', { cwd = directory }
     ) then
       vim.notify("Rust file formatted with rustfmt", vim.log.levels.INFO)
     end

@@ -82,7 +82,8 @@ skills. To intentionally remove all of a source's skills, remove its `skill`
 directives or explicitly skip every match.
 
 Neovim formatters consume unsaved buffer content and separate diagnostics from
-formatted output.
+formatted output. Rust formatting resolves package editions (including workspace
+inheritance) through offline Cargo metadata; standalone files use edition 2021.
 
 ## Regression tests
 

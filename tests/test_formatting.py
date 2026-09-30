@@ -102,6 +102,34 @@ vim.fn.writefile({{vim.json.encode({{
         self.format_case("plugins.config.lang.rust", "format_rust", "rustfmt",
                          on_save=True)
 
+    def test_rust_formatter_uses_workspace_edition_and_buffer_directory(self):
+        root = self.home / "workspace"
+        directory = root / "member/src"
+        directory.mkdir(parents=True)
+        (root / "Cargo.toml").write_text("[workspace.package]\nedition = '2024'\n")
+        (root / "member/Cargo.toml").write_text(
+            "[package]\nname = 'member'\nedition.workspace = true\n"
+        )
+        (root / "rustfmt.toml").write_text("hard_tabs = true\n")
+        self.mock("cargo", f"""printf '%s\\n' '{json.dumps({"packages": [{
+            "manifest_path": str(root / "member/Cargo.toml"), "edition": "2024"
+        }]})}'
+""")
+        # Intercept only rustfmt, while letting cargo metadata use the process API.
+        before = f"""
+local system = vim.system
+vim.system = function(cmd, opts)
+  if cmd[1] == 'rustfmt' then
+    assert(cmd[4] == '--edition' and cmd[5] == '2024', vim.inspect(cmd))
+    assert(cmd[6] == '--config-path'
+      and cmd[7] == {json.dumps(str((root / 'rustfmt.toml').resolve()))})
+    assert(opts.cwd == {json.dumps(str(directory.resolve()))})
+  end
+  return system(cmd, opts)
+end
+"""
+        self.format_case("plugins.config.lang.rust", "format_rust", "rustfmt",
+                         directory=directory, before=before)
 
     def test_terraform_command_escapes_directory(self):
         directory = self.home / "project space; echo INJECTED"
@@ -135,3 +163,57 @@ vim.cmd = cmd
         )
         self.assertEqual(lines, ['variable "unsaved" {', '  type = string', '}'])
         self.assertEqual(path.read_text(), saved)
+
+    def test_real_rustfmt_resolves_inherited_edition_and_config(self):
+        rustfmt, cargo = shutil.which("rustfmt"), shutil.which("cargo")
+        if not rustfmt or not cargo:
+            self.skipTest("Rustfmt and Cargo not installed")
+        self.mock("rustfmt", f'exec "{rustfmt}" "$@"\n')
+        self.mock("cargo", f'exec "{cargo}" "$@"\n')
+        root = self.home / "workspace"
+        directory = root / "member/src"
+        directory.mkdir(parents=True)
+        (root / "Cargo.toml").write_text(
+            '[workspace]\nmembers = ["member"]\nresolver = "2"\n'
+            '[workspace.package]\nedition = "2024"\n'
+        )
+        (root / "member/Cargo.toml").write_text(
+            '[package]\nname = "member"\nversion = "0.1.0"\nedition.workspace = true\n'
+        )
+        (root / "rustfmt.toml").write_text("hard_tabs = true\n")
+        path = directory / "lib.rs"
+        path.write_text("fn saved() {}\n")
+        lines = self.run_buffer(
+            path, ['async fn sample(){println!("unsaved");}'],
+            "require('plugins.config.lang.rust').format_rust()",
+        )
+        self.assertEqual(lines, ['async fn sample() {', '\tprintln!("unsaved");', '}'])
+        self.assertEqual(path.read_text(), "fn saved() {}\n")
+        self.assertFalse((root / "Cargo.lock").exists())
+
+    def test_cargo_metadata_failure_preserves_rust_buffer(self):
+        directory = self.home / "project"
+        directory.mkdir()
+        (directory / "Cargo.toml").write_text("invalid TOML")
+        self.mock("cargo", "echo metadata-error >&2; exit 1\n")
+        self.mock("rustfmt", "echo should-not-run; exit 0\n")
+        path = directory / "lib.rs"
+        path.write_text("saved disk content\n")
+        lines = self.run_buffer(
+            path, ["unsaved content"],
+            "require('plugins.config.lang.rust').format_rust()",
+        )
+        self.assertEqual(lines, ["unsaved content"])
+
+    def test_real_rustfmt_formats_standalone_async_file_without_config(self):
+        rustfmt = shutil.which("rustfmt")
+        if not rustfmt:
+            self.skipTest("Rustfmt not installed")
+        self.mock("rustfmt", f'exec "{rustfmt}" "$@"\n')
+        path = self.home / "standalone.rs"
+        path.write_text("fn saved() {}\n")
+        lines = self.run_buffer(
+            path, ['async fn sample(){println!("unsaved");}'],
+            "require('plugins.config.lang.rust').format_rust()",
+        )
+        self.assertEqual(lines, ['async fn sample() {', '    println!("unsaved");', '}'])
