@@ -36,8 +36,15 @@ _state_backup_file() {
     return 1
   fi
   if _state_backup_exists "$path"; then
-    # Already have a backup from a previous run — don't overwrite with our own content
-    return 0
+    local existing
+    existing="$(_state_backup_name "$path")"
+    # Reuse only an active baseline, not an orphan from a completed uninstall.
+    if awk -F '|' -v backup="$existing" \
+      '$4 == backup {found=1} END {exit !found}' "$STATE_MANIFEST"; then
+      return 0
+    fi
+    # Keep an unreferenced old backup available for manual recovery.
+    mv "$STATE_BACKUPS/$existing" "$STATE_BACKUPS/$existing.retired-$(_state_timestamp)-$$" || return 1
   fi
   local backup_name
   backup_name="$(_state_backup_name "$path")"

@@ -57,6 +57,30 @@ class Sandbox(unittest.TestCase):
 
 
 class RollbackTests(Sandbox):
+    def test_unreferenced_backup_from_old_uninstall_is_not_reused(self):
+        path = self.home / "config-file"
+        path.write_text("new baseline")
+        self.state(
+            'name="$(_state_backup_name "$HOME/config-file")"; '
+            'printf obsolete > "$STATE_BACKUPS/$name"; '
+            'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"'
+        )
+        self.uninstall()
+        self.assertEqual(path.read_text(), "new baseline")
+
+    def test_reinstall_captures_new_baseline_with_optional_state_retained(self):
+        path = self.home / "config-file"
+        path.write_text("baseline A")
+        self.state(
+            'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"; '
+            'state_record SOFTWARE unknown'
+        )
+        self.uninstall()
+        path.write_text("baseline B")
+        self.state('state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"')
+        self.uninstall()
+        self.assertEqual(path.read_text(), "baseline B")
+
     def test_original_survives_removed_link_and_setup_rerun(self):
         path = self.home / "config-file"
         path.write_text("original")
@@ -181,6 +205,11 @@ class RollbackTests(Sandbox):
         self.assertEqual(original.read_text(), '{"skills":[]}\n')
         self.uninstall()
         self.assertTrue(settings.is_symlink())
+
+
+
+
+
 
 
 if __name__ == "__main__":

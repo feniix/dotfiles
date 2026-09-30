@@ -209,6 +209,17 @@ if [[ "$DRY_RUN" != true ]]; then
     done
   } > "$STATE_MANIFEST.tmp"
   mv "$STATE_MANIFEST.tmp" "$STATE_MANIFEST"
+  # A restored path has completed its lifecycle even if optional software or
+  # unrelated failures keep the manifest alive. Do not reuse its old baseline.
+  for ((i=0; i<${#entries[@]}; i++)); do
+    [[ "${resolved[$i]}" == true ]] || continue
+    IFS='|' read -r type _ path extra <<< "${entries[$i]}"
+    [[ "$type" == ORIGINAL && "$extra" != ABSENT ]] || continue
+    if ! awk -F '|' -v backup="$extra" \
+      '$4 == backup {found=1} END {exit !found}' "$STATE_MANIFEST"; then
+      rm -rf "${STATE_BACKUPS:?}/${extra:?}"
+    fi
+  done
   if [[ "$remaining" == 0 && ! -d "$STATE_BACKUPS/agent-skills-conflicts" ]]; then
     rm -rf "$STATE_DIR"
   else
