@@ -44,7 +44,7 @@ export CURLOPT_COOKIEFILE="$XDG_DATA_HOME/curl/cookies"
 
 # AWS CLI Configuration (additional settings)
 export AWS_CLI_HISTORY_FILE="$XDG_DATA_HOME/aws/history"
-export AWS_WEB_IDENTITY_TOKEN_FILE="$XDG_DATA_HOME/aws/token"
+# Web identity is project/profile-specific; do not activate it globally.
 # Homebrew environment setup (prevent double-evaluation)
 if [ -z "$HOMEBREW_PREFIX" ]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"

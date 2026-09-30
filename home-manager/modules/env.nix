@@ -11,7 +11,6 @@
     AWS_CLI_HISTORY_FILE = "${config.xdg.dataHome}/aws/history";
     AWS_CONFIG_FILE = "${config.xdg.configHome}/aws/config";
     AWS_SHARED_CREDENTIALS_FILE = "${config.xdg.configHome}/aws/credentials";
-    AWS_WEB_IDENTITY_TOKEN_FILE = "${config.xdg.dataHome}/aws/token";
     CARGO_HOME = "${config.xdg.dataHome}/cargo";
     CURLOPT_COOKIEFILE = "${config.xdg.dataHome}/curl/cookies";
     DOCKER_CONFIG = "${config.xdg.configHome}/docker";
