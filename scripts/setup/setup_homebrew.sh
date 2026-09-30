@@ -7,6 +7,10 @@ set -e
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 BREWFILE="${DOTFILES_DIR}/Brewfile"
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+source "$DOTFILES_DIR/scripts/lib/software.sh"
 
 # Colors for better output
 RED='\033[0;31m'
@@ -69,9 +73,7 @@ install_packages() {
   brew update
 
   log_info "Installing packages (this may take a while)..."
-  brew bundle install --file="$BREWFILE" --verbose
-
-  state_record "SOFTWARE" "brew" "$BREWFILE"
+  software_track_brew_install brew bundle install --file="$BREWFILE" --verbose
   log_success "All packages installed successfully!"
 }
 
@@ -79,6 +81,7 @@ install_packages() {
 setup_homebrew() {
   log_info "Setting up Homebrew and packages..."
 
+  state_init
   install_homebrew
 
   read -p "Install all packages from Brewfile? This may take a while. [y/N] " -n 1 -r || true

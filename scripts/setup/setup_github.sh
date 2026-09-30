@@ -11,6 +11,11 @@ YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
+DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+source "$DOTFILES_DIR/scripts/lib/software.sh"
 
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -18,13 +23,14 @@ log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error()   { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # Install or update GitHub CLI
+state_init
 log_info "Checking GitHub CLI..."
 if command -v gh &>/dev/null; then
   log_success "GitHub CLI installed ($(gh --version | head -n1))"
-  brew upgrade gh 2>/dev/null || true
+  software_track_brew_install brew upgrade gh || log_warning "GitHub CLI upgrade failed."
 else
   log_info "Installing GitHub CLI..."
-  brew install gh || { log_error "Failed to install gh"; exit 1; }
+  software_track_brew_install brew install gh || { log_error "Failed to install gh"; exit 1; }
   log_success "GitHub CLI installed"
 fi
 

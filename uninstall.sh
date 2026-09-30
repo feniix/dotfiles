@@ -114,6 +114,28 @@ undo_entry() {
       [[ ! -d "$path" ]] || run rmdir "$path"
       ;;
     DIR_EXISTED) return 0 ;;
+    BREW_FORMULA|BREW_CASK)
+      [[ "$REMOVE_SOFTWARE" == true ]] || return 1
+      command -v brew >/dev/null || return 1
+      if [[ "$type" == BREW_FORMULA ]]; then
+        local installed leaves
+        installed="$(brew list --formula)" || return 1
+        printf '%s\n' "$installed" | grep -Fxq -- "$path" || return 0
+        leaves="$(brew leaves)" || return 1
+        printf '%s\n' "$leaves" | grep -Fxq -- "$path" || return 1
+        run brew uninstall --formula "$path"
+      else
+        local casks
+        casks="$(brew list --cask)" || return 1
+        printf '%s\n' "$casks" | grep -Fxq -- "$path" || return 0
+        run brew uninstall --cask "$path"
+      fi
+      ;;
+    MISE_VERSION)
+      [[ "$REMOVE_SOFTWARE" == true ]] || return 1
+      command -v mise >/dev/null || return 1
+      run mise uninstall --yes "$path"
+      ;;
     SOFTWARE)
       [[ "$REMOVE_SOFTWARE" == true ]] || return 1
       case "$path" in
@@ -147,6 +169,24 @@ for ((i=${#entries[@]}-1; i>=0; i--)); do
     log_warning "Unresolved: $type ($path). Preserving its records and backups."
   fi
 done
+
+# Removing an owned dependent may make another owned formula a leaf.
+# Retry until there is no progress; never force removal of shared dependencies.
+if [[ "$REMOVE_SOFTWARE" == true && "$DRY_RUN" != true ]]; then
+  progress=true
+  while [[ "$progress" == true ]]; do
+    progress=false
+    for ((i=${#entries[@]}-1; i>=0; i--)); do
+      [[ "${resolved[$i]}" != true ]] || continue
+      IFS='|' read -r type _ path extra <<< "${entries[$i]}"
+      [[ "$type" == BREW_FORMULA ]] || continue
+      if undo_entry "$type" "$path" "$extra"; then
+        resolved[$i]=true
+        progress=true
+      fi
+    done
+  done
+fi
 
 if [[ "$DRY_RUN" != true ]]; then
   remaining=0

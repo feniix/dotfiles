@@ -11,6 +11,10 @@ DOTFILES_DIR="${DOTFILES_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+if ! declare -F state_init >/dev/null; then
+  source "$DOTFILES_DIR/scripts/lib/state.sh"
+fi
+source "$DOTFILES_DIR/scripts/lib/software.sh"
 
 # Colors for better output
 RED='\033[0;31m'
@@ -58,11 +62,10 @@ setup_mise() {
   log_info "Setting up mise version manager..."
 
   if ! has "mise"; then
-    log_warning "mise not found. Please ensure mise is installed first."
-    log_info "On macOS with Homebrew: brew install mise"
-    log_info "Or visit https://mise.jdx.dev/ for installation instructions."
-    return 1
+    log_info "Installing mise with Homebrew..."
+    software_track_brew_install brew install mise || return 1
   fi
+  command -v jq >/dev/null || { log_error "jq is required for software ownership tracking."; return 1; }
 
   configure_mise_environment
 
@@ -71,16 +74,18 @@ setup_mise() {
 
   # Check for mise config.toml
   local mise_config="$XDG_CONFIG_HOME/mise/config.toml"
+  state_mkdir "$XDG_CONFIG_HOME/mise"
+  state_symlink "$DOTFILES_DIR/mise/config.toml" "$mise_config"
   if [ -f "$mise_config" ]; then
     log_info "Found mise configuration at $mise_config"
 
     log_info "Installing tool versions from config.toml..."
-    if mise install; then
-      state_record "SOFTWARE" "mise" "$mise_config"
+    if software_install_mise; then
       log_success "All tool versions installed successfully"
     else
-      log_warning "Some tool versions failed to install"
+      log_error "Tool installation failed; any added versions remain tracked."
       log_info "You can install individual tools later with: mise install <tool>@<version>"
+      return 1
     fi
 
     log_success "All mise tools have been installed!"
@@ -91,6 +96,7 @@ setup_mise() {
 }
 
 # Run the setup
+state_init
 setup_mise
 
 log_success "mise setup completed successfully!"
