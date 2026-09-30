@@ -150,8 +150,9 @@ list_keys() {
   
   for key in $KEYS_LIST; do
     if [ -f "$SSH_DIR/$key" ]; then
-      local mod_time=$(stat -f "%Sm" "$SSH_DIR/$key" 2>/dev/null || stat -c "%y" "$SSH_DIR/$key")
-      local perms=$(stat -f "%Sp" "$SSH_DIR/$key" 2>/dev/null || stat -c "%A" "$SSH_DIR/$key")
+      local mod_time perms
+      mod_time=$(stat -f "%Sm" "$SSH_DIR/$key" 2>/dev/null || stat -c "%y" "$SSH_DIR/$key")
+      perms=$(stat -f "%Sp" "$SSH_DIR/$key" 2>/dev/null || stat -c "%A" "$SSH_DIR/$key")
       echo "- $key ($perms, modified: $mod_time)"
       
       if [ -f "$SSH_DIR/${key}.pub" ]; then
@@ -282,4 +283,4 @@ main() {
 }
 
 # Run main function with provided arguments
-main "$@" 
+main "$@"
