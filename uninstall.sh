@@ -61,13 +61,19 @@ restore_path() {
 }
 
 undo_managed() {
-  local path="$1" expected="$2" backup
+  local path="$1" expected="$2" backup contents
   backup="$(original_for "$path")"
   [[ -n "$backup" ]] || return 1
   if [[ -e "$path" || -L "$path" ]]; then
     case "$expected" in
       link:*) [[ -L "$path" && "$(readlink "$path")" == "${expected#link:}" ]] || return 1 ;;
       file:*) [[ -f "$path" && ! -L "$path" && "$(_state_file_hash "$path")" == "${expected#file:}" ]] || return 1 ;;
+      directory)
+        [[ -d "$path" && ! -L "$path" ]] || return 1
+        # Refuse to delete user additions or any unresolved child entries.
+        contents="$(find "$path" -mindepth 1 -maxdepth 1 -print -quit)" || return 1
+        [[ -z "$contents" ]] || return 1
+        ;;
       *) return 1 ;;
     esac
   fi

@@ -185,6 +185,7 @@ class RollbackTests(Sandbox):
         self.uninstall()
         conflicts = list((self.home / "data/dotfiles-conflicts").rglob("SKILL.md"))
         self.assertEqual([path.read_text() for path in conflicts], ["custom"])
+        self.assertEqual((target / "SKILL.md").read_text(), "custom")
 
     def test_skill_reconciliation_can_update_symlinked_settings_safely(self):
         fake_repo = self.home / "repo"
@@ -206,10 +207,66 @@ class RollbackTests(Sandbox):
         self.uninstall()
         self.assertTrue(settings.is_symlink())
 
+    def skill_repo(self):
+        repo = self.home / "repo"
+        (repo / "agents/skills/demo").mkdir(parents=True)
+        (repo / "agents/skills/demo/SKILL.md").write_text("canonical")
+        library = repo / "scripts/lib"
+        library.mkdir(parents=True)
+        for name in ("state.sh", "defaults.sh"):
+            (library / name).write_text((REPO / "scripts/lib" / name).read_text())
+        self.env["DOTFILES_DIR"] = str(repo)
+        return repo
 
+    def test_matching_and_unique_skills_restore_after_repeated_setup(self):
+        repo = self.skill_repo()
+        directory = self.home / ".pi/agent/skills"
+        for name in ("demo", "unique"):
+            target = directory / name
+            target.mkdir(parents=True)
+            (target / "SKILL.md").write_text("canonical")
+        for _ in range(2):
+            self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh")])
+        self.uninstall()
+        for name in ("demo", "unique"):
+            self.assertFalse((directory / name).is_symlink())
+            self.assertEqual((directory / name / "SKILL.md").read_text(), "canonical")
+        self.assertTrue((repo / "agents/skills/unique/SKILL.md").exists())
 
+    def test_whole_directory_skill_link_is_restored(self):
+        repo = self.skill_repo()
+        directory = self.home / ".pi/agent/skills"
+        directory.parent.mkdir(parents=True)
+        directory.symlink_to(repo / "agents/skills")
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh")])
+        self.assertFalse(directory.is_symlink())
+        self.uninstall()
+        self.assertTrue(directory.is_symlink())
+        self.assertEqual(directory.resolve(), (repo / "agents/skills").resolve())
 
+    def test_replaced_skill_directory_preserves_new_user_entries(self):
+        repo = self.skill_repo()
+        directory = self.home / ".pi/agent/skills"
+        directory.parent.mkdir(parents=True)
+        directory.symlink_to(repo / "agents/skills")
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh")])
+        (directory / ".user-state").write_text("keep")
+        self.uninstall()
+        self.assertFalse(directory.is_symlink())
+        self.assertEqual((directory / ".user-state").read_text(), "keep")
+        (directory / ".user-state").unlink()
+        self.uninstall()
+        self.assertTrue(directory.is_symlink())
 
+    def test_skill_dry_run_creates_no_state_or_tool_directories(self):
+        repo = self.skill_repo()
+        before = sorted(str(p.relative_to(self.home)) for p in self.home.rglob("*"))
+        self.command([
+            "/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh"), "--dry-run",
+        ])
+        after = sorted(str(p.relative_to(self.home)) for p in self.home.rglob("*"))
+        self.assertEqual(after, before)
+        self.assertFalse((repo / "agents/prompts").exists())
 
 
 if __name__ == "__main__":

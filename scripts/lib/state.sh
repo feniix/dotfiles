@@ -180,6 +180,17 @@ state_mkdir() {
   fi
 }
 
+# Replace a non-directory entry with a real directory, retaining its baseline.
+# Uninstall removes it only after managed children are undone and it is empty.
+state_replace_with_directory() {
+  local path="$1"
+  _state_capture_original "$path" || return 1
+  state_record MANAGED "$path" pending || return 1
+  rm -f "$path" || return 1
+  mkdir -p "$path" || return 1
+  state_record MANAGED "$path" directory
+}
+
 # Create a symlink. Backs up any existing file/directory at the link path.
 state_symlink() {
   local target="$1"

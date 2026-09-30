@@ -68,8 +68,8 @@ log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 if ! declare -F state_symlink >/dev/null 2>&1; then
   # shellcheck source=../lib/state.sh
   source "$DOTFILES_DIR/scripts/lib/state.sh"
-  state_init
 fi
+[[ "$DRY_RUN" == 1 ]] || state_init
 
 if [[ "$DRY_RUN" == 1 ]]; then
   log_warning "DRY RUN — nothing will be changed"
@@ -126,18 +126,15 @@ ignored_name() {
 
 # ensure_real_dir <target>
 # Make <target> a real directory. Converts the old whole-directory symlink
-# layout (or any other symlink) into a real dir; the link is just removed
-# because the content it pointed at still lives in canonical.
+# layout (or any other symlink) into a real dir, preserving the original link.
 ensure_real_dir() {
   local target="$1"
   if [[ -L "$target" ]]; then
     log_info "$target is a symlink to $(readlink "$target"); replacing with a real directory"
-    run rm "$target"            # removes the link only, never its target
-    run mkdir -p "$target"
+    run state_replace_with_directory "$target"
   elif [[ -e "$target" && ! -d "$target" ]]; then
     log_warning "$target exists and is not a directory; backing up and replacing"
-    [[ "$DRY_RUN" == 1 ]] || state_delete_file "$target"
-    run mkdir -p "$target"
+    run state_replace_with_directory "$target"
   elif [[ ! -d "$target" ]]; then
     [[ "$DRY_RUN" == 1 ]] && echo "        would: mkdir -p $target" || state_mkdir "$target"
   fi
@@ -156,6 +153,10 @@ absorb() {
     ignored_name "$name" && continue
     [[ -L "$entry" ]] && continue          # links are handled by link_items/prune
     dest="$canonical/$name"
+    if [[ "$DRY_RUN" != 1 ]]; then
+      _state_capture_original "$entry"
+      state_record MANAGED "$entry" pending
+    fi
 
     if [[ ! -e "$dest" ]]; then
       echo "        move   $name  -> canonical"
@@ -206,7 +207,7 @@ prune() {
     [[ "$dest" == "$canonical"/* ]] || continue
     if [[ ! -e "$dest" ]]; then
       echo "        prune  $(basename "$entry")  (dangling -> $dest)"
-      run rm "$entry"
+      run state_delete_file "$entry"
       PRUNED=$((PRUNED + 1))
     fi
   done

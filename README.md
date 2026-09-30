@@ -72,6 +72,10 @@ The shell setup and Home Manager read the same `mise/config.toml` tool declarati
 Web-identity AWS authentication must be configured in its project/profile, not
 globally.
 
+Skill reconciliation preserves original tool-side entries for uninstall;
+conflicting copies also remain available in the conflicts directory.
+Skill setup's `--dry-run` does not create installation state.
+
 ## Regression tests
 
 Requires Python 3, Neovim, jq, and macOS's Bash/Zsh. The AWS credential-selection
