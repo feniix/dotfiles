@@ -6,6 +6,11 @@ from test_rollback import REPO, Sandbox
 
 
 class EnvironmentTests(Sandbox):
+    def setUp(self):
+        super().setUp()
+        for name in ("AWS_CONFIG_FILE", "AWS_SHARED_CREDENTIALS_FILE"):
+            self.env.pop(name, None)
+
     def shell(self, command):
         self.env["HOMEBREW_PREFIX"] = "/fixture"
         # zshenv's runtime directory is system-wide; do not create/chmod it.
@@ -42,3 +47,23 @@ class EnvironmentTests(Sandbox):
         self.env["AWS_EC2_METADATA_DISABLED"] = "true"
         result = self.shell(f'"{aws}" configure list')
         self.assertIn("shared-credentials-file", result.stdout)
+
+    def test_legacy_aws_paths_remain_available_until_migrated(self):
+        directory = self.home / ".aws"
+        directory.mkdir()
+        for name in ("credentials", "config"):
+            (directory / name).write_text("fixture")
+        result = self.shell(
+            'print -r -- "$AWS_SHARED_CREDENTIALS_FILE"; print -r -- "$AWS_CONFIG_FILE"'
+        )
+        self.assertEqual(result.stdout.splitlines(),
+                         [str(directory / "credentials"), str(directory / "config")])
+
+    def test_explicit_aws_paths_are_preserved(self):
+        self.env["AWS_CONFIG_FILE"] = "/explicit/config"
+        self.env["AWS_SHARED_CREDENTIALS_FILE"] = "/explicit/credentials"
+        result = self.shell(
+            'print -r -- "$AWS_SHARED_CREDENTIALS_FILE"; print -r -- "$AWS_CONFIG_FILE"'
+        )
+        self.assertEqual(result.stdout.splitlines(),
+                         ["/explicit/credentials", "/explicit/config"])

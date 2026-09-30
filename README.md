@@ -71,6 +71,8 @@ Agent skill conflicts are retained separately under
 The shell setup and Home Manager read the same `mise/config.toml` tool declarations.
 Web-identity AWS authentication must be configured in its project/profile, not
 globally.
+Explicit AWS config/credentials paths are preserved. Until an XDG replacement
+exists, existing `~/.aws/config` and `~/.aws/credentials` remain in use.
 
 Skill reconciliation preserves original tool-side entries for uninstall;
 conflicting copies also remain available in the conflicts directory.

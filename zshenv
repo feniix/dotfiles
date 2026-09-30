@@ -20,8 +20,18 @@ export LESSHISTFILE="$XDG_STATE_HOME/less/history"
 export NODE_REPL_HISTORY="$XDG_STATE_HOME/node/repl_history"
 export PYTHONSTARTUP="$XDG_CONFIG_HOME/python/pythonrc"
 export INPUTRC="$XDG_CONFIG_HOME/readline/inputrc"
-export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
-export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
+if [[ -z "$AWS_SHARED_CREDENTIALS_FILE" ]]; then
+  export AWS_SHARED_CREDENTIALS_FILE="$XDG_CONFIG_HOME/aws/credentials"
+  if [[ ! -f "$AWS_SHARED_CREDENTIALS_FILE" && -f "$HOME/.aws/credentials" ]]; then
+    export AWS_SHARED_CREDENTIALS_FILE="$HOME/.aws/credentials"
+  fi
+fi
+if [[ -z "$AWS_CONFIG_FILE" ]]; then
+  export AWS_CONFIG_FILE="$XDG_CONFIG_HOME/aws/config"
+  if [[ ! -f "$AWS_CONFIG_FILE" && -f "$HOME/.aws/config" ]]; then
+    export AWS_CONFIG_FILE="$HOME/.aws/config"
+  fi
+fi
 export DOCKER_CONFIG="$XDG_CONFIG_HOME/docker"
 export GNUPGHOME="$XDG_DATA_HOME/gnupg"
 export SCREENRC="$XDG_CONFIG_HOME/screen/screenrc"
