@@ -166,16 +166,10 @@ end
 function M.sort_imports()
   local file = vim.fn.expand('%')
   if vim.fn.executable('isort') == 1 then
-    local result = vim.fn.system('isort --stdout ' .. vim.fn.shellescape(file))
-    if vim.v.shell_error == 0 then
-      local lines = vim.split(result, '\n')
-      if lines[#lines] == '' then
-        table.remove(lines)  -- Remove trailing empty line
-      end
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    if require('plugins.config.format').buffer(
+      { 'isort', '--stdout', '--filename', file, '-' }, 'isort'
+    ) then
       vim.notify("Imports sorted with isort", vim.log.levels.INFO)
-    else
-      vim.notify("isort failed: " .. result, vim.log.levels.ERROR)
     end
   else
     vim.notify("isort not found. Install with: pip install isort", vim.log.levels.ERROR)
@@ -341,4 +335,4 @@ function M.show_python_version()
   end
 end
 
-return M 
+return M

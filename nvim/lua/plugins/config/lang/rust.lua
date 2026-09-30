@@ -157,18 +157,11 @@ end
 
 -- Format Rust file with rustfmt
 function M.format_rust()
-  local file = vim.fn.expand('%')
   if vim.fn.executable('rustfmt') == 1 then
-    local result = vim.fn.system('rustfmt --emit stdout ' .. vim.fn.shellescape(file))
-    if vim.v.shell_error == 0 then
-      local lines = vim.split(result, '\n')
-      if lines[#lines] == '' then
-        table.remove(lines)  -- Remove trailing empty line
-      end
-      vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    if require('plugins.config.format').buffer(
+      { 'rustfmt', '--emit', 'stdout' }, 'rustfmt'
+    ) then
       vim.notify("Rust file formatted with rustfmt", vim.log.levels.INFO)
-    else
-      vim.notify("rustfmt formatting failed: " .. result, vim.log.levels.ERROR)
     end
   else
     vim.notify("rustfmt not found. Install with: rustup component add rustfmt", vim.log.levels.ERROR)
@@ -254,4 +247,4 @@ function M.rust_playground()
   end
 end
 
-return M 
+return M
