@@ -18,7 +18,14 @@
 #   scripts/agents/vendor_skills.sh --dry-run    show what would change
 #   scripts/agents/vendor_skills.sh --only <id>  limit to one source id
 #
-# Afterwards review `git status agents/skills` and commit.
+# The manifest is declarative: after a run, agents/skills holds exactly what
+# each source provides at its pinned ref. Skills a source provided before but
+# no longer does (removed upstream, or you repinned to an older ref, or you
+# removed a skill/source line) are DELETED. Only skills recorded in the lock as
+# owned by that source are ever deleted; your own skills are never touched.
+#
+# Afterwards run scripts/setup/setup_agent_skills.sh (links new skills, prunes
+# links to deleted ones), review `git status agents` and commit.
 
 set -euo pipefail
 
@@ -73,16 +80,24 @@ while read -r kind a b c _; do
 done < "$MANIFEST"
 
 # --- Lock file helpers ------------------------------------------------------
-declare -A LOCKED=()
-declare -a PREV_VENDORED=()
+# Lock lines:  <id> <sha> <url>          resolved commit per source
+#             vendored <id> <name>       skill dir owned by that source
+#             vendored <name>            legacy (no owner); never deleted
+declare -A LOCKED=() PREV_OWNED=()
+declare -a PREV_LEGACY=() LOCK_IDS=()
 if [[ -f "$LOCK" ]]; then
-  while read -r id sha _; do
-    [[ -z "${id:-}" || "$id" == \#* ]] && continue
-    if [[ "$id" == "vendored" ]]; then PREV_VENDORED+=("$sha"); else LOCKED[$id]="$sha"; fi
+  while read -r a b c _; do
+    [[ -z "${a:-}" || "$a" == \#* ]] && continue
+    if [[ "$a" == "vendored" ]]; then
+      if [[ -n "${c:-}" ]]; then PREV_OWNED[$b]="${PREV_OWNED[$b]:-} $c"; else PREV_LEGACY+=("$b"); fi
+    else
+      LOCKED[$a]="$b"; LOCK_IDS+=("$a")
+    fi
   done < "$LOCK"
 fi
-declare -A RESOLVED=()
-declare -a NOW_VENDORED=()
+declare -A RESOLVED=() NOW_OWNED=() IN_MANIFEST=()
+declare -a NOW_VENDORED=() PROCESSED=()
+for id in "${SRC_IDS[@]}"; do IN_MANIFEST[$id]=1; done
 
 # --- Fetch a source, return its checkout dir --------------------------------
 checkout_source() {
@@ -172,36 +187,66 @@ for id in "${SRC_IDS[@]}"; do
     fi
     vendored_dirs+=("$DEST/$target")
     NOW_VENDORED+=("$target")
+    NOW_OWNED[$id]="${NOW_OWNED[$id]:-} $target"
   done
+  PROCESSED+=("$id")
   rm -rf "$stage"
   log_success "  $id @ $short (${#vendored_dirs[@]} skills)"
 done
 
-# --- Write lock -------------------------------------------------------------
-if [[ "$DRY_RUN" != 1 && -z "$ONLY" ]]; then
-  {
-    echo "# Resolved commits for agents/skills.vendor — written by scripts/agents/vendor_skills.sh"
-    for id in "${SRC_IDS[@]}"; do
-      [[ -n "${RESOLVED[$id]:-}" ]] && echo "$id ${RESOLVED[$id]} ${SRC_URL[$id]}"
-    done
-    echo "# skill dirs in agents/skills that came from the sources above"
-    for n in "${NOW_VENDORED[@]}"; do echo "vendored $n"; done
-  } > "$LOCK"
-elif [[ "$DRY_RUN" != 1 && -n "$ONLY" ]]; then
-  log_warning "lock file not rewritten when using --only"
-fi
-
-# --- Orphans: vendored last time, not vendored now (removed/renamed upstream) --
-if [[ -z "$ONLY" && ${#PREV_VENDORED[@]} -gt 0 ]]; then
-  for n in "${PREV_VENDORED[@]}"; do
-    case " ${NOW_VENDORED[*]} " in *" $n "*) continue ;; esac
-    [[ -d "$DEST/$n" ]] && log_warning "orphan: $DEST/$n was vendored before but no source provides it now; remove or keep by hand"
+# --- Remove skills a source no longer provides -------------------------------
+# Candidates: skills owned by a processed source that it did not produce this
+# run, plus (full runs only) everything owned by a source dropped from the
+# manifest. Never delete a name some source produced this run.
+REMOVED=0
+remove_owned() {
+  local id="$1" why="$2" n
+  for n in ${PREV_OWNED[$id]:-}; do
+    case " ${NOW_OWNED[$id]:-} " in *" $n "*) continue ;; esac
+    case " ${NOW_VENDORED[*]:-} " in *" $n "*) continue ;; esac
+    [[ -d "$DEST/$n" ]] || continue
+    echo "        remove $n  ($why)"
+    run rm -rf "${DEST:?}/$n"
+    REMOVED=$((REMOVED + 1))
+  done
+}
+for id in "${PROCESSED[@]}"; do
+  remove_owned "$id" "no longer provided by $id @ ${SRC_REF[$id]}"
+done
+if [[ -z "$ONLY" ]]; then
+  for id in "${LOCK_IDS[@]}"; do
+    [[ -n "${IN_MANIFEST[$id]:-}" ]] || remove_owned "$id" "source $id removed from manifest"
+  done
+  # legacy entries (no recorded owner): warn only
+  for n in "${PREV_LEGACY[@]}"; do
+    case " ${NOW_VENDORED[*]:-} " in *" $n "*) continue ;; esac
+    [[ -d "$DEST/$n" ]] && log_warning "unowned: $DEST/$n came from an older lock without an owner; remove or keep by hand"
   done
 fi
 
+# --- Write lock -------------------------------------------------------------
+# Processed sources get their new commit and skill list; with --only, the
+# other sources keep what the old lock said.
+if [[ "$DRY_RUN" != 1 ]]; then
+  {
+    echo "# Resolved commits for agents/skills.vendor — written by scripts/agents/vendor_skills.sh"
+    for id in "${SRC_IDS[@]}"; do
+      sha="${RESOLVED[$id]:-${LOCKED[$id]:-}}"
+      [[ -n "$sha" ]] && echo "$id $sha ${SRC_URL[$id]}"
+    done
+    echo "# skill dirs in agents/skills and the source that owns them"
+    for id in "${SRC_IDS[@]}"; do
+      if [[ -n "${RESOLVED[$id]:-}" ]]; then owned="${NOW_OWNED[$id]:-}"; else owned="${PREV_OWNED[$id]:-}"; fi
+      for n in $owned; do echo "vendored $id $n"; done
+    done
+  } > "$LOCK"
+fi
+
 echo ""
-if [[ "$CHANGED" -gt 0 ]]; then
-  log_info "$CHANGED skill dir(s) changed. Review and commit:"
+if [[ "$CHANGED" -gt 0 || "$REMOVED" -gt 0 ]]; then
+  log_info "$CHANGED skill dir(s) added/updated, $REMOVED removed."
+  log_info "Next: scripts/setup/setup_agent_skills.sh   (link new skills, prune removed ones)"
+  log_info "Then review and commit:"
   log_info "  git -C $DOTFILES_DIR status --short agents/skills agents/skills.lock"
 else
   log_success "all vendored skills already up to date"
