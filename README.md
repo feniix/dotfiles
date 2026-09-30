@@ -62,7 +62,7 @@ Agent skill conflicts are retained separately under
 |--------|----------|
 | Zsh | `~/.config/zsh/.zshrc` -> `~/dotfiles/zshrc` |
 | Zsh env | `~/.zshenv` -> `~/dotfiles/zshenv` |
-| Powerlevel10k | `~/.p10k.zsh` -> `~/dotfiles/p10k.zsh` |
+| Powerlevel10k | `~/.config/zsh/.p10k.zsh` -> `~/dotfiles/p10k.zsh` |
 | Git | `~/.config/git/config` -> `~/dotfiles/gitconfig` |
 | SSH | `~/.ssh/config` includes `~/.config/ssh/config` -> `~/dotfiles/ssh_config` |
 | Neovim | `~/.config/nvim` -> `~/dotfiles/nvim` |

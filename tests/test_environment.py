@@ -67,3 +67,22 @@ class EnvironmentTests(Sandbox):
         )
         self.assertEqual(result.stdout.splitlines(),
                          ["/explicit/credentials", "/explicit/config"])
+
+
+    def test_setup_prompt_link_matches_shell_source_path(self):
+        setup = (REPO / "setup.sh").read_text().split("# --- Homebrew", 1)[0]
+        # Exercise the real filesystem setup prefix, excluding chmod of repo scripts.
+        setup = setup.split("# --- Make scripts executable ---", 1)[0] + (
+            setup.split("# --- XDG directories ---", 1)[1]
+        )
+        self.command(["/bin/bash", "-ec", setup])
+        source = (REPO / "zshrc").read_text()
+        line = next(line for line in source.splitlines()
+                    if line.startswith("[[ ! -f ") and ".p10k.zsh" in line)
+        result = self.command([
+            "/bin/zsh", "-dfc",
+            f'XDG_CONFIG_HOME="{self.home / "config"}"; '
+            'source() { print -r -- "$1"; }; ' + line,
+        ])
+        self.assertEqual(result.stdout.strip(),
+                         str(self.home / "config/zsh/.p10k.zsh"))

@@ -43,7 +43,7 @@ log_info "Creating symlinks..."
 state_mkdir "$XDG_CONFIG_HOME/zsh"
 state_symlink "$DOTFILES_DIR/zshrc" "$XDG_CONFIG_HOME/zsh/.zshrc"
 state_symlink "$DOTFILES_DIR/zshenv" "$HOME/.zshenv"
-state_symlink "$DOTFILES_DIR/p10k.zsh" "$HOME/.p10k.zsh"
+state_symlink "$DOTFILES_DIR/p10k.zsh" "$XDG_CONFIG_HOME/zsh/.p10k.zsh"
 log_success "zshrc, zshenv, p10k.zsh"
 
 # git (reads XDG natively — no ~/.gitconfig needed)

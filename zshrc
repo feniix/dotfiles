@@ -487,7 +487,7 @@ fi
 [[ -f "${DOTFILES_DIR:-$HOME/dotfiles}/completion" ]] && source "${DOTFILES_DIR:-$HOME/dotfiles}/completion"
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
-[[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+[[ ! -f "$XDG_CONFIG_HOME/zsh/.p10k.zsh" ]] || source "$XDG_CONFIG_HOME/zsh/.p10k.zsh"
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 alias claude-p="CLAUDE_CONFIG_DIR=/Users/feniix/.claude-personal claude"
