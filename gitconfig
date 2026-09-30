@@ -33,7 +33,7 @@
   autosquash = true
 
 [branch]
-  autosetupmerge = always
+	autoSetupMerge = true
 
 [diff]
   renames = copies
