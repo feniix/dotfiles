@@ -15,7 +15,7 @@
 # patch in scripts/agents/vendor_skills.sh.
 
 # Matt Pocock's engineering skills (was the mattpocock-skills Claude plugin)
-source mattpocock https://github.com/mattpocock/skills.git main
+source mattpocock https://github.com/mattpocock/skills.git v1.2.3
 skill  mattpocock skills/engineering/*
 skill  mattpocock skills/productivity/*
 skill  mattpocock skills/in-progress/*
