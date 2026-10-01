@@ -235,7 +235,8 @@ if should_run "hotcorners"; then
   # Possible values:
   #  0: no-op        2: Mission Control   3: Application Windows
   #  4: Desktop      5: Screen Saver      6: Disable Screen Saver
-  # 10: Display Sleep  11: Launchpad  12: Notification Center  13: Lock Screen
+  # 10: Display Sleep  11: Launchpad (removed in macOS 26)
+  # 12: Notification Center  13: Lock Screen
 
   # Top left     -> Mission Control
   run defaults write com.apple.dock wvous-tl-corner -int 2
