@@ -59,13 +59,21 @@ state_mkdir "$XDG_CONFIG_HOME/ssh"
 state_symlink "$DOTFILES_DIR/ssh_config" "$XDG_CONFIG_HOME/ssh/config"
 state_mkdir "$HOME/.ssh"
 state_mkdir "$HOME/.ssh/controlmasters"
-state_write_file "$HOME/.ssh/config"
-cat > "$HOME/.ssh/config" <<'EOF'
-# XDG-compliant SSH configuration
-Include ~/.config/ssh/config
-EOF
-chmod 600 "$HOME/.ssh/config"
-state_finish_file "$HOME/.ssh/config"
+# Other tools (gcloud, OrbStack, VS Code) append hosts here, so only ensure the
+# Include is present, ahead of any Host block, instead of owning the file.
+SSH_INCLUDE='Include ~/.config/ssh/config'
+if [[ -L "$HOME/.ssh/config" ]] ||
+  ! grep -Eq '^[[:space:]]*Include[[:space:]]+~/\.config/ssh/config[[:space:]]*$' "$HOME/.ssh/config" 2>/dev/null; then
+  SSH_EXISTING="$(cat "$HOME/.ssh/config" 2>/dev/null || true)"
+  state_write_file "$HOME/.ssh/config"
+  {
+    echo "# XDG-compliant SSH configuration"
+    echo "$SSH_INCLUDE"
+    [[ -z "$SSH_EXISTING" ]] || printf '\n%s\n' "$SSH_EXISTING"
+  } > "$HOME/.ssh/config"
+  chmod 600 "$HOME/.ssh/config"
+  state_finish_file "$HOME/.ssh/config"
+fi
 log_success "ssh config"
 
 # vim

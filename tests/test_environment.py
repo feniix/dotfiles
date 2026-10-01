@@ -91,13 +91,38 @@ class EnvironmentTests(Sandbox):
         ])
         self.assertIn("shared-marker", result.stdout)
 
-    def test_setup_prompt_link_matches_shell_source_path(self):
+    def setup_prefix(self):
         setup = (REPO / "setup.sh").read_text().split("# --- Homebrew", 1)[0]
         # Exercise the real filesystem setup prefix, excluding chmod of repo scripts.
         setup = setup.split("# --- Make scripts executable ---", 1)[0] + (
             setup.split("# --- XDG directories ---", 1)[1]
         )
-        self.command(["/bin/bash", "-ec", setup])
+        return self.command(["/bin/bash", "-ec", setup])
+
+    def test_setup_keeps_hosts_other_tools_add_to_ssh_config(self):
+        self.setup_prefix()
+        config = self.home / ".ssh/config"
+        with config.open("a") as f:
+            f.write("\nHost gcp-vm\n  HostName 10.0.0.5\n")
+        self.setup_prefix()
+        text = config.read_text()
+        self.assertIn("Host gcp-vm", text)
+        self.assertEqual(text.count("Include ~/.config/ssh/config"), 1)
+
+    def test_setup_puts_include_ahead_of_existing_ssh_hosts(self):
+        ssh = self.home / ".ssh"
+        ssh.mkdir()
+        (ssh / "config").write_text("Host old\n  HostName 10.0.0.9\n")
+        self.setup_prefix()
+        lines = (ssh / "config").read_text().splitlines()
+        include = lines.index("Include ~/.config/ssh/config")
+        self.assertLess(include, lines.index("Host old"))
+        self.assertEqual(oct((ssh / "config").stat().st_mode & 0o777), "0o600")
+        self.uninstall()
+        self.assertEqual((ssh / "config").read_text(), "Host old\n  HostName 10.0.0.9\n")
+
+    def test_setup_prompt_link_matches_shell_source_path(self):
+        self.setup_prefix()
         source = (REPO / "zshrc").read_text()
         line = next(line for line in source.splitlines()
                     if line.startswith("[[ ! -f ") and ".p10k.zsh" in line)

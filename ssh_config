@@ -11,19 +11,12 @@ Include ~/.orbstack/ssh/config
 Compression yes
 HashKnownHosts no
 
-# Keep NAT/state happy and detect broken links quickly (helps "hangy" sessions)
-ServerAliveInterval 10
-ServerAliveCountMax 3
+# Keep NAT/state happy (helps "hangy" sessions); keepalive timing is under Host *
 TCPKeepAlive yes
 
 # Reduce interactive latency/jitter impact (SSH sends DSCP)
 # If your network mangles DSCP, comment this out.
 IPQoS lowdelay throughput
-
-# Fast connection reuse
-ControlMaster auto
-ControlPersist 10m
-ControlPath ~/.ssh/controlmasters/%C
 
 # Reliability improvements
 ConnectTimeout 5
@@ -37,6 +30,9 @@ Host github.com
   User git
   IdentityFile ~/.ssh/id_ed25519
   IdentitiesOnly yes
+  # Per-alias socket: %C hashes the resolved host (github.com), so both GitHub
+  # aliases would otherwise share one master and silently reuse its key.
+  ControlPath ~/.ssh/controlmasters/%r@%n:%p
 
 # -------------------------------------------------------------------
 # GitHub (GATX key)
@@ -46,6 +42,7 @@ Host github-gatx
   User git
   IdentityFile ~/.ssh/id_ed25519_gatx
   IdentitiesOnly yes
+  ControlPath ~/.ssh/controlmasters/%r@%n:%p
 
 # -------------------------------------------------------------------
 # WSL Development Host
@@ -62,6 +59,7 @@ Host wsl-dev
 Host feniixhq-lan
   HostName 192.168.4.67
   User feniix
+  ForwardAgent yes
 
   # More aggressive keepalives for your LAN target
   ServerAliveInterval 5
@@ -75,6 +73,7 @@ Host feniixhq-lan
 Host feniixhq
   HostName 100.113.48.101
   User feniix
+  ForwardAgent yes
 
   ServerAliveInterval 10
   ServerAliveCountMax 3
@@ -83,6 +82,15 @@ Host feniixhq
 # -------------------------------------------------------------------
 # Catch-all defaults (kept last)
 # -------------------------------------------------------------------
+# Options before the first Host apply everywhere and cannot be overridden, so
+# connection sharing lives here, where the per-alias ControlPath above wins.
 Host *
-  ForwardAgent yes
+  # Forward the agent only to the hosts named above.
+  ForwardAgent no
   AddKeysToAgent yes
+  # Detect broken links quickly; hosts above may tighten these.
+  ServerAliveInterval 10
+  ServerAliveCountMax 3
+  ControlMaster auto
+  ControlPersist 10m
+  ControlPath ~/.ssh/controlmasters/%C
