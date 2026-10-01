@@ -143,9 +143,14 @@ checkout_source() {
 
 # --- Rewrite references after a rename --------------------------------------
 # In the given (staged) skill dirs, replace "name: old", /old and `old` with new.
+# Only *.md and *.txt files are rewritten (see agents/skills.vendor).
 rewrite_refs() {
-  local old="$1" new="$2"; shift 2
-  local f
+  local old new f
+  # Escape the names for an ERE pattern / sed replacement (# is the delimiter),
+  # so e.g. a "." in a skill name only matches a literal dot.
+  old="$(printf '%s' "$1" | sed 's/[][\.*^$+?(){}|#]/\\&/g')"
+  new="$(printf '%s' "$2" | sed 's/[\&#]/\\&/g')"
+  shift 2
   for d in "$@"; do
     [[ -d "$d" ]] || continue
     while IFS= read -r -d '' f; do

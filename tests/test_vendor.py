@@ -291,3 +291,24 @@ class UpstreamVendorTests(Sandbox):
         self.vendor("--update")
         self.assertEqual(self.lock_sha("up"), second)
         self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a v2")
+
+    def test_rename_treats_the_old_name_literally_and_only_rewrites_docs(self):
+        self.upstream("up", {
+            "skills/a.b": "---\nname: a.b\n---\nUse /a.b, not /axb or `axb`.\n",
+            "skills/axb": "---\nname: axb\n---\nSee `a.b`.\n",
+            "skills/a.b/run.sh": "echo /a.b\n",
+        })
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} main\nskill  up skills/*\n"
+            "rename up a.b renamed\n"
+        )
+        self.vendor()
+        self.assertEqual(
+            (self.dest / "renamed/SKILL.md").read_text(),
+            "---\nname: renamed\n---\nUse /renamed, not /axb or `axb`.\n",
+        )
+        self.assertEqual(
+            (self.dest / "axb/SKILL.md").read_text(),
+            "---\nname: axb\n---\nSee `renamed`.\n",
+        )
+        self.assertEqual((self.dest / "renamed/run.sh").read_text(), "echo /a.b\n")
