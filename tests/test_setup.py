@@ -60,6 +60,24 @@ class SetupTests(Sandbox):
         self.assertEqual((zdotdir / ".zshrc").read_text(), "managed")
         self.assertIn("--unattended", (self.home / "omz-args").read_text())
 
+    def test_missing_signing_key_is_created_only_on_request(self):
+        git = self.home / "config/git"
+        git.mkdir(parents=True)
+        (git / "config").write_text(
+            "[user]\n  email = me@example.com\n  signingkey = ~/.ssh/id_ed25519\n")
+        self.mock("ssh-keygen", 'while [[ $1 != -f ]]; do shift; done\n'
+                  'echo private > "$2"; echo "ssh-ed25519 AAAA me" > "$2.pub"\n')
+        script = ["/bin/bash", str(REPO / "scripts/ssh/manage_ssh_keys.sh"), "signing-key"]
+        key = self.home / ".ssh/id_ed25519"
+        declined = self.command(script, input="n\n")
+        self.assertIn("commits will fail until it does", declined.stdout)
+        self.assertFalse(key.exists())
+        accepted = self.command(script, input="y\n")
+        self.assertTrue(key.exists())
+        self.assertIn("gh ssh-key add", accepted.stdout)
+        again = self.command(script)
+        self.assertIn("Git signing key present", again.stdout)
+
     def test_zsh_check_only_does_not_initialize_state(self):
         (self.home / ".oh-my-zsh").mkdir()
         self.mock("brew", "exit 0\n")

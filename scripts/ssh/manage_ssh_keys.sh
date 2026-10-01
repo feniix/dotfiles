@@ -224,6 +224,35 @@ add_passphrase() {
   rm "$SSH_DIR/${key_file}.bak"
 }
 
+# Git signs every commit with user.signingkey; without that key every commit
+# fails. A new Mac usually restores the existing key (it is registered on
+# GitHub and in git_allowed_signers), so generating one is opt-in.
+check_signing_key() {
+  local key
+  key="$(git config --global --get user.signingkey 2>/dev/null || true)"
+  [[ -n "$key" && "$key" != key::* ]] || return 0
+  key="${key/#\~/$HOME}"
+  if [[ -f "$key" ]]; then
+    log_success "Git signing key present: $key"
+    return 0
+  fi
+
+  log_warning "Git signs commits with $key, which does not exist: commits will fail until it does."
+  log_info "To restore it from a backup: $0 restore <dir>"
+  read -p "Generate a new ed25519 key at $key instead? [y/N] " -n 1 -r || true
+  echo
+  [[ $REPLY =~ ^[Yy]$ ]] || return 0
+
+  mkdir -p "$(dirname "$key")"
+  chmod 700 "$(dirname "$key")"
+  ssh-keygen -t ed25519 -f "$key" -C "$(git config --global --get user.email || whoami)"
+  log_success "Created $key"
+  log_info "Register it with GitHub and trust it for local verification:"
+  echo "  gh ssh-key add $key.pub --type authentication --title \"$(hostname -s)\""
+  echo "  gh ssh-key add $key.pub --type signing --title \"$(hostname -s)\""
+  echo "  add \"$(git config --global --get user.email) $(cut -d' ' -f1,2 "$key.pub" 2>/dev/null)\" to git_allowed_signers"
+}
+
 # Display help information
 show_help() {
   echo "SSH Keys Management Utility"
@@ -237,6 +266,7 @@ show_help() {
   echo "  list               List current SSH keys"
   echo "  check-passphrases  Check if keys have passphrases"
   echo "  add-passphrase <key> Add a passphrase to an existing key"
+  echo "  signing-key        Check git's signing key exists; offer to create it"
   echo "  help               Display this help message"
   echo ""
   echo "Default backup directory: $BACKUP_DIR"
@@ -270,6 +300,9 @@ main() {
       ;;
     add-passphrase)
       add_passphrase "$1"
+      ;;
+    signing-key)
+      check_signing_key
       ;;
     help)
       show_help
