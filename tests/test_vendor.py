@@ -277,3 +277,17 @@ class UpstreamVendorTests(Sandbox):
         result = self.vendor("--frozen", check=False)
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((self.dest / "a").exists())
+
+    def test_update_follows_a_tag_the_upstream_moved(self):
+        first = self.upstream("up", {"skills/a": "a v1"})
+        self.git(self.upstreams["up"], "tag", "v1")
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} v1\nskill  up skills/*\n"
+        )
+        self.vendor()
+        self.assertEqual(self.lock_sha("up"), first)
+        second = self.upstream("up", {"skills/a": "a v2"})
+        self.git(self.upstreams["up"], "tag", "-f", "v1")
+        self.vendor("--update")
+        self.assertEqual(self.lock_sha("up"), second)
+        self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a v2")
