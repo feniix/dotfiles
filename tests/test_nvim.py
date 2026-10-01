@@ -165,3 +165,18 @@ class SetupNvimTests(Sandbox):
         self.setup_nvim()
         self.assertFalse((self.home / ".vimrc").exists())
         self.assertFalse((self.home / "config/vim/vimrc").exists())
+
+
+class CheckNvimTests(Sandbox):
+    def check(self):
+        self.mock("nvim", 'echo "NVIM v0.12.0"\n')
+        return self.command(["/bin/bash", str(REPO / "scripts/nvim/check_nvim.sh")]).stdout
+
+    def test_legacy_plugin_manager_is_not_also_reported_clean(self):
+        (self.home / "data/nvim/plugged").mkdir(parents=True)
+        out = self.check()
+        self.assertIn("FOUND", out)
+        self.assertNotIn("No legacy plugin managers", out)
+
+    def test_clean_data_dir_reports_no_legacy_plugin_managers(self):
+        self.assertIn("No legacy plugin managers", self.check())

@@ -79,15 +79,19 @@ echo -e "${GREEN}OK${RESET} $count plugins installed"
 # Legacy plugin managers
 echo ""
 echo -e "${BLUE}Legacy cleanup${RESET}"
+legacy_found=0
 for path in \
   "$XDG_DATA_HOME/nvim/site/autoload/plug.vim" \
   "$XDG_DATA_HOME/nvim/plugged" \
   "$XDG_DATA_HOME/nvim/site/pack/packer"; do
   if [ -e "$path" ]; then
     echo -e "${YELLOW}FOUND${RESET} $path (can be removed)"
+    legacy_found=1
   fi
 done
-echo -e "${GREEN}OK${RESET} No legacy plugin managers" 2>/dev/null || true
+if [ "$legacy_found" -eq 0 ]; then
+  echo -e "${GREEN}OK${RESET} No legacy plugin managers"
+fi
 
 echo ""
 echo "Run :checkhealth user in nvim for detailed diagnostics"
