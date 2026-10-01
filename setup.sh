@@ -82,47 +82,49 @@ if [ -f "$DOTFILES_DIR/.vimrc" ]; then
   log_success ".vimrc"
 fi
 
-# --- Homebrew (install first — other scripts depend on Homebrew packages) ---
-log_info "Setting up Homebrew packages..."
-source "$SCRIPTS_DIR/setup/setup_homebrew.sh"
+# --- Setup steps ---
+# Each step runs as its own process so one failure (a refused mas install, a
+# cancelled gh login) cannot stop the rest; failures are summarized at the end.
+export DOTFILES_DIR XDG_CONFIG_HOME
+FAILED_STEPS=()
+run_step() {
+  local label="$1"
+  shift
+  log_info "$label..."
+  if ! "$@"; then
+    log_warning "$label failed; continuing."
+    FAILED_STEPS+=("$label")
+  fi
+}
 
-# --- Oh-My-Zsh ---
-log_info "Setting up oh-my-zsh..."
-source "$SCRIPTS_DIR/setup/setup_zsh.sh"
-
-# --- Neovim ---
-log_info "Setting up Neovim..."
-source "$SCRIPTS_DIR/setup/setup_nvim.sh"
-
-# --- macOS ---
-log_info "Setting up macOS preferences..."
-source "$SCRIPTS_DIR/setup/setup_macos.sh"
-
-# --- GitHub ---
-log_info "Setting up GitHub integration..."
-source "$SCRIPTS_DIR/setup/setup_github.sh"
-
-# --- SSH key permissions ---
-if [ -f "$SCRIPTS_DIR/ssh/manage_ssh_keys.sh" ]; then
-  log_info "Fixing SSH key permissions..."
-  bash "$SCRIPTS_DIR/ssh/manage_ssh_keys.sh" fix-permissions
+# Homebrew first: every later step installs or checks packages with it.
+run_step "Setting up Homebrew packages" bash "$SCRIPTS_DIR/setup/setup_homebrew.sh"
+# A fresh install only put brew on PATH inside that step's process.
+if ! command -v brew >/dev/null; then
+  for brew in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    [[ -x "$brew" ]] && eval "$("$brew" shellenv)" && break
+  done
+fi
+if ! command -v brew >/dev/null; then
+  echo "Homebrew is not installed; the remaining steps all need it. Fix that and rerun." >&2
+  exit 1
 fi
 
-# --- mise ---
-log_info "Setting up mise..."
-source "$SCRIPTS_DIR/setup/setup_mise.sh"
-
-# --- pi user config ---
-if [ -f "$SCRIPTS_DIR/setup/setup_pi.sh" ]; then
-  log_info "Linking pi user config..."
-  source "$SCRIPTS_DIR/setup/setup_pi.sh"
-fi
-
-# --- shared agent skills + prompts (pi, Codex, Claude Code profiles) ---
-if [ -f "$SCRIPTS_DIR/setup/setup_agent_skills.sh" ]; then
-  log_info "Linking shared agent skills and prompts..."
-  source "$SCRIPTS_DIR/setup/setup_agent_skills.sh"
-fi
+run_step "Setting up oh-my-zsh" bash "$SCRIPTS_DIR/setup/setup_zsh.sh"
+run_step "Setting up Neovim" bash "$SCRIPTS_DIR/setup/setup_nvim.sh"
+run_step "Setting up macOS preferences" bash "$SCRIPTS_DIR/setup/setup_macos.sh"
+run_step "Setting up GitHub integration" bash "$SCRIPTS_DIR/setup/setup_github.sh"
+run_step "Fixing SSH key permissions" bash "$SCRIPTS_DIR/ssh/manage_ssh_keys.sh" fix-permissions
+run_step "Checking the git signing key" bash "$SCRIPTS_DIR/ssh/manage_ssh_keys.sh" signing-key
+run_step "Setting up mise" bash "$SCRIPTS_DIR/setup/setup_mise.sh"
+run_step "Linking pi user config" bash "$SCRIPTS_DIR/setup/setup_pi.sh"
+run_step "Linking shared agent skills and prompts" bash "$SCRIPTS_DIR/setup/setup_agent_skills.sh"
 
 echo ""
+if (( ${#FAILED_STEPS[@]} )); then
+  log_warning "Setup finished with ${#FAILED_STEPS[@]} failed step(s):"
+  printf '  - %s\n' "${FAILED_STEPS[@]}"
+  echo "Fix them and rerun ./setup.sh; completed steps are skipped or adopted."
+  exit 1
+fi
 log_success "Dotfiles setup complete! Restart your terminal to apply changes."

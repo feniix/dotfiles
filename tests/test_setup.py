@@ -60,6 +60,33 @@ class SetupTests(Sandbox):
         self.assertEqual((zdotdir / ".zshrc").read_text(), "managed")
         self.assertIn("--unattended", (self.home / "omz-args").read_text())
 
+    def test_failed_step_does_not_stop_the_remaining_setup(self):
+        # Run the real setup.sh on a copy of the repo with every CLI it calls
+        # mocked; brew bundle fails the way a refused mas install does.
+        repo = self.home / "repo"
+        shutil.copytree(REPO, repo, ignore=shutil.ignore_patterns(".git", "__pycache__"))
+        self.env["DOTFILES_DIR"] = str(repo)
+        self.mock("brew", 'case "$1" in bundle) exit 1;; esac; exit 0\n')
+        self.mock("gh", 'case "$1" in config) mkdir -p "$XDG_CONFIG_HOME/gh"; '
+                  'echo "$3: $4" >> "$XDG_CONFIG_HOME/gh/config.yml";; esac; exit 0\n')
+        self.mock("mise", 'case "$1" in ls) echo "{}";; version) echo 2026.9.0;; esac; exit 0\n')
+        self.mock("curl", "printf '%s\\n' 'mkdir -p \"$HOME/.oh-my-zsh\"'\n")
+        self.mock("defaults", 'case "$1" in export) echo "<plist><dict/></plist>";; esac; exit 0\n')
+        self.mock("ssh-keygen", "exit 1\n")
+        # Homebrew: install packages (fails); macOS defaults: no; new key: no.
+        result = self.command(["/bin/bash", str(repo / "setup.sh")],
+                              input="y\nn\nn\n", check=False)
+        out = result.stdout + result.stderr
+        self.assertEqual(result.returncode, 1, out)
+        self.assertIn("Setting up Homebrew packages failed; continuing.", out)
+        self.assertIn("failed step(s):\n  - Setting up Homebrew packages", out)
+        self.assertEqual(out.count("failed; continuing."), 1, out)
+        # Steps after the failure still ran.
+        self.assertTrue((self.home / ".oh-my-zsh").is_dir())
+        self.assertTrue((self.home / "config/nvim").is_symlink())
+        self.assertTrue((self.home / ".pi/agent/settings.json").is_symlink())
+        self.assertIn("commits will fail until it does", out)
+
     def test_missing_signing_key_is_created_only_on_request(self):
         git = self.home / "config/git"
         git.mkdir(parents=True)

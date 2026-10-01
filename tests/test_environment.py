@@ -92,7 +92,7 @@ class EnvironmentTests(Sandbox):
         self.assertIn("shared-marker", result.stdout)
 
     def setup_prefix(self):
-        setup = (REPO / "setup.sh").read_text().split("# --- Homebrew", 1)[0]
+        setup = (REPO / "setup.sh").read_text().split("# --- Setup steps ---", 1)[0]
         # Exercise the real filesystem setup prefix, excluding chmod of repo scripts.
         setup = setup.split("# --- Make scripts executable ---", 1)[0] + (
             setup.split("# --- XDG directories ---", 1)[1]
