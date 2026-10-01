@@ -24,34 +24,41 @@
 #
 # Per-item links keep tool-managed content (Claude's claude.ai `synced/`
 # bucket, plugin caches, etc.) out of dotfiles, and are the documented mode for
-# Claude Code. The trade-off: something a tool installs into its own directory
-# is NOT in dotfiles until this script runs again. Each run reconciles:
+# Claude Code. Each run reconciles:
 #
-#   real entry in a tool dir, not in canonical   -> moved into canonical, linked
+#   canonical entry missing from a tool dir      -> linked
+#   dangling link into canonical (item removed)  -> deleted
+#   real entry (a skill/prompt a tool installed) -> reported and left alone
+#   synced/, .bucket-*, .DS_Store                -> left alone
+#
+# Real entries are NOT absorbed by default: agents/ is published in a public
+# repo, and a tool dir may hold a private skill (e.g. in a work profile).
+# With --absorb (or AGENT_SKILLS_ABSORB=1), real entries are reconciled too:
+#
+#   real entry, not in canonical                 -> moved into canonical, linked
 #   real entry identical to canonical            -> replaced by a link
 #   real entry different from canonical          -> copied to a conflicts dir,
 #                                                   then replaced by a link
-#   canonical entry missing from a tool dir      -> linked
-#   dangling link into canonical (item removed)  -> deleted
-#   synced/, .bucket-*, .DS_Store                -> left alone
 #
-# So the workflow is: install or write a skill anywhere, run this script,
-# commit dotfiles.
+# So the workflow to share a skill a tool installed: run this script with
+# --absorb, review `git status agents`, commit dotfiles.
 #
 # Plugin-installed skills (Claude marketplaces, pi packages) live in each
 # tool's own cache and are intentionally NOT covered here.
 #
 # Usage:
-#   ./scripts/setup/setup_agent_skills.sh [--dry-run]
-#   or sourced from setup.sh (set AGENT_SKILLS_DRY_RUN=1 for a dry run)
+#   ./scripts/setup/setup_agent_skills.sh [--dry-run] [--absorb]
+#   or run from setup.sh (AGENT_SKILLS_DRY_RUN=1 / AGENT_SKILLS_ABSORB=1)
 
 set -e
 
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 DRY_RUN="${AGENT_SKILLS_DRY_RUN:-0}"
+ABSORB="${AGENT_SKILLS_ABSORB:-0}"
 for arg in "$@"; do
   case "$arg" in
     --dry-run|-n) DRY_RUN=1 ;;
+    --absorb)     ABSORB=1 ;;
   esac
 done
 
@@ -89,6 +96,7 @@ PROMPTS_SRC="$DOTFILES_DIR/agents/prompts"
 CONFLICTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts/agent-skills/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 CONFLICTS=0
 MOVED=0
+FOUND=0
 LINKED=0
 PRUNED=0
 
@@ -141,8 +149,9 @@ ensure_real_dir() {
 }
 
 # absorb <canonical> <target>
-# Move real entries of <target> into <canonical> (or set aside conflicts) so
-# they can be replaced by links.
+# Without --absorb: report real entries of <target> and leave them alone.
+# With --absorb: move them into <canonical> (or set aside conflicts) so they
+# can be replaced by links.
 absorb() {
   local canonical="$1" target="$2" entry name dest
   local escaped="${target//\//__}"
@@ -153,6 +162,11 @@ absorb() {
     ignored_name "$name" && continue
     [[ -L "$entry" ]] && continue          # links are handled by link_items/prune
     dest="$canonical/$name"
+    if [[ "$ABSORB" != 1 ]]; then
+      echo "        found  $name in $target (not absorbed; rerun with --absorb to move it into the repo)"
+      FOUND=$((FOUND + 1))
+      continue
+    fi
     if [[ "$DRY_RUN" != 1 ]]; then
       _state_capture_original "$entry"
       state_record MANAGED "$entry" pending
@@ -184,6 +198,10 @@ link_items() {
     name="$(basename "$src")"
     ignored_name "$name" && continue
     link="$target/$name"
+    # A real entry left in place by absorb (no --absorb) is never replaced.
+    if [[ "$ABSORB" != 1 && -e "$link" && ! -L "$link" ]]; then
+      continue
+    fi
     if [[ -L "$link" && "$(readlink "$link")" == "$src" ]]; then
       [[ "$DRY_RUN" == 1 ]] || state_symlink "$src" "$link"   # ensure recorded
       continue
@@ -272,6 +290,10 @@ echo ""
 [[ "$PRUNED" -gt 0 ]] && log_info "$PRUNED dangling link(s) removed"
 if [[ "$MOVED" -gt 0 ]]; then
   log_info "$MOVED item(s) moved into dotfiles — review and commit: git -C $DOTFILES_DIR status agents"
+fi
+if [[ "$FOUND" -gt 0 ]]; then
+  log_warning "$FOUND real item(s) in tool dirs were left in place (listed above as \"found\")."
+  log_warning "agents/ is public: rerun with --absorb only for items that may be published."
 fi
 if [[ "$CONFLICTS" -gt 0 ]]; then
   log_warning "$CONFLICTS item(s) differed from the canonical copy and were set aside in:"

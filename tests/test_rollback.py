@@ -181,7 +181,8 @@ class RollbackTests(Sandbox):
         target.mkdir(parents=True)
         (target / "SKILL.md").write_text("custom")
         self.env["DOTFILES_DIR"] = str(fake_repo)
-        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh")])
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh"),
+                      "--absorb"])
         self.uninstall()
         conflicts = list((self.home / "data/dotfiles-conflicts").rglob("SKILL.md"))
         self.assertEqual([path.read_text() for path in conflicts], ["custom"])
@@ -226,7 +227,8 @@ class RollbackTests(Sandbox):
             target.mkdir(parents=True)
             (target / "SKILL.md").write_text("canonical")
         for _ in range(2):
-            self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh")])
+            self.command(["/bin/bash", str(REPO / "scripts/setup/setup_agent_skills.sh"),
+                          "--absorb"])
         self.uninstall()
         for name in ("demo", "unique"):
             self.assertFalse((directory / name).is_symlink())
