@@ -183,6 +183,45 @@ class UpstreamVendorTests(Sandbox):
         self.assertEqual(self.lock_sha("other"), other)
         self.assertEqual((self.dest / "c/SKILL.md").read_text(), "c v1")
 
+    def test_vendored_skill_never_overwrites_a_first_party_skill(self):
+        mine = self.dest / "a"
+        mine.mkdir()
+        (mine / "SKILL.md").write_text("first-party")
+        (mine / "notes.txt").write_text("keep me")
+        self.upstream("up", {"skills/a": "upstream a", "skills/b": "upstream b"})
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} main\nskill  up skills/*\n"
+        )
+        result = self.vendor(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("up wants", result.stderr)
+        self.assertIn("first-party", result.stderr)
+        self.assertEqual((mine / "SKILL.md").read_text(), "first-party")
+        self.assertEqual((mine / "notes.txt").read_text(), "keep me")
+        self.assertEqual((self.dest / "b/SKILL.md").read_text(), "upstream b")
+        self.assertIn("vendored up b", self.lock.read_text())
+        self.assertNotIn("vendored up a", self.lock.read_text())
+
+    def test_vendored_skill_never_overwrites_another_sources_skill(self):
+        self.upstream("one", {"skills/shared": "from one"})
+        self.manifest.write_text(
+            f"source one {self.upstreams['one']} main\nskill  one skills/*\n"
+        )
+        self.vendor()
+        self.upstream("two", {"skills/shared": "from two", "skills/extra": "extra"})
+        with self.manifest.open("a") as file:
+            file.write(f"source two {self.upstreams['two']} main\n"
+                       "skill  two skills/*\n")
+        result = self.vendor(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("two wants", result.stderr)
+        self.assertIn("source one", result.stderr)
+        self.assertEqual((self.dest / "shared/SKILL.md").read_text(), "from one")
+        self.assertEqual((self.dest / "extra/SKILL.md").read_text(), "extra")
+        lock = self.lock.read_text()
+        self.assertIn("vendored one shared", lock)
+        self.assertNotIn("vendored two shared", lock)
+
     def test_frozen_refuses_a_source_without_a_pin(self):
         self.upstream("up", {"skills/a": "a v1"})
         self.manifest.write_text(

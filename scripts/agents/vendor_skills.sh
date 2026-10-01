@@ -67,7 +67,7 @@ if [[ "$FROZEN" == 1 && "$UPDATE" == 1 ]]; then
   echo "--frozen and --update cannot be combined" >&2; exit 2
 fi
 
-GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
@@ -97,19 +97,19 @@ done < "$MANIFEST"
 # Lock lines:  <id> <sha> <url>          resolved commit per source
 #             vendored <id> <name>       skill dir owned by that source
 #             vendored <name>            legacy (no owner); never deleted
-declare -A LOCKED=() PREV_OWNED=()
+declare -A LOCKED=() PREV_OWNED=() OWNER=()
 declare -a PREV_LEGACY=() LOCK_IDS=()
 if [[ -f "$LOCK" ]]; then
   while read -r a b c _; do
     [[ -z "${a:-}" || "$a" == \#* ]] && continue
     if [[ "$a" == "vendored" ]]; then
-      if [[ -n "${c:-}" ]]; then PREV_OWNED[$b]="${PREV_OWNED[$b]:-} $c"; else PREV_LEGACY+=("$b"); fi
+      if [[ -n "${c:-}" ]]; then PREV_OWNED[$b]="${PREV_OWNED[$b]:-} $c"; OWNER[$c]="$b"; else PREV_LEGACY+=("$b"); fi
     else
       LOCKED[$a]="$b"; LOCK_IDS+=("$a")
     fi
   done < "$LOCK"
 fi
-declare -A RESOLVED=() NOW_OWNED=() IN_MANIFEST=()
+declare -A RESOLVED=() NOW_OWNED=() IN_MANIFEST=() NOW_OWNER=()
 declare -a NOW_VENDORED=() PROCESSED=()
 for id in "${SRC_IDS[@]}"; do IN_MANIFEST[$id]=1; done
 
@@ -157,8 +157,28 @@ rewrite_refs() {
   done
 }
 
+# --- Ownership -------------------------------------------------------------
+# clash_with <id> <name>: print who else holds agents/skills/<name>, if anyone.
+# A source may only write a dir the lock says it owns, or a name nobody holds.
+# Anything else (a first-party skill, a legacy unowned entry, or a dir owned
+# by another source) is left alone.
+clash_with() {
+  local id="$1" name="$2" owner
+  owner="${NOW_OWNER[$name]:-}"
+  if [[ -n "$owner" && "$owner" != "$id" ]]; then
+    echo "source $owner (vendored earlier in this run)"; return
+  fi
+  owner="${OWNER[$name]:-}"
+  if [[ -n "$owner" && "$owner" != "$id" ]]; then
+    echo "source $owner (per $LOCK)"; return
+  fi
+  if [[ -z "$owner" && -e "$DEST/$name" ]]; then
+    echo "a first-party skill (not owned by any source in $LOCK)"
+  fi
+}
+
 # --- Main -------------------------------------------------------------------
-CHANGED=0
+CHANGED=0 CLASHES=0
 for id in "${SRC_IDS[@]}"; do
   [[ -n "$ONLY" && "$ONLY" != "$id" ]] && continue
   log_info "source $id (${SRC_URL[$id]} @ ${SRC_REF[$id]})"
@@ -206,6 +226,13 @@ for id in "${SRC_IDS[@]}"; do
     [[ ${#staged_targets[@]} -gt 0 ]] && rewrite_refs "$old" "$new" "${staged_targets[@]/#/$stage/}"
   done
   for target in "${staged_targets[@]}"; do
+    other="$(clash_with "$id" "$target")"
+    if [[ -n "$other" ]]; then
+      echo -e "        ${RED}CLASH${NC}  $target: $id wants $DEST/$target, which belongs to $other; left untouched" >&2
+      CLASHES=$((CLASHES + 1))
+      continue
+    fi
+    NOW_OWNER[$target]="$id"
     if [[ -d "$DEST/$target" ]] && diff -rq -x .DS_Store "$stage/$target" "$DEST/$target" >/dev/null 2>&1; then
       echo "        same   $target"
     else
@@ -280,4 +307,9 @@ if [[ "$CHANGED" -gt 0 || "$REMOVED" -gt 0 ]]; then
   log_info "  git -C $DOTFILES_DIR status --short agents/skills agents/skills.lock"
 else
   log_success "all vendored skills already up to date"
+fi
+if [[ "$CLASHES" -gt 0 ]]; then
+  echo -e "${RED}[ERROR]${NC} $CLASHES vendored skill(s) clash with an existing skill of the same name and were skipped." >&2
+  echo -e "${RED}[ERROR]${NC} Resolve each with a rename/skip line in $MANIFEST, then re-run." >&2
+  exit 1
 fi
