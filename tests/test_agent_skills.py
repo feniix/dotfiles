@@ -109,6 +109,8 @@ class SetupAgentSkillsTests(Sandbox):
         (self.repo / "scripts/lib").mkdir(parents=True)
         shutil.copy(REPO / "scripts/lib/state.sh", self.repo / "scripts/lib/state.sh")
         self.env["DOTFILES_DIR"] = str(self.repo)
+        (self.home / ".claude-work").mkdir()
+        (self.home / ".claude-work/settings.json").write_text("{}")
         self.profile = self.home / ".claude-work/skills"
         self.private = self.profile / "private-skill"
         self.private.mkdir(parents=True)
@@ -145,3 +147,16 @@ class SetupAgentSkillsTests(Sandbox):
         )
         self.assertTrue(self.private.is_symlink())
         self.assertEqual(self.private.resolve(), (self.skills / "private-skill").resolve())
+
+    def test_only_claude_dirs_that_look_like_profiles_are_linked(self):
+        backup = self.home / ".claude-backup-2024"
+        backup.mkdir()
+        (backup / "notes.txt").write_text("not a profile")
+        legacy = self.home / ".claude-legacy"
+        legacy.mkdir()
+        (legacy / ".claude.json").write_text("{}")
+        self.setup_skills()
+        self.assertFalse((backup / "skills").exists())
+        self.assertFalse((backup / "commands").exists())
+        self.assertTrue((legacy / "skills/shared").is_symlink())
+        self.assertTrue((self.profile / "shared").is_symlink())

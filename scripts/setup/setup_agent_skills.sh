@@ -15,7 +15,8 @@
 #   skills  ->  ~/.pi/agent/skills/<name>       (pi)
 #               ~/.agents/skills/<name>         (Codex user scope, Agent Skills standard)
 #               ~/.claude/skills/<name>         (Claude Code, default profile)
-#               ~/.claude-*/skills/<name>       (Claude Code, extra CLAUDE_CONFIG_DIR profiles)
+#               ~/.claude-*/skills/<name>       (Claude Code, extra CLAUDE_CONFIG_DIR profiles;
+#                                                only dirs holding settings.json or .claude.json)
 #
 #   prompts ->  ~/.pi/agent/prompts/<name>.md   (pi prompt templates)
 #               ~/.codex/prompts/<name>.md      (Codex custom prompts)
@@ -102,10 +103,14 @@ PRUNED=0
 
 # --- Targets ---
 # Claude Code profiles: default home plus any extra CLAUDE_CONFIG_DIR homes
-# following the ~/.claude-<name> convention. Only existing homes are linked.
+# following the ~/.claude-<name> convention. Only existing homes are linked,
+# and a ~/.claude-* dir counts only if it looks like a profile (Claude Code
+# writes settings.json / .claude.json there), so e.g. ~/.claude-backup-* is
+# never given skills/ and commands/.
 CLAUDE_HOMES=()
-for d in "$HOME/.claude" "$HOME"/.claude-*; do
-  [[ -d "$d" ]] && CLAUDE_HOMES+=("$d")
+[[ -d "$HOME/.claude" ]] && CLAUDE_HOMES+=("$HOME/.claude")
+for d in "$HOME"/.claude-*; do
+  [[ -d "$d" && ( -f "$d/settings.json" || -f "$d/.claude.json" ) ]] && CLAUDE_HOMES+=("$d")
 done
 
 SKILL_TARGETS=("$HOME/.pi/agent/skills" "$HOME/.agents/skills")
