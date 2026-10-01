@@ -33,6 +33,9 @@ local function check_core_utils()
   end
   
   ok("core.utils module is loaded successfully")
+
+  -- Platform helpers live under utils.platform
+  local platform = utils.platform or {}
   
   -- Check platform detection functions
   local platform_functions = {
@@ -41,7 +44,7 @@ local function check_core_utils()
   }
   
   for _, func_name in ipairs(platform_functions) do
-    if utils[func_name] and is_function(utils[func_name]) then
+    if platform[func_name] and is_function(platform[func_name]) then
       ok("Platform function '" .. func_name .. "' is available")
     else
       warn("Platform function '" .. func_name .. "' is missing or not callable")
@@ -49,7 +52,7 @@ local function check_core_utils()
   end
   
   -- Test platform detection
-  local os_name = utils.get_os and utils.get_os()
+  local os_name = platform.get_os and platform.get_os()
   if os_name then
     info("Detected OS: " .. os_name)
     
@@ -73,7 +76,7 @@ local function check_core_utils()
   end
   
   -- Test terminal detection
-  local terminal = utils.get_terminal and utils.get_terminal()
+  local terminal = platform.get_terminal and platform.get_terminal()
   if terminal then
     info("Detected terminal: " .. terminal)
     ok("Terminal detection is working")
@@ -82,7 +85,7 @@ local function check_core_utils()
   end
   
   -- Test clipboard configuration
-  local clipboard_config = utils.get_clipboard_config and utils.get_clipboard_config()
+  local clipboard_config = platform.get_clipboard_config and platform.get_clipboard_config()
   if clipboard_config then
     ok("Clipboard configuration is available")
     if clipboard_config.name then
@@ -107,7 +110,7 @@ local function check_core_utils()
   
   -- Test some utilities if they exist
   if utils.safe_require and is_function(utils.safe_require) then
-    local test_module = utils.safe_require("vim")
+    local test_module = utils.safe_require("core.utils")
     if test_module then
       ok("safe_require utility is working correctly")
     else

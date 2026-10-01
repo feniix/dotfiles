@@ -139,7 +139,6 @@ local function check_essential_configs()
   start("Essential Plugin Configurations")
   
   local essential_configs = {
-    { name = "colorscheme", module = "plugins.config.colorscheme", critical = true },
     { name = "telescope", module = "plugins.config.telescope", critical = true },
     { name = "treesitter", module = "plugins.config.treesitter", critical = true },
     { name = "cmp", module = "plugins.config.cmp", critical = true },

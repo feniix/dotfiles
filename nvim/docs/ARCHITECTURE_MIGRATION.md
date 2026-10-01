@@ -252,20 +252,15 @@ nvim/
 **Available Commands:**
 ```vim
 :checkhealth                " Run all health checks (comprehensive)
-:HealthCheck               " Run comprehensive health check
-:HealthQuick               " Run quick essential checks only
-:HealthStructure           " Check overall structure
-:HealthCore                " Check core modules
-:HealthPlugins             " Check plugin system
-:HealthUser                " Check user override system
 
 " Individual health checks:
-:checkhealth structure     " Structure & architecture
 :checkhealth core          " Core modules
 :checkhealth plugins       " Plugin system
-:checkhealth user_system   " User override system
-:checkhealth user          " Legacy user configuration
+:checkhealth user          " Tools, platform, DAP, Go, treesitter
 ```
+
+`health/structure.lua` and `health/user_system.lua` have no `:checkhealth`
+target; see `docs/modules/health.md`.
 
 **Health Check Categories:**
 - 📁 **Structure & Architecture**: Directory structure, module organization

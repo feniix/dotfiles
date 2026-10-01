@@ -17,31 +17,30 @@ The health check system provides multiple levels of validation:
 ### Basic Usage
 
 ```vim
-" Run comprehensive health check
+" Run every health check (Neovim's, the plugins', and this config's)
 :checkhealth
 
-" Run quick essential checks only
-:HealthQuick
-
-" Run specific health check categories
-:checkhealth structure
-:checkhealth core
-:checkhealth plugins
-:checkhealth user_system
+" Run this configuration's checks
+:checkhealth core      " lua/core/health.lua    -> health/core.lua
+:checkhealth plugins   " lua/plugins/health.lua -> health/plugins.lua
+:checkhealth user      " lua/user/health.lua (tools, platform, DAP, Go, treesitter)
 ```
+
+Neovim only discovers checks at `lua/<name>/health.lua` (or
+`lua/<name>/health/init.lua`), so `lua/core/health.lua` and
+`lua/plugins/health.lua` are thin entry points that call into the modules
+under `lua/health/`.
+
+`health/structure.lua`, `health/user_system.lua` and the aggregate
+`health/init.lua` have no `:checkhealth` target. Run them from inside a
+health report, e.g. by adding an entry point like the two above.
 
 ### User Commands
 
-The health system provides several convenient commands:
-
-```vim
-:HealthCheck          " Comprehensive health check
-:HealthQuick          " Quick essential systems check
-:HealthStructure      " Check configuration structure
-:HealthCore           " Check core modules
-:HealthPlugins        " Check plugin system
-:HealthUser           " Check user override system
-```
+`:UserConfig` runs `:checkhealth user`. The `:HealthCheck`, `:HealthQuick`,
+`:HealthStructure`, `:HealthCore`, `:HealthPlugins` and `:HealthUser`
+commands are defined by `require("health").setup()`, which the configuration
+does not call, so they do not exist unless you call it yourself.
 
 ## Health Check Modules
 
@@ -106,7 +105,7 @@ Validates the plugin management and configuration system.
 **What it checks:**
 - **Plugin Manager**: lazy.nvim installation and configuration
 - **Plugin Specifications**: All spec categories (ui, editor, lsp, tools, lang/*)
-- **Essential Configurations**: telescope, treesitter, cmp, colorscheme
+- **Essential Configurations**: telescope, treesitter, cmp, lualine, gitsigns, which-key
 - **Advanced Configurations**: dap, diffview, indent-blankline
 - **Language Configurations**: Go, Terraform, Puppet language support
 - **Individual Plugin Health**: Loading status and functionality
@@ -118,7 +117,6 @@ Validates the plugin management and configuration system.
 telescope     -- File finder and fuzzy search
 treesitter    -- Syntax highlighting and parsing
 cmp           -- Auto-completion engine
-colorscheme   -- Theme management
 
 -- Advanced plugins  
 dap           -- Debug Adapter Protocol
@@ -218,10 +216,10 @@ Based on health check results, the system provides targeted recommendations:
 
 ### Adding Custom Health Checks
 
-Create a new health check module:
+Create a new health check module where `:checkhealth` will find it:
 
 ```lua
--- lua/health/my_custom.lua
+-- lua/my_custom/health.lua  (run with :checkhealth my_custom)
 local M = {}
 
 local health = vim.health or require("health")
@@ -291,9 +289,10 @@ return M
 **Health check module not found:**
 ```vim
 :checkhealth my_module
-" Error: Health check module 'my_module' is not available
+" Error: No healthcheck found for "my_module" plugin.
 
-" Solution: Ensure the module exists at lua/health/my_module.lua
+" Solution: Ensure the module exists at lua/my_module/health.lua
+" (or lua/my_module/health/init.lua) and returns a table with check()
 ```
 
 **Module loading failures:**
@@ -307,9 +306,6 @@ return M
 
 **Performance issues:**
 ```vim
-" Check startup time
-:HealthQuick
-
 " Detailed plugin analysis
 :checkhealth plugins
 
@@ -349,7 +345,7 @@ vim.api.nvim_create_autocmd("VimEnter", {
     local week_seconds = 7 * 24 * 60 * 60
     
     if os.time() - last_check > week_seconds then
-      vim.notify("Consider running :HealthCheck for configuration validation", vim.log.levels.INFO)
+      vim.notify("Consider running :checkhealth for configuration validation", vim.log.levels.INFO)
       vim.fn.writefile({}, vim.fn.stdpath("cache") .. "/last_health_check")
     end
   end,
@@ -400,8 +396,8 @@ jobs:
 
 ### Regular Health Monitoring
 
-1. **Weekly Comprehensive Checks**: Run `:HealthCheck` weekly
-2. **After Updates**: Run `:HealthQuick` after plugin updates
+1. **Weekly Comprehensive Checks**: Run `:checkhealth` weekly
+2. **After Updates**: Run `:checkhealth plugins` after plugin updates
 3. **Before Important Work**: Validate system before critical projects
 4. **Performance Monitoring**: Track startup time trends
 
@@ -416,9 +412,9 @@ jobs:
 
 ```vim
 " Monthly maintenance routine
-:HealthCheck                 " Comprehensive validation
-:Lazy sync                   " Update plugins
-:HealthPlugins              " Validate plugin health
+:checkhealth core plugins user  " Validate this configuration
+:Lazy sync                      " Update plugins
+:checkhealth plugins            " Validate plugin health
 :Mason update               " Update LSP servers
 :checkhealth mason          " Validate LSP health
 ```
