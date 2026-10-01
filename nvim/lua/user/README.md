@@ -283,12 +283,6 @@ Execute custom logic after all setup is complete:
 
 ```lua
 function M.post_setup()
-  -- Set up custom commands
-  vim.api.nvim_create_user_command('ReloadConfig', function()
-    vim.cmd('source ~/.config/nvim/init.lua')
-    print('Configuration reloaded!')
-  end, {})
-  
   -- Set up custom highlights
   vim.api.nvim_set_hl(0, 'CustomHighlight', {
     fg = '#ff0000',

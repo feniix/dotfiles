@@ -66,18 +66,36 @@ local function health_check()
   vim.cmd('checkhealth')
 end
 
--- Reload Neovim configuration
+-- Reload the parts of the configuration that are safe to re-run.
+-- lazy.nvim refuses to re-source init.lua ("Re-sourcing your config is not
+-- supported"), so plugin specs and plugin configs still need a restart.
+-- Options, global keymaps and the user overrides are plain setup functions
+-- that only set options, keymaps and grouped autocmds, so they can run again.
+local function is_reloadable(name)
+  return name == 'user' or name:match('^user%.') ~= nil
+    or name == 'core.options' or name == 'core.keymaps'
+end
+
 local function reload_config()
-  -- Clear loaded modules
-  for name, _ in pairs(package.loaded) do
-    if name:match('^core') or name:match('^plugins') then
+  for name in pairs(package.loaded) do
+    if is_reloadable(name) then
       package.loaded[name] = nil
     end
   end
-  
-  -- Reload init file
-  dofile(vim.env.MYVIMRC)
-  vim.notify("Configuration reloaded", vim.log.levels.INFO)
+
+  local ok, err = pcall(function()
+    require('core.options').setup()
+    require('core.keymaps').setup()
+    require('user').setup_core_overrides()
+  end)
+  if not ok then
+    vim.notify("Reload failed: " .. tostring(err), vim.log.levels.ERROR)
+    return
+  end
+  vim.notify(
+    "Reloaded options, keymaps and user overrides. Restart Neovim to apply plugin changes.",
+    vim.log.levels.INFO
+  )
 end
 
 -- Create user commands for plugin management
@@ -104,7 +122,7 @@ function M.setup()
   })
   
   vim.api.nvim_create_user_command('ReloadConfig', reload_config, {
-    desc = 'Reload Neovim configuration'
+    desc = 'Reload options, keymaps and user overrides (plugins need a restart)'
   })
   
   -- Set up keymaps for quick access
@@ -121,7 +139,9 @@ function M.setup_keymaps()
   keymap('n', '<leader>pc', clean_plugins, vim.tbl_extend('force', opts, { desc = 'Clean plugins' }))
   keymap('n', '<leader>ps', status_plugins, vim.tbl_extend('force', opts, { desc = 'Plugin status' }))
   keymap('n', '<leader>ph', health_check, vim.tbl_extend('force', opts, { desc = 'Health check' }))
-  keymap('n', '<leader>pr', reload_config, vim.tbl_extend('force', opts, { desc = 'Reload config' }))
+  keymap('n', '<leader>pr', reload_config, vim.tbl_extend('force', opts, { desc = 'Reload options, keymaps and user overrides' }))
 end
+
+M.reload_config = reload_config
 
 return M 

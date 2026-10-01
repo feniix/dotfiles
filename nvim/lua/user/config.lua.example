@@ -214,12 +214,6 @@ M.modules = {
 
 -- Custom logic to run after all setup is complete
 function M.post_setup()
-  -- Example: Set up custom commands
-  vim.api.nvim_create_user_command('ReloadConfig', function()
-    vim.cmd('source ~/.config/nvim/init.lua')
-    print('Configuration reloaded!')
-  end, {})
-  
   -- Example: Set up custom highlights
   vim.api.nvim_set_hl(0, 'CustomHighlight', {
     fg = '#ff0000',
