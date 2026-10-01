@@ -106,6 +106,25 @@ PY
         self.assertEqual(json.loads(inventory.read_text()),
                          {"formula": ["existing"], "cask": ["old-app"]})
 
+    def test_interrupted_brew_install_is_recovered_on_the_next_run(self):
+        inventory = self.brew_fixture()
+        # A run killed during brew bundle: its before-snapshot is left behind
+        # and the packages it added are already installed.
+        self.state(
+            's="$STATE_DIR/software-brew.killed"; mkdir -p "$s"; '
+            'printf "existing\\n" > "$s/formula.before"; '
+            'printf "old-app\\n" > "$s/cask.before"; '
+            'state_record SOFTWARE_INVENTORY "$s" brew'
+        )
+        inventory.write_text(json.dumps(
+            {"formula": ["added", "existing"], "cask": ["new-app", "old-app"]}))
+        self.source_setup("setup_homebrew.sh", input="y\n")
+        manifest = (self.home / "data/dotfiles-state/manifest").read_text()
+        self.assertNotIn("SOFTWARE_INVENTORY", manifest)
+        self.uninstall("--software")
+        self.assertEqual(json.loads(inventory.read_text()),
+                         {"formula": ["existing"], "cask": ["old-app"]})
+
     def test_partial_mise_failure_is_reported_and_added_version_is_owned(self):
         inventory = self.mise_fixture(fail_install=True)
         result = self.source_setup("setup_mise.sh", check=False)
