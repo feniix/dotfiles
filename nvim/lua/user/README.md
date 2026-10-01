@@ -44,7 +44,7 @@ M.options = {
 
 -- Add custom keymaps
 M.keymaps = {
-  normal = {
+  n = {
     ['<leader>w'] = ':w<CR>',
     ['<leader>q'] = ':q<CR>',
   },
@@ -87,7 +87,7 @@ M.options = {
 ```lua
 M.keymaps = {
   -- Normal mode mappings
-  normal = {
+  n = {
     ['<leader>w'] = ':w<CR>',
     ['<leader>q'] = ':q<CR>',
     ['<C-h>'] = '<C-w>h',
@@ -97,20 +97,20 @@ M.keymaps = {
   },
   
   -- Insert mode mappings
-  insert = {
+  i = {
     ['jk'] = '<Esc>',
     ['<C-a>'] = '<Home>',
     ['<C-e>'] = '<End>',
   },
   
   -- Visual mode mappings
-  visual = {
+  v = {
     ['<leader>y'] = '"+y',
     ['<leader>p'] = '"+p',
   },
   
   -- Advanced mapping with options
-  normal = {
+  n = {
     ['<leader>ff'] = {
       '<cmd>Telescope find_files<CR>',
       desc = 'Find files',
@@ -372,13 +372,13 @@ M.options = {
 }
 
 M.keymaps = {
-  normal = {
+  n = {
     ['<leader>w'] = ':w<CR>',
     ['<leader>q'] = ':q<CR>',
     ['<leader>ff'] = '<cmd>Telescope find_files<CR>',
     ['<leader>fg'] = '<cmd>Telescope live_grep<CR>',
   },
-  insert = {
+  i = {
     ['jk'] = '<Esc>',
   },
 }

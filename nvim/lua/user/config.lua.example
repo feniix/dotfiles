@@ -26,7 +26,7 @@ M.options = {
 -- Override or add keymaps
 M.keymaps = {
   -- Example: Custom leader key mappings
-  normal = {
+  n = {
     ['<leader>w'] = ':w<CR>',
     ['<leader>q'] = ':q<CR>',
     ['<C-h>'] = '<C-w>h',
@@ -36,12 +36,12 @@ M.keymaps = {
   },
   
   -- Example: Insert mode mappings
-  insert = {
+  i = {
     ['jk'] = '<Esc>',
   },
   
   -- Example: Visual mode mappings
-  visual = {
+  v = {
     ['<leader>y'] = '"+y',
   },
 }

@@ -1,95 +1,88 @@
 -- User configuration file for Neovim
 -- This file allows you to override and customize any aspect of the configuration
 -- Copy and modify from config.lua.example for more extensive customization
+--
+-- Keys read by lua/user/init.lua: options, keymaps, autocmds, plugins.specs,
+-- plugins.config, lazy_config, modules, post_setup. Leave a key out (or
+-- commented) to keep the defaults; an empty table still counts as set.
 
 local M = {}
 
--- Enable user overrides
-M.enabled = true
-
 -- Core vim option overrides (optional)
-M.core_overrides = {
-  -- Example: override some core options
-  -- options = {
-  --   number = true,
-  --   relativenumber = true,
-  --   tabstop = 4,  -- Override to 4 spaces instead of 2
-  -- },
-  
-  -- Example: add custom keymaps
-  -- keymaps = {
-  --   { "n", "<leader>xx", ":echo 'Hello from user config!'<CR>", { desc = "Test user keymap" } },
-  -- },
-  
-  -- Example: add custom autocommands
-  -- autocmds = {
-  --   {
-  --     event = "BufWritePre", 
-  --     pattern = "*.lua",
-  --     callback = function()
-  --       print("Saving a Lua file!")
-  --     end
-  --   },
-  -- },
-}
+-- M.options = {
+--   number = true,
+--   relativenumber = true,
+--   tabstop = 4,  -- Override to 4 spaces instead of 2
+-- }
 
--- Plugin-specific overrides (optional)
-M.plugin_overrides = {
-  -- Example: override telescope configuration
-  -- telescope = {
-  --   defaults = {
-  --     prompt_prefix = "🚀 ",  -- Change the prompt
-  --   }
-  -- },
-  
-  -- Example: override which-key configuration  
-  -- ["which-key"] = {
-  --   preset = "helix",  -- Change which-key preset
-  -- },
-}
+-- Custom keymaps (optional): { mode, lhs, rhs, opts }
+-- M.keymaps = {
+--   { "n", "<leader>xx", ":echo 'Hello from user config!'<CR>", { desc = "Test user keymap" } },
+-- }
 
--- Additional plugin specifications (optional)
-M.additional_plugins = {
-  -- Example: add a new plugin
-  -- {
-  --   "folke/zen-mode.nvim", 
-  --   cmd = "ZenMode",
-  --   config = function()
-  --     require("zen-mode").setup()
-  --   end
-  -- },
-}
+-- Custom autocommands (optional)
+-- M.autocmds = {
+--   {
+--     event = "BufWritePre",
+--     pattern = "*.lua",
+--     callback = function()
+--       print("Saving a Lua file!")
+--     end
+--   },
+-- }
+
+-- M.plugins = {
+--   -- Additional plugin specifications, grouped by category
+--   specs = {
+--     editor = {
+--       {
+--         "folke/zen-mode.nvim",
+--         cmd = "ZenMode",
+--         config = function()
+--           require("zen-mode").setup()
+--         end
+--       },
+--     },
+--   },
+--
+--   -- Plugin configuration overrides, applied by
+--   -- lua/user/overrides/plugins/<name>.lua
+--   config = {
+--     telescope = {
+--       defaults = {
+--         prompt_prefix = "🚀 ",  -- Change the prompt
+--       }
+--     },
+--     ["which-key"] = {
+--       preset = "helix",  -- Change which-key preset
+--     },
+--   },
+-- }
 
 -- Lazy.nvim configuration overrides (optional)
-M.lazy_overrides = {
-  -- Example: change lazy.nvim settings
-  -- defaults = {
-  --   lazy = false,  -- Make all plugins load on startup
-  -- },
-}
+-- M.lazy_config = {
+--   defaults = {
+--     lazy = false,  -- Make all plugins load on startup
+--   },
+-- }
 
--- Custom modules to load (optional)
-M.custom_modules = {
-  -- Example: load a custom module
-  -- "user.modules.my_custom_module",
-}
+-- Modules to load from lua/user/modules/ (optional)
+-- M.modules = {
+--   "my_custom_module",
+-- }
 
--- Post-setup hooks (optional)
-M.post_setup_hooks = {
-  -- Example: function to run after everything is set up
-  -- function()
-  --   print("User configuration loaded successfully!")
-  -- end,
-}
+-- Function to run after everything is set up (optional)
+-- function M.post_setup()
+--   print("User configuration loaded successfully!")
+-- end
 
 -- Quick test function
 function M.test()
   return {
-    enabled = M.enabled,
     config_loaded = true,
     timestamp = os.date(),
     message = "User configuration is working! ✅"
   }
 end
 
-return M 
+return M
