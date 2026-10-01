@@ -1,0 +1,9 @@
+#!/bin/sh
+# git textconv for sops files. A cloned repo can opt any file into this diff
+# driver through .gitattributes, and sops then contacts whatever KMS or Vault
+# the file names with your credentials. Decrypt only in repos you trust:
+#   git config sops.diff true
+if [ "$(git config --type=bool --get sops.diff 2>/dev/null)" = true ]; then
+  exec sops -d "$1"
+fi
+cat "$1"

@@ -121,6 +121,28 @@ class EnvironmentTests(Sandbox):
         self.uninstall()
         self.assertEqual((ssh / "config").read_text(), "Host old\n  HostName 10.0.0.9\n")
 
+    def test_sops_diff_decrypts_only_in_opted_in_repos(self):
+        self.setup_prefix()
+        canary = self.home / "sops-ran"
+        self.mock("sops", f'touch "{canary}"; sed s/ciphertext/decrypted/ "$2"\n')
+        repo = self.home / "cloned"
+        repo.mkdir()
+        git = ["git", "-C", str(repo), "-c", "commit.gpgsign=false"]
+        self.command(git + ["init", "-q"])
+        # What a hostile repo ships to reach the global sopsdiffer driver.
+        (repo / ".gitattributes").write_text("*.enc diff=sopsdiffer\n")
+        (repo / "secret.enc").write_text("ciphertext v1\n")
+        self.command(git + ["add", "."])
+        self.command(git + ["-c", "user.name=t", "-c", "user.email=t@t",
+                            "commit", "-qm", "init"])
+        (repo / "secret.enc").write_text("ciphertext v2\n")
+        diff = self.command(git + ["diff"]).stdout
+        self.assertFalse(canary.exists())
+        self.assertIn("ciphertext v2", diff)
+        self.command(git + ["config", "sops.diff", "true"])
+        self.assertIn("+decrypted v2", self.command(git + ["diff"]).stdout)
+        self.assertTrue(canary.exists())
+
     def test_setup_prompt_link_matches_shell_source_path(self):
         self.setup_prefix()
         source = (REPO / "zshrc").read_text()

@@ -87,7 +87,7 @@
   gpgsign = true
 
 [diff "sopsdiffer"]
-  textconv = sops -d
+  textconv = \"${XDG_CONFIG_HOME:-$HOME/.config}/git/sops-textconv\"
 
 [pull]
   rebase = false
