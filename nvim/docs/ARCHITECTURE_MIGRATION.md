@@ -8,8 +8,7 @@ This document outlines the reorganization of the Neovim configuration with bette
 
 ```
 nvim/
-├── init.lua                 # Original configuration (preserved)
-├── init-new.lua            # New reorganized configuration entry point
+├── init.lua                 # Entry point: loads core, then plugins
 ├── lua/
 │   ├── core/               # Core Neovim configuration
 │   │   ├── init.lua        # Core module loader
@@ -72,7 +71,7 @@ nvim/
 - [x] Plugin management structure (`plugins/`)
 - [x] Basic plugin specifications
 - [x] Essential plugin configurations
-- [x] New entry point (`init-new.lua`)
+- [x] New entry point (`init.lua`, which replaced the original)
 - [x] Backward compatibility with existing setup
 - [x] Health check compatibility (fixed platform module API)
 - [x] Platform detection and utilities migration

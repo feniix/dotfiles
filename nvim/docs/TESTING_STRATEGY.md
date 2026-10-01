@@ -2,6 +2,8 @@
 
 This document outlines the comprehensive testing approach for ensuring reliable Neovim configuration across macOS and Linux platforms.
 
+> **Status: proposal.** None of the Lua suites (`lua/tests/*.lua`), shell scripts (`scripts/test/*.sh`) or the GitHub Actions workflow below exist in this repo. The Neovim tests that do exist are Python tests in the repo's `tests/` directory (`tests/test_nvim.py`, `tests/test_formatting.py`), run with `uvx pytest -q tests`.
+
 ## 🎯 Testing Objectives
 
 1. **Platform Compatibility**: Ensure all features work identically on macOS and Linux
@@ -69,7 +71,7 @@ RUN apt-get update && apt-get install -y \
 
 ### Automated Test Suite
 ```lua
--- lua/tests/platform_suite.lua
+-- proposed, not in the repo: lua/tests/platform_suite.lua
 local M = {}
 
 -- Test categories
@@ -129,7 +131,7 @@ return M
 
 ### Platform Detection Tests
 ```lua
--- lua/tests/platform_detection.lua
+-- proposed, not in the repo: lua/tests/platform_detection.lua
 local platform = require('core.utils').platform
 local M = {}
 
@@ -195,7 +197,7 @@ return M
 
 ### Plugin Compatibility Tests
 ```lua
--- lua/tests/plugin_loading.lua
+-- proposed, not in the repo: lua/tests/plugin_loading.lua
 local M = {}
 
 -- Critical plugins that must work on both platforms
@@ -282,7 +284,7 @@ return M
 
 ### Performance Benchmarks
 ```lua
--- lua/tests/performance_benchmarks.lua
+-- proposed, not in the repo: lua/tests/performance_benchmarks.lua
 local M = {}
 
 function M.run_tests()
@@ -382,7 +384,7 @@ return M
 ### macOS Testing Script
 ```bash
 #!/bin/bash
-# scripts/test/test_macos.sh
+# proposed, not in the repo: scripts/test/test_macos.sh
 
 set -e
 
@@ -420,7 +422,7 @@ echo "🎉 macOS testing completed successfully!"
 ### Linux Testing Script
 ```bash
 #!/bin/bash
-# scripts/test/test_linux.sh
+# proposed, not in the repo: scripts/test/test_linux.sh
 
 set -e
 
@@ -481,7 +483,7 @@ echo "🎉 Linux testing completed successfully!"
 ### Cross-Platform Test Runner
 ```bash
 #!/bin/bash
-# scripts/test/run_all_tests.sh
+# proposed, not in the repo: scripts/test/run_all_tests.sh
 
 set -e
 
@@ -598,7 +600,7 @@ jobs:
 
 ### Success Criteria
 ```lua
--- lua/tests/success_criteria.lua
+-- proposed, not in the repo: lua/tests/success_criteria.lua
 local M = {}
 
 M.criteria = {
@@ -654,7 +656,7 @@ return M
 
 ### Test Report Generation
 ```lua
--- lua/tests/report_generator.lua
+-- proposed, not in the repo: lua/tests/report_generator.lua
 local M = {}
 
 function M.generate_html_report(test_results)

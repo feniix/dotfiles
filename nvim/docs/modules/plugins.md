@@ -96,12 +96,11 @@ Plugin specifications define what plugins to install and when to load them.
 }
 ```
 
-### lsp.lua - LSP and Completion
+### lsp.lua - Completion and Debugging
 
-**LSP Ecosystem**:
-- **nvim-lspconfig** - LSP configuration
-- **nvim-cmp** - Completion engine
-- **mason.nvim** - LSP installer
+No language servers are configured; the file holds completion and DAP.
+
+- **nvim-cmp** - Completion engine (with cmp-buffer, cmp-path, cmp-cmdline)
 - **nvim-dap** - Debug Adapter Protocol
 - **nvim-dap-ui** - Debug UI
 - **nvim-dap-virtual-text** - Debug virtual text

@@ -415,8 +415,6 @@ jobs:
 :checkhealth core plugins user  " Validate this configuration
 :Lazy sync                      " Update plugins
 :checkhealth plugins            " Validate plugin health
-:Mason update               " Update LSP servers
-:checkhealth mason          " Validate LSP health
 ```
 
 The health check system provides comprehensive validation and monitoring for your Neovim configuration, ensuring reliability, performance, and maintainability as your setup evolves. 
