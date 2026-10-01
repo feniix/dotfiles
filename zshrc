@@ -37,6 +37,9 @@ append_manpath() {
 
 # Reset PATH to ensure proper ordering
 reset_path() {
+  # append_path skips directories that do not exist (e.g. an uninstalled
+  # keg-only formula) and ones already on PATH.
+  local dir
   # Save important system paths that should be included but at lower priority
   local usr_local_bin="/usr/local/bin"
   local usr_bin="/usr/bin"
@@ -47,25 +50,28 @@ reset_path() {
   eval $(brew shellenv)
 
   # Add homebrew core utils next (highest priority after base homebrew)
-  export PATH="$PATH:/opt/homebrew/opt/curl/bin"
-  export PATH="$PATH:/opt/homebrew/opt/make/libexec/gnubin"
-  export PATH="$PATH:/opt/homebrew/opt/gnu-getopt/bin"
-  export PATH="$PATH:/opt/homebrew/opt/gnu-tar/libexec/gnubin"
-  export PATH="$PATH:/opt/homebrew/opt/findutils/bin"
-  export PATH="$PATH:/opt/homebrew/opt/gawk/bin"
-  export PATH="$PATH:/opt/homebrew/opt/less/bin"
-  export PATH="$PATH:/opt/homebrew/opt/libpq/bin"
-  export PATH="$PATH:/opt/homebrew/opt/ssh-copy-id/bin"
+  append_path "/opt/homebrew/opt/curl/bin"
+  append_path "/opt/homebrew/opt/make/libexec/gnubin"
+  append_path "/opt/homebrew/opt/gnu-getopt/bin"
+  append_path "/opt/homebrew/opt/gnu-tar/libexec/gnubin"
+  append_path "/opt/homebrew/opt/findutils/bin"
+  append_path "/opt/homebrew/opt/gawk/bin"
+  append_path "/opt/homebrew/opt/less/bin"
+  append_path "/opt/homebrew/opt/libpq/bin"
+  append_path "/opt/homebrew/opt/ssh-copy-id/bin"
 
   # Tool-specific paths
-  export PATH="$PATH:${KREW_ROOT:-$HOME/.krew}/bin"
-  export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
+  append_path "${KREW_ROOT:-$HOME/.krew}/bin"
+  append_path "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 
   # Add user directories next
-  export PATH="$PATH:$HOME/bin:$HOME/.local/share/go/bin"
+  append_path "$HOME/bin"
+  append_path "$HOME/.local/share/go/bin"
 
   # Add system paths at lowest priority
-  export PATH="$PATH:$usr_local_bin:$usr_bin:$usr_sbin:$bin:$sbin"
+  for dir in "$usr_local_bin" "$usr_bin" "$usr_sbin" "$bin" "$sbin"; do
+    append_path "$dir"
+  done
 }
 
 # Initialize with proper ordering
@@ -98,9 +104,8 @@ if type brew &>/dev/null; then
   # oh-my-zsh runs compinit (with its own cached dump) once this FPATH is set
   FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
 
-  # Completion caching
+  # Completion caching (oh-my-zsh sets cache-path to its own cache dir)
   zstyle ':completion:*' use-cache on
-  zstyle ':completion:*' cache-path ~/.zsh/cache
 
   # Better completion options
   zstyle ':completion:*' menu select

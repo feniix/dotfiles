@@ -5,7 +5,11 @@ export XDG_DATA_HOME="$HOME/.local/share"
 export XDG_STATE_HOME="$HOME/.local/state"
 export XDG_RUNTIME_DIR="/tmp/runtime-$(id -u)"
 
-# Create XDG runtime directory if it doesn't exist
+# /tmp is shared: if another user pre-created this path (or made it a
+# symlink), use a private directory instead of trusting theirs.
+if [[ -L "$XDG_RUNTIME_DIR" || ( -e "$XDG_RUNTIME_DIR" && ! -O "$XDG_RUNTIME_DIR" ) ]]; then
+  XDG_RUNTIME_DIR="$(mktemp -d "${TMPDIR:-/tmp}/runtime.XXXXXX")"
+fi
 if [ ! -d "$XDG_RUNTIME_DIR" ]; then
   mkdir -p "$XDG_RUNTIME_DIR"
   chmod 0700 "$XDG_RUNTIME_DIR"
