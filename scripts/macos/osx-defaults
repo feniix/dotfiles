@@ -57,16 +57,24 @@ run() {
     echo "  [dry-run] $*"
   else
     if [[ "$1" == defaults ]]; then
-      local domain scope=user
+      local op domain key scope=user legacy=false
       if [[ "$2" == -currentHost ]]; then
         scope=host
-        domain="$4"
+        op="$3" domain="$4" key="$5"
       else
-        domain="$3"
+        op="$2" domain="$3" key="$4"
       fi
-      # Never change a domain uninstall could not restore.
+      # Decide before the snapshot below makes every domain look tracked.
+      if defaults_domain_is_legacy "$scope" "$domain"; then legacy=true; fi
+      # Never change a domain uninstall could not restore. The snapshot stays
+      # as the fallback for keys a per-key record cannot represent.
       if ! defaults_backup_domain "$domain" "$scope"; then
         echo "  SKIPPED (no backup of $scope:$domain): $*" >&2
+        FAILED+=("$*")
+        return 0
+      fi
+      if [[ "$op" == write ]] && ! defaults_record_key "$domain" "$scope" "$key" "$legacy"; then
+        echo "  SKIPPED (no baseline for $scope:$domain:$key): $*" >&2
         FAILED+=("$*")
         return 0
       fi

@@ -109,6 +109,28 @@ undo_legacy_path() {
   esac
 }
 
+# Run after every DEFAULTS_KEY entry had its turn. A domain with per-key
+# records keeps settings osx-defaults never wrote; only legacy domains and
+# SNAPSHOT keys (values a key record cannot hold) import the whole snapshot.
+undo_defaults_domain() {
+  local domain_path="$1" backup="$2" j key_type key_path key_extra
+  local keys=() snapshot=false pending=false
+  for ((j=0; j<${#entries[@]}; j++)); do
+    IFS='|' read -r key_type _ key_path key_extra <<< "${entries[$j]}"
+    [[ "$key_type" == DEFAULTS_KEY && "$key_path" == "$domain_path:"* ]] || continue
+    keys+=("$j")
+    [[ "$key_extra" != SNAPSHOT ]] || snapshot=true
+    [[ "${resolved[$j]}" == true ]] || pending=true
+  done
+  if (( ${#keys[@]} )) && [[ "$snapshot" != true ]]; then
+    # Every tracked key is back; the snapshot was only a fallback.
+    [[ "$pending" != true ]]
+    return
+  fi
+  defaults_restore_domain "$domain_path" "$backup" || return 1
+  for j in "${keys[@]}"; do resolved[$j]=true; done
+}
+
 undo_entry() {
   local type="$1" path="$2" extra="$3"
   case "$type" in
@@ -121,9 +143,14 @@ undo_entry() {
       [[ ! -d "$path" ]] || run rmdir "$path"
       ;;
     DIR_EXISTED) return 0 ;;
+    DEFAULTS_KEY)
+      # Status 2 keeps it quietly: its domain entry reports the retention.
+      [[ "$RESTORE_DEFAULTS" == true ]] || return 2
+      defaults_restore_key "$path" "$extra"
+      ;;
     DEFAULTS_DOMAIN)
       [[ "$RESTORE_DEFAULTS" == true ]] || return 1
-      defaults_restore_domain "$path" "$extra"
+      undo_defaults_domain "$path" "$extra"
       ;;
     DEFAULTS_BACKUP)
       log_warning "Legacy all-domain dump at $path cannot be safely imported. Keeping it for manual recovery."
@@ -169,20 +196,32 @@ undo_entry() {
   esac
 }
 
-for ((i=${#entries[@]}-1; i>=0; i--)); do
-  IFS='|' read -r type _ path extra <<< "${entries[$i]}"
-  [[ "${resolved[$i]}" == true ]] && continue
-  if undo_entry "$type" "$path" "$extra"; then
-    resolved[$i]=true
-    if [[ "$type" == MANAGED ]]; then
-      for ((j=0; j<${#entries[@]}; j++)); do
-        IFS='|' read -r other_type _ other_path _ <<< "${entries[$j]}"
-        [[ "$other_type" == ORIGINAL && "$other_path" == "$path" ]] && resolved[$j]=true
-      done
+# Defaults domains go last: whether one is imported depends on its keys.
+for pass in main domains; do
+  for ((i=${#entries[@]}-1; i>=0; i--)); do
+    IFS='|' read -r type _ path extra <<< "${entries[$i]}"
+    [[ "${resolved[$i]}" == true ]] && continue
+    if [[ "$pass" == main ]]; then
+      [[ "$type" != DEFAULTS_DOMAIN ]] || continue
+    else
+      [[ "$type" == DEFAULTS_DOMAIN ]] || continue
     fi
-  elif [[ "$type" != ORIGINAL ]]; then
-    log_warning "Unresolved: $type ($path). Preserving its records and backups."
-  fi
+    status=0
+    undo_entry "$type" "$path" "$extra" || status=$?
+    if [[ "$status" == 0 ]]; then
+      resolved[$i]=true
+      if [[ "$type" == MANAGED ]]; then
+        for ((j=0; j<${#entries[@]}; j++)); do
+          IFS='|' read -r other_type _ other_path _ <<< "${entries[$j]}"
+          [[ "$other_type" == ORIGINAL && "$other_path" == "$path" ]] && resolved[$j]=true
+        done
+      fi
+    # ORIGINAL is consumed with its MANAGED entry; a deferred key (status 2)
+    # is reported or imported with its domain.
+    elif [[ "$type" != ORIGINAL && "$type$status" != DEFAULTS_KEY2 ]]; then
+      log_warning "Unresolved: $type ($path). Preserving its records and backups."
+    fi
+  done
 done
 
 # Removing an owned dependent may make another owned formula a leaf.
