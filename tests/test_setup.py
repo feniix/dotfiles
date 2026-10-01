@@ -39,6 +39,27 @@ class SetupTests(Sandbox):
         self.uninstall("--software")
         self.assertFalse((self.home / ".oh-my-zsh").exists())
 
+    def test_omz_install_keeps_managed_zshrc_and_fixed_path(self):
+        # Mirrors the real installer: ZDOTDIR moves the install and the zshrc
+        # is replaced unless KEEP_ZSHRC=yes; --unattended must reach it.
+        self.mock("curl", "cat <<'EOF'\n"
+                  'ZSH="${ZSH:-${ZDOTDIR:+$ZDOTDIR/ohmyzsh}}"; ZSH="${ZSH:-$HOME/.oh-my-zsh}"\n'
+                  'mkdir -p "$ZSH"\n'
+                  'zrc="${ZDOTDIR:-$HOME}/.zshrc"\n'
+                  '[ "$KEEP_ZSHRC" = yes ] || { mv "$zrc" "$zrc.pre-oh-my-zsh"; echo template > "$zrc"; }\n'
+                  'echo "$@" > "$HOME/omz-args"\n'
+                  "EOF\n")
+        self.mock("brew", "exit 0\n")
+        zdotdir = self.home / "config/zsh"
+        zdotdir.mkdir(parents=True)
+        (zdotdir / ".zshrc").write_text("managed")
+        self.env["ZDOTDIR"] = str(zdotdir)
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_zsh.sh")])
+        self.assertTrue((self.home / ".oh-my-zsh").is_dir())
+        self.assertFalse((zdotdir / "ohmyzsh").exists())
+        self.assertEqual((zdotdir / ".zshrc").read_text(), "managed")
+        self.assertIn("--unattended", (self.home / "omz-args").read_text())
+
     def test_zsh_check_only_does_not_initialize_state(self):
         (self.home / ".oh-my-zsh").mkdir()
         self.mock("brew", "exit 0\n")

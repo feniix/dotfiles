@@ -93,7 +93,10 @@ else
     exit 1
   fi
 
-  if RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"; then
+  # Pin the install path (the installer otherwise follows ZDOTDIR) and keep
+  # the managed zshrc; "" fills $0 so --unattended reaches the installer.
+  if ZSH="$HOME/.oh-my-zsh" KEEP_ZSHRC=yes CHSH=no RUNZSH=no \
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
     state_record "SOFTWARE" "omz" "$HOME/.oh-my-zsh"
     log_success "Oh My Zsh has been installed successfully."
   else
