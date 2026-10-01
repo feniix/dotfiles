@@ -211,6 +211,14 @@ class EnvironmentTests(Sandbox):
         self.assertIn("+decrypted v2", self.command(git + ["diff"]).stdout)
         self.assertTrue(canary.exists())
 
+    def test_setup_puts_utilities_on_path(self):
+        self.setup_prefix()
+        for name in ("flushdns", "view-secrets"):
+            link = self.home / ".local/bin" / name
+            self.assertEqual(link.resolve(), REPO / "scripts/utils" / name)
+        self.uninstall()
+        self.assertFalse((self.home / ".local/bin/flushdns").exists())
+
     def test_setup_links_tmux_config(self):
         self.setup_prefix()
         link = self.home / "config/tmux/tmux.conf"

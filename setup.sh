@@ -82,6 +82,13 @@ state_mkdir "$XDG_CONFIG_HOME/tmux"
 state_symlink "$DOTFILES_DIR/tmux.conf" "$XDG_CONFIG_HOME/tmux/tmux.conf"
 log_success "tmux.conf"
 
+# utilities: ~/.local/bin is on PATH via zshrc
+state_mkdir "$HOME/.local/bin"
+for util in "$DOTFILES_DIR"/scripts/utils/*; do
+  state_symlink "$util" "$HOME/.local/bin/$(basename "$util")"
+done
+log_success "utilities in ~/.local/bin"
+
 # vim
 if [ -f "$DOTFILES_DIR/.vimrc" ]; then
   state_symlink "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
