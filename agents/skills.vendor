@@ -1,6 +1,12 @@
 # Third-party skill bundles vendored into agents/skills.
 # Applied by scripts/agents/vendor_skills.sh; pins recorded in skills.lock.
 #
+# Runs are pinned: a source already in skills.lock is copied at its locked
+# commit, so editing skip/rename lines and re-running never pulls new upstream
+# code. To move a pin (or apply a changed <ref>/URL), run
+# `vendor_skills.sh --update [<id>]`, review the diff, then commit. <ref> is
+# only resolved by --update and for sources with no lock entry yet.
+#
 # Directives (whitespace separated, # comments allowed):
 #   source <id> <git-url> <ref>          a repo to pull from
 #   skill  <id> <path-glob-in-repo>       skill dirs to copy (glob, may match many)

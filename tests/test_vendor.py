@@ -142,3 +142,52 @@ class UpstreamVendorTests(Sandbox):
         self.vendor(cwd=decoy)
         for name in ("only", "alpha", "beta"):
             self.assertTrue((self.dest / name / "SKILL.md").exists(), name)
+
+    def pinned_fixture(self):
+        first = self.upstream("up", {"skills/a": "a v1", "skills/b": "b v1"})
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} main\nskill  up skills/*\n"
+        )
+        self.vendor()
+        self.assertEqual(self.lock_sha("up"), first)
+        second = self.upstream("up", {"skills/a": "a v2", "skills/b": "b v2"})
+        return first, second
+
+    def test_rerun_without_update_keeps_the_pinned_commit(self):
+        first, _ = self.pinned_fixture()
+        with self.manifest.open("a") as file:
+            file.write("skip up b\n")
+        self.vendor()
+        self.assertEqual(self.lock_sha("up"), first)
+        self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a v1")
+        self.assertFalse((self.dest / "b").exists())
+
+    def test_update_moves_the_pin(self):
+        _, second = self.pinned_fixture()
+        self.vendor("--update")
+        self.assertEqual(self.lock_sha("up"), second)
+        self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a v2")
+
+    def test_update_with_an_id_moves_only_that_source(self):
+        first, second = self.pinned_fixture()
+        other = self.upstream("other", {"skills/c": "c v1"})
+        with self.manifest.open("a") as file:
+            file.write(f"source other {self.upstreams['other']} main\n"
+                       "skill  other skills/*\n")
+        self.vendor()  # no lock entry yet: resolves its ref
+        self.assertEqual(self.lock_sha("other"), other)
+        self.assertEqual(self.lock_sha("up"), first)
+        self.upstream("other", {"skills/c": "c v2"})
+        self.vendor("--update", "up")
+        self.assertEqual(self.lock_sha("up"), second)
+        self.assertEqual(self.lock_sha("other"), other)
+        self.assertEqual((self.dest / "c/SKILL.md").read_text(), "c v1")
+
+    def test_frozen_refuses_a_source_without_a_pin(self):
+        self.upstream("up", {"skills/a": "a v1"})
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} main\nskill  up skills/*\n"
+        )
+        result = self.vendor("--frozen", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.dest / "a").exists())

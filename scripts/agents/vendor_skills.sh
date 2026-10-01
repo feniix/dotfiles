@@ -5,7 +5,14 @@
 # Reads agents/skills.vendor (see that file for the directive format),
 # clones or updates each source repo into a local cache, copies the selected
 # skill directories into agents/skills, applies renames, and writes the
-# resolved commit of every source to agents/skills.lock.
+# commit of every source to agents/skills.lock.
+#
+# Pinned by default: a source with an entry in skills.lock is used at that
+# commit, so applying a skip/rename never pulls new upstream code (which would
+# go live at once through the skill symlinks). Only --update re-resolves a
+# source's <ref> and moves its pin. A source with no lock entry yet (new, or
+# just added to the manifest) resolves its <ref> either way. After changing a
+# source's <ref> or URL in the manifest, run --update <id> to apply it.
 #
 # agents/skills is symlinked into pi, Codex and every Claude Code profile by
 # scripts/setup/setup_agent_skills.sh, so one run updates all of them. This
@@ -13,13 +20,15 @@
 # could see.
 #
 # Usage:
-#   scripts/agents/vendor_skills.sh              update to each source's <ref>
-#   scripts/agents/vendor_skills.sh --frozen     use the commits in skills.lock
-#   scripts/agents/vendor_skills.sh --dry-run    show what would change
-#   scripts/agents/vendor_skills.sh --only <id>  limit to one source id
+#   scripts/agents/vendor_skills.sh               re-apply the manifest at the pinned commits
+#   scripts/agents/vendor_skills.sh --update      re-resolve every source's <ref>, move the pins
+#   scripts/agents/vendor_skills.sh --update <id> re-resolve that source only
+#   scripts/agents/vendor_skills.sh --frozen      pinned commits only; fail if a source has no pin
+#   scripts/agents/vendor_skills.sh --dry-run     show what would change
+#   scripts/agents/vendor_skills.sh --only <id>   limit to one source id
 #
 # The manifest is declarative: after a run, agents/skills holds exactly what
-# each source provides at its pinned ref. Skills a source provided before but
+# each source provides at its pinned commit. Skills a source provided before but
 # no longer does (removed upstream, or you repinned to an older ref, or you
 # removed a skill/source line) are DELETED. Only skills recorded in the lock as
 # owned by that source are ever deleted; your own skills are never touched.
@@ -41,17 +50,22 @@ LOCK="$DOTFILES_DIR/agents/skills.lock"
 DEST="$DOTFILES_DIR/agents/skills"
 CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/dotfiles-vendor-skills"
 
-DRY_RUN=0 FROZEN=0 ONLY=""
+DRY_RUN=0 FROZEN=0 UPDATE=0 UPDATE_ID="" ONLY=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run|-n) DRY_RUN=1 ;;
     --frozen)     FROZEN=1 ;;
+    --update)     UPDATE=1
+                  if [[ $# -gt 1 && "$2" != -* ]]; then UPDATE_ID="$2"; shift; fi ;;
     --only)       ONLY="$2"; shift ;;
-    -h|--help)    sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help)    sed -n '2,/^set -euo/p' "$0" | sed '$d'; exit 0 ;;
     *) echo "unknown option: $1" >&2; exit 2 ;;
   esac
   shift
 done
+if [[ "$FROZEN" == 1 && "$UPDATE" == 1 ]]; then
+  echo "--frozen and --update cannot be combined" >&2; exit 2
+fi
 
 GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 log_info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
@@ -99,6 +113,9 @@ declare -A RESOLVED=() NOW_OWNED=() IN_MANIFEST=()
 declare -a NOW_VENDORED=() PROCESSED=()
 for id in "${SRC_IDS[@]}"; do IN_MANIFEST[$id]=1; done
 
+# wants_update <id>: true when --update covers this source
+wants_update() { [[ "$UPDATE" == 1 && ( -z "$UPDATE_ID" || "$UPDATE_ID" == "$1" ) ]]; }
+
 # --- Fetch a source, return its checkout dir --------------------------------
 checkout_source() {
   local id="$1" url="${SRC_URL[$1]}" ref="${SRC_REF[$1]}" dir="$CACHE/$1" want
@@ -108,8 +125,11 @@ checkout_source() {
   else
     git -C "$dir" fetch --quiet --tags origin || return 1
   fi
-  if [[ "$FROZEN" == 1 && -n "${LOCKED[$id]:-}" ]]; then
+  if [[ -n "${LOCKED[$id]:-}" ]] && ! wants_update "$id"; then
     want="${LOCKED[$id]}"
+    log_info "  pinned at ${want:0:12} (--update $id follows $ref)"
+  elif [[ "$FROZEN" == 1 ]]; then
+    log_warning "$id: no pinned commit in $LOCK and --frozen given"; return 1
   else
     want="$(git -C "$dir" rev-parse --verify --quiet "origin/$ref" || git -C "$dir" rev-parse --verify --quiet "$ref")" \
       || { log_warning "$id: cannot resolve ref '$ref'"; return 1; }
@@ -190,7 +210,9 @@ for id in "${SRC_IDS[@]}"; do
       echo "        same   $target"
     else
       [[ -d "$DEST/$target" ]] && echo "        update $target" || echo "        add    $target"
-      run rsync -a --delete --exclude .DS_Store "$stage/$target/" "$DEST/$target/"
+      # --checksum: a same-size edit within the same second as the last copy
+      # would otherwise be skipped by rsync's size+mtime check
+      run rsync -a --checksum --delete --exclude .DS_Store "$stage/$target/" "$DEST/$target/"
       CHANGED=$((CHANGED + 1))
     fi
     vendored_dirs+=("$DEST/$target")
