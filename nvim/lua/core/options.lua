@@ -39,18 +39,16 @@ function M.setup()
     vim.g.python3_host_prog = vim.fn.exepath('python3')
   end
   
-  -- Node.js provider (if available)
+  -- Node.js provider: enable it only when the `neovim` npm package is
+  -- installed. `npm install -g neovim` puts neovim-node-host on PATH, so a
+  -- PATH lookup is enough; spawning `npm root -g` here cost ~110ms per start.
+  local node_host = ''
   if utils.platform.command_available('node') then
-    -- Check for neovim npm package instead of node binary
-    local neovim_path = vim.fn.system('npm root -g 2>/dev/null'):gsub('\n', '') .. '/neovim/bin/cli.js'
-    if vim.fn.filereadable(neovim_path) == 1 then
-      vim.g.node_host_prog = neovim_path
-    else
-      -- Disable node provider if neovim package not found
-      vim.g.loaded_node_provider = 0
-    end
+    node_host = vim.fn.exepath('neovim-node-host')
+  end
+  if node_host ~= '' then
+    vim.g.node_host_prog = node_host
   else
-    -- Disable node provider if node not available
     vim.g.loaded_node_provider = 0
   end
   

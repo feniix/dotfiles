@@ -12,7 +12,8 @@ from test_rollback import REPO, Sandbox
 class NvimModuleTests(Sandbox):
     def run_lua(self, body):
         """Run `body` with nvim/lua on the path; it returns a JSON-able value."""
-        if not shutil.which("nvim"):
+        nvim = shutil.which("nvim")
+        if not nvim:
             self.fail("nvim is required for Neovim config tests")
         result = self.home / "result.json"
         script = self.home / "probe.lua"
@@ -25,7 +26,7 @@ local value = (function()
 end)()
 vim.fn.writefile({{vim.json.encode(value)}}, {json.dumps(str(result))})
 """)
-        self.command(["nvim", "--headless", "-u", "NONE", "-i", "NONE",
+        self.command([nvim, "--headless", "-u", "NONE", "-i", "NONE",
                       "--noplugin", "-l", str(script)])
         return json.loads(result.read_text())
 
@@ -68,3 +69,24 @@ keymaps.setup({ n = { ['<leader>zm'] = ':echo 2<CR>' } })
 return { vim.fn.maparg(',zl', 'n'), vim.fn.maparg(',zm', 'n') }
 """)
         self.assertEqual(maps, [":echo 1<CR>", ":echo 2<CR>"])
+
+    def node_provider(self):
+        # `npm` must never run at startup; the mock records any call. Only
+        # the mocks and the system dirs are on PATH, so a real
+        # neovim-node-host cannot leak in.
+        self.mock("npm", 'echo "$@" >> "$HOME/npm-calls"\n')
+        self.mock("node", "exit 0\n")
+        self.env["PATH"] = str(self.home / "bin") + ":/usr/bin:/bin"
+        result = self.run_lua("""
+require('core.options').setup()
+return { vim.g.node_host_prog or '', vim.g.loaded_node_provider or -1 }
+""")
+        self.assertFalse((self.home / "npm-calls").exists())
+        return result
+
+    def test_node_provider_uses_neovim_node_host_on_path(self):
+        host = self.mock("neovim-node-host", "exit 0\n")
+        self.assertEqual(self.node_provider(), [str(host), -1])
+
+    def test_node_provider_disabled_without_neovim_package(self):
+        self.assertEqual(self.node_provider(), ["", 0])
