@@ -121,6 +121,57 @@ class EnvironmentTests(Sandbox):
         self.uninstall()
         self.assertEqual((ssh / "config").read_text(), "Host old\n  HostName 10.0.0.9\n")
 
+    def zshrc_function(self, name):
+        source = (REPO / "zshrc").read_text()
+        start = source.index(f"function {name}()")
+        return source[start:source.index("\n}\n", start) + 3]
+
+    def test_rm_local_branches_keeps_unmerged_work(self):
+        remote, work = self.home / "remote.git", self.home / "work"
+        git = ["git", "-c", "commit.gpgsign=false", "-c", "user.name=t",
+               "-c", "user.email=t@t", "-c", "init.defaultBranch=main"]
+        self.command(git + ["init", "-q", "--bare", str(remote)])
+        self.command(git + ["clone", "-q", str(remote), str(work)])
+        w = git + ["-C", str(work)]
+        self.command(w + ["commit", "-q", "--allow-empty", "-m", "base"])
+        self.command(w + ["push", "-q", "origin", "main"])
+        for branch, subject in (("merged", "done"), ("unmerged", "wip"),
+                                ("live", "fix: gone] in subject")):
+            self.command(w + ["switch", "-q", "-c", branch, "main"])
+            if branch != "merged":
+                self.command(w + ["commit", "-q", "--allow-empty", "-m", subject])
+            self.command(w + ["push", "-q", "-u", "origin", branch])
+        self.command(w + ["switch", "-q", "main"])
+        for branch in ("merged", "unmerged"):
+            self.command(git + ["-C", str(remote), "branch", "-D", branch])
+        result = self.command([
+            "/bin/zsh", "-dfc",
+            f'cd "{work}"; ' + self.zshrc_function("rm_local_branches") + "rm_local_branches",
+        ])
+        branches = self.command(w + ["branch", "--format=%(refname:short)"]).stdout.split()
+        self.assertEqual(sorted(branches), ["live", "main", "unmerged"])
+        self.assertIn("kept unmerged", result.stdout)
+        outside = self.command(["/bin/zsh", "-dfc", f'cd "{self.home}"; '
+                                + self.zshrc_function("rm_local_branches")
+                                + "rm_local_branches"], check=False)
+        self.assertIn("not a git repo", outside.stdout)
+        self.assertNotIn("parse error", outside.stderr)
+
+    def test_rsyncmove_never_splices_onto_a_different_file(self):
+        source = (REPO / "zshrc").read_text()
+        alias = next(line for line in source.splitlines()
+                     if line.startswith("alias rsyncmove="))
+        src, dst = self.home / "src", self.home / "dst"
+        src.write_text("XXXXXXXXXXGOODTAIL")
+        dst.write_text("AAAAAAAAAA")
+        rsync = shutil.which("rsync", path="/opt/homebrew/bin:/usr/local/bin")
+        if not rsync:
+            self.skipTest("Homebrew rsync not installed")
+        self.command(["/bin/zsh", "-dfc",
+                      f'{alias}; alias rsync="{rsync}"; eval \'rsyncmove "{src}" "{dst}"\''])
+        self.assertEqual(dst.read_text(), "XXXXXXXXXXGOODTAIL")
+        self.assertFalse(src.exists())
+
     def test_provider_wrappers_see_only_their_own_key(self):
         self.env.update(KIMI_API_KEY="kimi-secret", OPENAI_API_KEY="o",
                         OPENAI_ADMIN_KEY="a", LINEAR_API_KEY="l",

@@ -357,8 +357,10 @@ alias h='fc -li 1'
 alias hs='history | grep'
 
 # Copy/move with progress bar
-alias rsynccopy="rsync --partial --progress --append --rsh=ssh -r -h"
-alias rsyncmove="rsync --partial --progress --append --rsh=ssh -r -h --remove-sent-files"
+# --append-verify resumes partial copies but rechecks the whole file, so a
+# different file already at the destination is never spliced onto.
+alias rsynccopy="rsync --partial --progress --append-verify --rsh=ssh -r -h"
+alias rsyncmove="rsync --partial --progress --append-verify --rsh=ssh -r -h --remove-source-files"
 
 # === FUNCTIONS ===
 # Compact JDK version switcher
@@ -413,12 +415,20 @@ function list() {
 
 # Remove git branches that have been deleted upstream
 function rm_local_branches() {
-  if [ $(git rev-parse --is-inside-work-tree 2> /dev/null) = "true" ]; then
-    echo "deleting local branches that do not have a remote"
-    git fetch --all -p; git branch -vv | grep ": gone]" | awk '{ print $1 }' | xargs -r -n 1 git branch -D
-  else
+  if [[ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != true ]]; then
     echo "not a git repo"
+    return 1
   fi
+  echo "deleting local branches whose remote branch is gone"
+  git fetch --all -p || return
+  # Read tracking state, not `branch -vv` text (commit subjects can say
+  # "gone]"), and use -d so unmerged work is kept and reported.
+  git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads |
+    awk '$2 == "[gone]" { print $1 }' |
+    while read -r branch; do
+      git branch -d "$branch" ||
+        echo "kept $branch: it has unmerged commits (git branch -D $branch to drop them)"
+    done
 }
 
 # === EXTERNAL TOOLS INTEGRATION ===
