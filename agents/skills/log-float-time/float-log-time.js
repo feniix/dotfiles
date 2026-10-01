@@ -13,14 +13,40 @@
 // 1. Be on https://spantree.float.com/log-time (logged in). Inject this file once.
 // 2. await floatPrimeAuth()  → steps the week until Float makes an authenticated
 //    request, then restores the week it started on.
-// 3. await floatListTasks()   → confirm the intended task name is live
-// 4. await floatLogTime({ date: "2026-08-04", hours: 8, task: "<live name>", notes: "..." })
+// 3. await floatListTasks("211la")  → confirm the intended task name is live
+//    (project alias or id; omitted → the default Evie Platform project)
+// 4. await floatLogTime({ date: "2026-08-04", hours: 8, project: "211la",
+//      task: "<live name>", notes: "..." })
 
 (() => {
+  // Known projects, keyed by a short alias. Project ids are stable; task names and
+  // ids are NOT — they are always resolved live from task-meta for the TARGET
+  // project at write time (defaultTask is only the name to look up).
+  const PROJECTS = {
+    "evie-platform": { id: 11348463, label: "Spantree / Evie Platform", defaultTask: "Tooling & Internal Platform" },
+    "211la": { id: 11848944, label: "211 LA (2LA presales)", defaultTask: "Presales Engineering" },
+  };
+
   window.FLOAT_CFG = {
     people_id: 17853024,
-    project_id: 11348463, // Spantree / Evie Platform
+    project_id: PROJECTS["evie-platform"].id, // default project
     phase_id: 0,
+    projects: PROJECTS,
+  };
+
+  // Resolve a project alias, numeric id, or undefined (→ default) to a known project.
+  // Unknown ids are refused: writing to a project nobody vetted is how stray tasks happen.
+  const resolveProject = (project) => {
+    if (project === undefined || project === null) {
+      return Object.values(PROJECTS).find((p) => p.id === window.FLOAT_CFG.project_id);
+    }
+    const byKey = PROJECTS[String(project)];
+    if (byKey) return byKey;
+    const byId = Object.values(PROJECTS).find((p) => p.id === Number(project));
+    if (byId) return byId;
+    throw new Error(
+      `unknown project "${project}"; known: ${Object.entries(PROJECTS).map(([k, p]) => `${k} (${p.id})`).join(", ")}`,
+    );
   };
 
   if (!window.__floatOrigFetch) {
@@ -157,14 +183,15 @@
     return { ok: isPrimed(), steps, api3Seen: window.__floatApi3Seen };
   };
 
-  window.floatListTasks = async function floatListTasks() {
-    const response = await authenticatedFetch(
-      `/svc/api3/v3/task-meta?project_id=${window.FLOAT_CFG.project_id}`,
-    );
+  /** Live tasks for a project (alias, id, or default). */
+  window.floatListTasks = async function floatListTasks(project) {
+    const target = resolveProject(project);
+    const response = await authenticatedFetch(`/svc/api3/v3/task-meta?project_id=${target.id}`);
     const data = await response.json().catch(() => null);
     return {
       status: response.status,
       ok: response.ok,
+      project: { id: target.id, label: target.label },
       tasks: collectTaskPairs(data),
       data,
     };
@@ -204,11 +231,16 @@
       date,
       hours,
       notes = "",
-      task = "Tooling & Internal Platform",
+      project, // alias ("evie-platform", "211la") or id; omitted → default project
+      projectId, // legacy alias for `project`
       peopleId = window.FLOAT_CFG.people_id,
-      projectId = window.FLOAT_CFG.project_id,
       phaseId = window.FLOAT_CFG.phase_id,
     } = args || {};
+    // Task lookup and the write MUST target the same project; resolving once
+    // guarantees it (an id checked against another project's list would let
+    // Float mint a stray blank task).
+    const target = resolveProject(project ?? projectId);
+    const task = (args && args.task) || target.defaultTask;
 
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date || "")) {
       throw new Error("date must be YYYY-MM-DD");
@@ -218,7 +250,7 @@
     }
     if (typeof task !== "string" || !task) throw new Error("task is required");
 
-    const live = await window.floatListTasks();
+    const live = await window.floatListTasks(target.id);
     if (!live.ok) throw new Error(`task lookup failed with status ${live.status}`);
     const matches = live.tasks.filter((candidate) => candidate.name === task);
     if (matches.length !== 1) {
@@ -234,7 +266,7 @@
     const body = JSON.stringify([
       {
         people_id: peopleId,
-        project_id: projectId,
+        project_id: target.id,
         phase_id: phaseId,
         task_meta_id: matches[0].id,
         date,
@@ -256,6 +288,7 @@
       status: response.status,
       ok: response.ok,
       data,
+      project: { id: target.id, label: target.label },
       task: matches[0],
       noteLength: String(notes).slice(0, 1500).length,
     };
@@ -265,14 +298,15 @@
    * Partial-edit an existing entry, e.g. { task_meta_id: N } or { hours: 6 }.
    * Note the id goes in the PATH — PUT to the bare collection returns 404.
    * A task change is verified against the live list first, same as a create.
+   * Pass `project` (alias or id) when the entry is not on the default project.
    */
   window.floatUpdateTime = async function floatUpdateTime(loggedTimeId, patch) {
     if (!loggedTimeId) throw new Error("loggedTimeId is required");
     if (!patch || typeof patch !== "object") throw new Error("patch object is required");
 
-    const body = { ...patch };
+    const { project, ...body } = patch;
     if (body.task) {
-      const live = await window.floatListTasks();
+      const live = await window.floatListTasks(project ?? body.project_id);
       if (!live.ok) throw new Error(`task lookup failed with status ${live.status}`);
       const matches = live.tasks.filter((candidate) => candidate.name === body.task);
       if (matches.length !== 1) {

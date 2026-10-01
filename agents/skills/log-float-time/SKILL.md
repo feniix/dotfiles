@@ -1,6 +1,6 @@
 ---
 name: log-float-time
-description: Log or record the user's work time in Float for the Spantree / Evie Platform project through a dedicated agent-browser Chrome profile that holds the user's Float login. Use when the user asks to log Float time, record hours against an Evie Platform task, or submit a day's work to Float. Resolve date, hours, task, and notes; summarize git commits when notes are omitted; require confirmation before the live write; and verify the result afterward.
+description: Log or record the user's work time in Float — the Spantree / Evie Platform project or the 211 LA (2LA presales) project — through a dedicated agent-browser Chrome profile that holds the user's Float login. Use when the user asks to log Float time, record hours against an Evie Platform or 211 LA task, or submit a day's work to Float. Resolve date, project, hours, task, and notes; summarize git commits when notes are omitted; require confirmation before the live write; and verify the result afterward.
 ---
 
 # Log time to Float
@@ -19,20 +19,34 @@ This mutates a live timesheet. Confirm before writing; verify after.
   any slash-form or incomplete date** — `08/04`, `08/04/2026`, `04/08` — showing the plausible
   readings in ISO. Never silently pick a locale convention. Resolve the date *before* reading
   commits, and continue only once one exact `YYYY-MM-DD` is settled.
+- `project` — which Float project the work belongs to (see "Projects" below). Infer it from
+  the work: commits in a `211LA-*` repo (e.g. `Spantree/211LA-chatbot-poc`,
+  `Spantree/211LA-ai-poc`) or 2LA-keyed work → `211la`; Evie Platform / evie-kit / EVP work →
+  `evie-platform`. **If the day mixes both, or it is unclear, ask** — and offer to split the
+  hours into one entry per project. Always show the project in the confirmation.
 - `hours` — default **8**. Float allows at most 24; `0` soft-deletes.
-- `task` — default **"Tooling & Internal Platform"**. Must match a live task name exactly.
+- `task` — default is the project's default task (below). Must match a live task name exactly.
 - `notes` — supplied text, or summarized from that date's git commits.
 
-### Stable coordinates
+### Projects
 
-`people_id` `17853024` · `project_id` `11348463` (Spantree / Evie Platform) · `phase_id` `0`.
-These do not change.
+| alias (helper `project:`) | `project_id` | Float project | default task |
+|---|---|---|---|
+| `evie-platform` (default) | `11348463` | Spantree / Evie Platform | `Tooling & Internal Platform` |
+| `211la` | `11848944` | 211 LA (2LA presales; the API returns no project name — identified from the user's 2LA entries, Sep 2026) | `Presales Engineering` |
+
+Stable coordinates: `people_id` `17853024` · `phase_id` `0` · the project ids above.
+These do not change. The helper refuses any project not in this table — add a row here
+**and** in `PROJECTS` in `float-log-time.js` to support another one.
 
 ### Tasks are NOT stable
 
-Known names as of 2026-09-30: `Product Development`, `Tooling & Internal Platform`,
-`Training Material Development`, `Product Management`. **Treat this list and every cached
-id as advisory only — always resolve the id from the live task list at write time.**
+Known names as of 2026-10-01 — Evie Platform: `Product Development`,
+`Tooling & Internal Platform`, `Training Material Development`, `Product Management`;
+211 LA: `Presales Engineering` (task-meta `42370613`). **Treat these lists and every cached id
+as advisory only — always resolve the id from the live task list of the TARGET project at
+write time.** The helper's lookup and write both use the one resolved project, so a task can
+never be checked against one project and written to another.
 
 The helper deliberately holds no task table, because a stale one is what caused the
 failure documented under "Gotchas".
@@ -58,7 +72,7 @@ If there are no commits, stop and ask whether to use empty or supplied notes.
 
 ## Confirm before writing
 
-Show the resolved date, hours, task, and the exact notes preview. Ask for explicit
+Show the resolved date, project, hours, task, and the exact notes preview. Ask for explicit
 confirmation. Do not open Float or create an entry until the user confirms.
 
 ## Browser setup
@@ -129,17 +143,18 @@ session. Do this:
      const r = await floatListEntries("<date>");
      return { status: r.status, ok: r.ok,
        entries: r.entries.map(e => ({ id: e.logged_time_id, date: e.date, hours: e.hours,
-         task: e.task_name, noteLength: e.noteLength })) };
+         project_id: e.project_id, task: e.task_name, noteLength: e.noteLength })) };
    })()
    EOF
    ```
    If an entry with the same date, hours, project, task, and notes already exists, report
    success without writing again. If the date has any other logged time or an ambiguous
    block, describe it and ask the user before adding a second entry.
-5. **Confirm the task is live:**
+5. **Confirm the task is live** on the target project (`"evie-platform"` or `"211la"`):
    ```bash
    cat <<'EOF' | ab eval --stdin
-   (async () => { const r = await floatListTasks(); return { status: r.status, tasks: r.tasks }; })()
+   (async () => { const r = await floatListTasks("<project alias>");
+     return { status: r.status, project: r.project, tasks: r.tasks }; })()
    EOF
    ```
    `floatLogTime` repeats this check and refuses an unknown or stale task, but look at the
@@ -149,9 +164,9 @@ session. Do this:
    ```bash
    cat <<'EOF' | ab eval --stdin
    (async () => {
-     const r = await floatLogTime({ date: "<date>", hours: <hours>,
+     const r = await floatLogTime({ date: "<date>", hours: <hours>, project: "<project alias>",
        task: "<exact live name>", notes: "<JSON-escaped notes>" });
-     return { status: r.status, ok: r.ok, task: r.task, noteLength: r.noteLength };
+     return { status: r.status, ok: r.ok, project: r.project, task: r.task, noteLength: r.noteLength };
    })()
    EOF
    ```
@@ -166,7 +181,7 @@ Re-read the saved entry with the step-4 listing and confirm date, hours, project
 and note length. Prefer this API read-back over opening the block in the UI — it cannot
 mutate anything. If a dialog does open, close it with `Cancel`, never `Update`.
 
-Report the date, hours, task, and note length. Finish with `ab close`.
+Report the date, project, hours, task, and note length. Finish with `ab close`.
 
 ## Gotchas
 
@@ -177,7 +192,8 @@ Report the date, hours, task, and note length. Finish with `ab close`.
   project and attaches the entry to it. This has happened. It is why every write must resolve
   its id from a live `task-meta` response.
 - A stray blank task can be removed with `DELETE /svc/api3/v3/task-meta/<id>` (204).
-- To edit an entry use `floatUpdateTime(id, patch)` — the id goes in the **path**;
+- To edit an entry use `floatUpdateTime(id, patch)` — pass `project: "<alias>"` in the patch
+  when changing the task of a non-default-project entry; the id goes in the **path**;
   `PUT` to the bare collection returns 404. The PUT response shape is inconsistent, so always
   re-read afterward rather than trusting the returned body.
 - `GET /svc/api3/v3/logged-time` returns the **whole team's** rows. Filter by `people_id`
