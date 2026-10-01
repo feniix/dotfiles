@@ -199,27 +199,8 @@ function M.setup()
     vim.cmd('DiffviewOpen --staged')
   end, { desc = 'Open diffview for staged changes' })
 
-  -- Set up global keymaps
-  M.setup_keymaps()
-end
-
-function M.setup_keymaps()
-  local keymap = vim.keymap.set
-  local opts = { noremap = true, silent = true }
-
-  -- Diffview commands
-  keymap('n', '<leader>gd', ':DiffviewOpen<CR>', vim.tbl_extend('force', opts, { desc = 'Open Git diff view' }))
-  keymap('n', '<leader>gh', ':DiffviewFileHistory<CR>', vim.tbl_extend('force', opts, { desc = 'Open Git file history' }))
-  keymap('n', '<leader>gH', ':DiffviewFileHistory %<CR>', vim.tbl_extend('force', opts, { desc = 'Open current file history' }))
-  keymap('n', '<leader>gq', ':DiffviewClose<CR>', vim.tbl_extend('force', opts, { desc = 'Close Git diff view' }))
-  
-  -- Advanced Git diff commands
-  keymap('n', '<leader>gm', ':DiffviewOpenMain<CR>', vim.tbl_extend('force', opts, { desc = 'Diff against origin/main' }))
-  keymap('n', '<leader>gM', ':DiffviewOpenMaster<CR>', vim.tbl_extend('force', opts, { desc = 'Diff against origin/master' }))
-  keymap('n', '<leader>gS', ':DiffviewOpenStaged<CR>', vim.tbl_extend('force', opts, { desc = 'View staged changes' }))
-  
-  -- File history with range selection (visual mode)
-  keymap('v', '<leader>gh', ':DiffviewFileHistory<CR>', vim.tbl_extend('force', opts, { desc = 'File history for selection' }))
+  -- Keymaps live in the lazy spec (plugins/specs/tools.lua) so they exist
+  -- before the plugin loads.
 end
 
 return M

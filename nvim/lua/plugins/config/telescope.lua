@@ -218,58 +218,8 @@ function M.setup()
   -- Load telescope extensions
   pcall(telescope.load_extension, 'fzf')
 
-  -- Set up keymaps
-  M.setup_keymaps()
-end
-
-function M.setup_keymaps()
-  local safe_require = _G.safe_require or require
-  local builtin = safe_require('telescope.builtin')
-  
-  if not builtin then
-    vim.notify("Telescope builtin not available", vim.log.levels.WARN)
-    return
-  end
-
-  local keymap = vim.keymap.set
-  local opts = { noremap = true, silent = true }
-
-  -- File pickers (wrapped with safety checks)
-  keymap('n', '<leader>ff', function() safe_telescope_call(builtin.find_files) end, vim.tbl_extend('force', opts, { desc = 'Telescope find files' }))
-  keymap('n', '<leader>fg', function() safe_telescope_call(builtin.live_grep) end, vim.tbl_extend('force', opts, { desc = 'Telescope live grep' }))
-  keymap('n', '<leader>fb', function() safe_telescope_call(builtin.buffers) end, vim.tbl_extend('force', opts, { desc = 'Telescope buffers' }))
-  keymap('n', '<leader>fh', function() safe_telescope_call(builtin.help_tags) end, vim.tbl_extend('force', opts, { desc = 'Telescope help tags' }))
-  keymap('n', '<leader>fr', function() safe_telescope_call(builtin.oldfiles) end, vim.tbl_extend('force', opts, { desc = 'Telescope recent files' }))
-  keymap('n', '<leader>fc', function() safe_telescope_call(builtin.colorscheme) end, vim.tbl_extend('force', opts, { desc = 'Telescope colorschemes' }))
-
-  -- Search (wrapped with safety checks)
-  keymap('n', '<leader>fw', function() safe_telescope_call(builtin.grep_string) end, vim.tbl_extend('force', opts, { desc = 'Telescope grep string under cursor' }))
-  keymap('n', '<leader>fs', function()
-    if not can_open_telescope() then return end
-    safe_telescope_call(builtin.grep_string, { search = vim.fn.input("Grep > ") })
-  end, vim.tbl_extend('force', opts, { desc = 'Telescope grep search' }))
-
-  -- Git (wrapped with safety checks)
-  keymap('n', '<leader>gc', function() safe_telescope_call(builtin.git_commits) end, vim.tbl_extend('force', opts, { desc = 'Telescope git commits' }))
-  keymap('n', '<leader>gb', function() safe_telescope_call(builtin.git_branches) end, vim.tbl_extend('force', opts, { desc = 'Telescope git branches' }))
-  keymap('n', '<leader>gs', function() safe_telescope_call(builtin.git_status) end, vim.tbl_extend('force', opts, { desc = 'Telescope git status' }))
-
-  -- LSP (wrapped with safety checks - these will be available when LSP is set up)
-  keymap('n', '<leader>lr', function() safe_telescope_call(builtin.lsp_references) end, vim.tbl_extend('force', opts, { desc = 'Telescope LSP references' }))
-  keymap('n', '<leader>ld', function() safe_telescope_call(builtin.lsp_definitions) end, vim.tbl_extend('force', opts, { desc = 'Telescope LSP definitions' }))
-  keymap('n', '<leader>li', function() safe_telescope_call(builtin.lsp_implementations) end, vim.tbl_extend('force', opts, { desc = 'Telescope LSP implementations' }))
-  keymap('n', '<leader>ls', function() safe_telescope_call(builtin.lsp_document_symbols) end, vim.tbl_extend('force', opts, { desc = 'Telescope LSP document symbols' }))
-  keymap('n', '<leader>lw', function() safe_telescope_call(builtin.lsp_workspace_symbols) end, vim.tbl_extend('force', opts, { desc = 'Telescope LSP workspace symbols' }))
-
-  -- Vim (wrapped with safety checks)
-  keymap('n', '<leader>fk', function() safe_telescope_call(builtin.keymaps) end, vim.tbl_extend('force', opts, { desc = 'Telescope keymaps' }))
-  keymap('n', '<leader>fm', function() safe_telescope_call(builtin.marks) end, vim.tbl_extend('force', opts, { desc = 'Telescope marks' }))
-  keymap('n', '<leader>fo', function() safe_telescope_call(builtin.vim_options) end, vim.tbl_extend('force', opts, { desc = 'Telescope vim options' }))
-  keymap('n', '<leader>ft', function() safe_telescope_call(builtin.filetypes) end, vim.tbl_extend('force', opts, { desc = 'Telescope filetypes' }))
-
-  -- Additional convenience mappings (wrapped with safety checks)
-  keymap('n', '<C-p>', function() safe_telescope_call(builtin.find_files) end, vim.tbl_extend('force', opts, { desc = 'Telescope find files' }))
-  keymap('n', '<C-f>', function() safe_telescope_call(builtin.live_grep) end, vim.tbl_extend('force', opts, { desc = 'Telescope live grep' }))
+  -- Keymaps live in the lazy spec (plugins/specs/editor.lua) so they exist
+  -- before the plugin loads.
 end
 
 -- Expose helper functions for external use
