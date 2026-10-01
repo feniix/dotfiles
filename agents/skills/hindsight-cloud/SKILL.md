@@ -7,17 +7,21 @@ description: Store team knowledge, project conventions, and learnings from tasks
 
 You have persistent memory via **Hindsight Cloud**. This memory bank is **shared with the team**, so knowledge stored here benefits everyone working on this codebase.
 
-**Proactively store team knowledge and recall context** to provide better assistance.
+**Recall context before tasks, and propose team knowledge worth keeping.** Because the bank is shared with the team, **never store anything without asking the user first**: show what you would store and wait for a yes.
 
 ## Setup Check (First-Time Only)
 
-Before using memory commands, verify the Hindsight CLI is configured:
+Before using memory commands, verify the Hindsight CLI is configured. The config file holds the API key, so never print it (no `cat`, `less` or `grep` without `-q`); only check that it is there:
 
 ```bash
-cat ~/.hindsight/config
+if [ -s ~/.hindsight/config ] && grep -q '^[[:space:]]*api_key[[:space:]]*=' ~/.hindsight/config; then
+  echo "hindsight: configured"
+else
+  echo "hindsight: not configured"
+fi
 ```
 
-**If the file doesn't exist or is missing credentials**, help the user set it up:
+**If it reports not configured**, help the user set it up:
 
 1. **Install the CLI** (if `hindsight` command not found):
    ```bash
@@ -96,6 +100,8 @@ hindsight memory reflect <bank-id> "How should I approach this task based on pas
 
 This is a **shared team bank**. Store knowledge that benefits the team. For individual preferences, include the person's name.
 
+**Always ask before storing.** Everything below is a candidate to *propose*, not to store on your own: tell the user what you would retain (and in which bank), and run `memory retain` only after they agree. Never store secrets, credentials or anything the user has not cleared for the team.
+
 ### Project/Team Conventions (shared)
 - Coding standards ("Project uses 2-space indentation")
 - Required tools and versions ("Project requires Node 20+, PostgreSQL 15+")
@@ -139,7 +145,7 @@ This is a **shared team bank**. Store knowledge that benefits the team. For indi
 
 ## Best Practices
 
-1. **Store immediately**: When you discover something, store it right away
+1. **Propose promptly, store on approval**: When you discover something worth keeping, offer it to the user right away and store it once they say yes
 2. **Pass rich context**: Include full observations, not pre-summarized strings — the server extracts facts automatically
 3. **Include outcomes**: Store what happened AND why, including failures and workarounds
 4. **Recall first**: Always check for relevant context before starting work
