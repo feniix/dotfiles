@@ -383,11 +383,20 @@ clash_with() {
 }
 
 # --- Main -------------------------------------------------------------------
-CHANGED=0 CLASHES=0
+# A source that cannot be fetched or matches nothing is skipped and recorded
+# in FAILED: the lock keeps its previous entries (its skills on disk are left
+# as they were), the other sources are still applied, and the run exits 1.
+CHANGED=0 CLASHES=0 stage="" LOCK_TMP=""
+declare -a FAILED=()
+trap 'rm -rf "${stage:-}" "${LOCK_TMP:-}"' EXIT
 for id in "${SRC_IDS[@]}"; do
   [[ -n "$ONLY" && "$ONLY" != "$id" ]] && continue
   log_info "source $id (${SRC_URL[$id]} @ ${SRC_REF[$id]})"
-  checkout_source "$id" || exit 1
+  if ! checkout_source "$id"; then
+    unset "RESOLVED[$id]"; FAILED+=("$id")
+    log_warning "  $id skipped; its skills and lock entries are left as they were"
+    continue
+  fi
   dir="$CACHE/$id"
   short="${RESOLVED[$id]:0:12}"
   [[ -n "${LOCKED[$id]:-}" && "${LOCKED[$id]}" != "${RESOLVED[$id]}" ]] \
@@ -405,8 +414,9 @@ for id in "${SRC_IDS[@]}"; do
     done
   done
   if [[ ${#picked[@]} -eq 0 && -n "${SRC_GLOBS[$id]:-}" ]]; then
-    log_warning "  no skills matched for $id; refusing to change ownership or the lock"
-    exit 1
+    log_warning "  no skills matched for $id; refusing to change its skills or lock entries"
+    unset "RESOLVED[$id]"; FAILED+=("$id")
+    continue
   fi
   # No skill directives (or skipping all matches below) explicitly selects
   # nothing. Process that empty result so old owned entries are removed.
@@ -455,7 +465,7 @@ for id in "${SRC_IDS[@]}"; do
     NOW_OWNED[$id]="${NOW_OWNED[$id]:-} $target"
   done
   PROCESSED+=("$id")
-  rm -rf "$stage"
+  rm -rf "$stage"; stage=""
   log_success "  $id @ $short (${#vendored_dirs[@]} skills)"
 done
 
@@ -490,9 +500,11 @@ if [[ -z "$ONLY" ]]; then
 fi
 
 # --- Write lock -------------------------------------------------------------
-# Processed sources get their new commit and skill list; with --only, the
-# other sources keep what the old lock said.
-if [[ "$DRY_RUN" != 1 ]]; then
+# Processed sources get their new commit and skill list; failed sources, and
+# with --only the other sources, keep what the old lock said. Written to a temp
+# file and moved into place. Left untouched when every source failed.
+if [[ "$DRY_RUN" != 1 ]] && (( ${#PROCESSED[@]} > 0 || ${#FAILED[@]} == 0 )); then
+  LOCK_TMP="$(mktemp "$LOCK.XXXXXX")"; chmod 644 "$LOCK_TMP"
   {
     echo "# Resolved commits for agents/skills.vendor — written by scripts/agents/vendor_skills.sh"
     for id in "${SRC_IDS[@]}"; do
@@ -504,7 +516,8 @@ if [[ "$DRY_RUN" != 1 ]]; then
       if [[ -n "${RESOLVED[$id]:-}" ]]; then owned="${NOW_OWNED[$id]:-}"; else owned="${PREV_OWNED[$id]:-}"; fi
       for n in $owned; do echo "vendored $id $n"; done
     done
-  } > "$LOCK"
+  } > "$LOCK_TMP"
+  mv -f "$LOCK_TMP" "$LOCK"; LOCK_TMP=""
 fi
 
 echo ""
@@ -515,6 +528,10 @@ if [[ "$CHANGED" -gt 0 || "$REMOVED" -gt 0 ]]; then
   log_info "  git -C $DOTFILES_DIR status --short agents/skills agents/skills.lock"
 else
   log_success "all vendored skills already up to date"
+fi
+if [[ ${#FAILED[@]} -gt 0 ]]; then
+  echo -e "${RED}[ERROR]${NC} source(s) not applied: ${FAILED[*]} (see warnings above); their lock entries were kept." >&2
+  [[ "$CLASHES" -gt 0 ]] || exit 1
 fi
 if [[ "$CLASHES" -gt 0 ]]; then
   echo -e "${RED}[ERROR]${NC} $CLASHES vendored skill(s) clash with an existing skill of the same name and were skipped." >&2

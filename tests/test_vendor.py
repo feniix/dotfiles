@@ -312,3 +312,25 @@ class UpstreamVendorTests(Sandbox):
             "---\nname: axb\n---\nSee `renamed`.\n",
         )
         self.assertEqual((self.dest / "renamed/run.sh").read_text(), "echo /a.b\n")
+
+    def test_a_failed_source_keeps_its_lock_entries_while_others_apply(self):
+        self.upstream("one", {"skills/a": "a v1"})
+        two = self.upstream("two", {"skills/b": "b v1"})
+        self.manifest.write_text(
+            f"source one {self.upstreams['one']} main\nskill  one skills/*\n"
+            f"source two {self.upstreams['two']} main\nskill  two skills/*\n"
+        )
+        self.vendor()
+        newer = self.upstream("one", {"skills/a": "a v2"})
+        shutil.rmtree(self.upstreams["two"])  # the cached clone can no longer fetch
+        result = self.vendor("--update", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("two", result.stderr)
+        self.assertEqual(self.lock_sha("one"), newer)
+        self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a v2")
+        self.assertEqual(self.lock_sha("two"), two)
+        self.assertIn("vendored two b", self.lock.read_text())
+        self.assertEqual((self.dest / "b/SKILL.md").read_text(), "b v1")
+        leftovers = [p.name for p in self.lock.parent.iterdir()
+                     if p.name.startswith("skills.lock.")]
+        self.assertEqual(leftovers, [])
