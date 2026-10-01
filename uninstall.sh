@@ -35,7 +35,7 @@ if [[ "$DRY_RUN" != true ]]; then
   [[ "$REPLY" =~ ^[Yy]$ ]] || exit 0
 fi
 
-entries=() resolved=()
+entries=() resolved=() not_undone=()
 while IFS= read -r line; do
   [[ -z "$line" || "$line" == \#* ]] && continue
   entries+=("$line")
@@ -151,6 +151,10 @@ undo_entry() {
     DEFAULTS_DOMAIN)
       [[ "$RESTORE_DEFAULTS" == true ]] || return 1
       undo_defaults_domain "$path" "$extra"
+      ;;
+    NON_RESTORABLE)
+      [[ "$RESTORE_DEFAULTS" == true ]] || return 1
+      not_undone+=("$path")
       ;;
     DEFAULTS_BACKUP)
       log_warning "Legacy all-domain dump at $path cannot be safely imported. Keeping it for manual recovery."
@@ -270,6 +274,10 @@ if [[ "$DRY_RUN" != true ]]; then
   else
     log_warning "Recovery state retained at $STATE_DIR ($remaining pending entries)."
   fi
+fi
+if (( ${#not_undone[@]} )); then
+  log_warning "Not undone automatically (no safe way to restore the previous value):"
+  printf '  %s\n' "${not_undone[@]}"
 fi
 log_success "Uninstall pass complete."
 [[ "$DRY_RUN" != true ]] || log_info "Dry-run: no changes made."

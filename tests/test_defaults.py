@@ -190,6 +190,20 @@ PY
         self.assertEqual(self.load()["user:com.apple.dock"],
                          self.original["user:com.apple.dock"])
 
+    def test_commands_without_a_restore_are_listed_not_undone(self):
+        self.mock("nvram", "exit 1\n")  # a refused command changed nothing
+        self.apply("--only", "system,energy,finder", check=False)
+        result = self.uninstall()
+        self.assertNotIn("Not undone automatically", result.stdout)
+        result = self.uninstall("--defaults")
+        listed = result.stdout.split("Not undone automatically", 1)[1]
+        for command in ("sudo pmset -a standbydelay 86400", "sudo pmset -c sleep 78",
+                        f"chflags nohidden {self.home}/Library",
+                        "sudo chflags nohidden /Volumes"):
+            self.assertIn("  " + command + "\n", listed)
+        self.assertNotIn("nvram", listed)
+        self.assertFalse((self.home / "data/dotfiles-state").exists())
+
     def test_failed_export_prevents_changes_to_that_domain(self):
         self.env["FAIL_EXPORT"] = "user:com.apple.dock"
         result = self.apply("--only", "dock", check=False)

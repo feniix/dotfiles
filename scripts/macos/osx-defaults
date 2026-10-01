@@ -81,9 +81,19 @@ run() {
     fi
     # One refused write (e.g. a TCC-protected domain without Full Disk
     # Access) must not abort every later section; report it at the end.
-    if [[ "$BACKUP_ONLY" != true ]] && ! "$@"; then
-      echo "  FAILED: $*" >&2
-      FAILED+=("$*")
+    if [[ "$BACKUP_ONLY" != true ]]; then
+      if ! "$@"; then
+        echo "  FAILED: $*" >&2
+        FAILED+=("$*")
+        return 0
+      fi
+      # These have no snapshot to restore; uninstall lists them instead.
+      local cmd="$1"
+      [[ "$cmd" != sudo ]] || cmd="$2"
+      case "$cmd" in
+        pmset|nvram|chflags) state_record NON_RESTORABLE "$*" ||
+          log_warning "Could not record that uninstall will not undo: $*" ;;
+      esac
     fi
   fi
   return 0
@@ -523,7 +533,7 @@ echo "Done! Some changes require a logout/restart to take effect."
 if [[ "$BACKUP_ONLY" == true ]]; then
   echo "Affected domains backed up; no settings applied."
 elif [[ "$DRY_RUN" != true ]]; then
-  echo "Only defaults domains are automatically restorable; pmset, nvram and file flags are not."
+  echo "uninstall.sh --defaults restores the defaults keys written here; it lists pmset, nvram and file flag changes but does not undo them."
 fi
 
 if (( ${#FAILED[@]} )); then
