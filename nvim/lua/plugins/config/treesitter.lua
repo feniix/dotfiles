@@ -39,8 +39,11 @@ function M.setup()
   vim.api.nvim_create_autocmd('FileType', {
     group = vim.api.nvim_create_augroup('TreesitterSetup', { clear = true }),
     callback = function()
-      pcall(vim.treesitter.start)
-      vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      -- Without a parser the treesitter indentexpr returns -1, which
+      -- flattens indentation; keep the filetype's own indent there.
+      if pcall(vim.treesitter.start) then
+        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end
     end,
   })
 
