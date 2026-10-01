@@ -268,6 +268,65 @@ class RollbackTests(Sandbox):
         self.assertEqual(after, before)
         self.assertFalse((repo / "agents/prompts").exists())
 
+    def conflicts(self):
+        root = self.home / "data/dotfiles-conflicts/setup"
+        return sorted(p for p in root.rglob("*") if p.is_file()) if root.exists() else []
+
+    def test_rerun_moves_aside_directory_that_replaced_a_link(self):
+        link = 'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-dir"'
+        self.state(link)
+        path = self.home / "config-dir"
+        path.unlink()
+        path.mkdir()
+        (path / "precious.lua").write_text("mine")
+        self.state(link)
+        self.assertTrue(path.is_symlink())
+        [saved] = self.conflicts()
+        self.assertEqual(saved.name, "precious.lua")
+        self.assertEqual(saved.read_text(), "mine")
+        # The pre-dotfiles baseline is still what uninstall restores.
+        self.uninstall()
+        self.assertFalse(path.exists())
+
+    def test_rerun_over_own_link_sets_nothing_aside(self):
+        link = 'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"'
+        self.state(link)
+        self.state(link)
+        self.assertEqual(self.conflicts(), [])
+
+    def test_first_run_backs_up_instead_of_setting_aside(self):
+        path = self.home / "config-file"
+        path.write_text("baseline")
+        self.state('state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"')
+        self.assertEqual(self.conflicts(), [])
+        self.uninstall()
+        self.assertEqual(path.read_text(), "baseline")
+
+    def test_rerun_moves_aside_recreated_deleted_file(self):
+        path = self.home / ".gitconfig"
+        path.write_text("baseline")
+        delete = 'state_delete_file "$HOME/.gitconfig"'
+        self.state(delete)
+        path.write_text("written by a tool")
+        self.state(delete)
+        self.assertFalse(path.exists())
+        [saved] = self.conflicts()
+        self.assertEqual(saved.read_text(), "written by a tool")
+
+    def test_failed_manifest_rewrite_keeps_manifest(self):
+        self.state('state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"')
+        manifest = self.home / "data/dotfiles-state/manifest"
+        before = manifest.read_text()
+        self.mock("awk", "exit 1\n")
+        result = self.command([
+            "/bin/bash", "-ec",
+            f'log_warning() {{ :; }}; source "{REPO}/scripts/lib/state.sh"; '
+            'state_record MANAGED "$HOME/config-file" changed || exit 3',
+        ], check=False)
+        self.assertEqual(result.returncode, 3, result.stdout + result.stderr)
+        self.assertEqual(manifest.read_text(), before)
+        self.assertEqual(list(manifest.parent.glob("manifest.*")), [])
+
 
 if __name__ == "__main__":
     unittest.main()

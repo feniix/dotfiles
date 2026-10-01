@@ -12,6 +12,8 @@ STATE_BACKUPS="$STATE_DIR/backups"
 
 _STATE_INITIALIZED=false
 _STATE_ADOPTING=false
+# Outside STATE_DIR so a completed uninstall never deletes the user's copies.
+STATE_CONFLICTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts/setup/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 
 # --- Internal helpers ---
 
@@ -65,10 +67,16 @@ _state_remove_entry() {
   local type="$1"
   local path="$2"
   if [[ -f "$STATE_MANIFEST" ]]; then
-    local tmp="$STATE_MANIFEST.tmp"
-    awk -F '|' -v type="$type" -v path="$path" \
-      '!($1 == type && $3 == path)' "$STATE_MANIFEST" > "$tmp"
-    mv "$tmp" "$STATE_MANIFEST"
+    # Callers run under `|| return 1`, which disables errexit, so a failed
+    # write must not reach the mv or it replaces the manifest with nothing.
+    local tmp
+    tmp="$(mktemp "$STATE_MANIFEST.XXXXXX")" || return 1
+    if ! awk -F '|' -v type="$type" -v path="$path" \
+      '!($1 == type && $3 == path)' "$STATE_MANIFEST" > "$tmp"; then
+      rm -f "$tmp"
+      return 1
+    fi
+    mv -f "$tmp" "$STATE_MANIFEST" || { rm -f "$tmp"; return 1; }
   fi
 }
 
@@ -97,7 +105,7 @@ _state_capture_original() {
         ;;
     esac
     state_record ORIGINAL "$path" "$backup" || return 1
-    _state_remove_entry "$type" "$path"
+    _state_remove_entry "$type" "$path" || return 1
   else
     backup="ABSENT"
     if [[ "$adopt_link" != true && ( -e "$path" || -L "$path" ) ]]; then
@@ -106,6 +114,25 @@ _state_capture_original() {
     fi
     state_record ORIGINAL "$path" "$backup"
   fi
+}
+
+# On a rerun the baseline is already captured, so anything at a managed path
+# that setup did not leave there is the user's work: move it aside, not away.
+_state_set_aside_changes() {
+  local path="$1" managed
+  _state_has_entry ORIGINAL "$path" || return 0
+  [[ -e "$path" || -L "$path" ]] || return 0
+  managed="$(awk -F '|' -v path="$path" \
+    '$1 == "MANAGED" && $3 == path {print $4}' "$STATE_MANIFEST")"
+  if [[ -L "$path" ]]; then
+    [[ "$managed" == "link:$(readlink "$path")" ]] && return 0
+  elif [[ -d "$path" ]]; then
+    [[ "$managed" == directory ]] && return 0
+  fi
+  local dest="$STATE_CONFLICTS_DIR/${path#/}"
+  mkdir -p "$(dirname "$dest")" || return 1
+  mv "$path" "$dest" || return 1
+  log_warning "$path was changed outside setup — moved it to $dest"
 }
 
 _state_file_hash() {
@@ -142,7 +169,7 @@ state_record() {
   local extra="${3:-}"
 
   # Deduplicate: update existing entry rather than appending
-  _state_remove_entry "$type" "$path"
+  _state_remove_entry "$type" "$path" || return 1
 
   echo "${type}|$(_state_timestamp)|${path}|${extra}" >> "$STATE_MANIFEST"
 }
@@ -184,6 +211,7 @@ state_mkdir() {
 # Uninstall removes it only after managed children are undone and it is empty.
 state_replace_with_directory() {
   local path="$1"
+  _state_set_aside_changes "$path" || return 1
   _state_capture_original "$path" || return 1
   state_record MANAGED "$path" pending || return 1
   rm -f "$path" || return 1
@@ -203,6 +231,7 @@ state_symlink() {
     return 0
   fi
 
+  _state_set_aside_changes "$link_path" || return 1
   _state_capture_original "$link_path" || return 1
   state_record MANAGED "$link_path" pending || return 1
   rm -rf "$link_path" || return 1
@@ -243,6 +272,11 @@ state_delete_file() {
     return 0
   fi
 
+  _state_set_aside_changes "$path" || return 1
+  if [[ ! -e "$path" && ! -L "$path" ]]; then
+    state_record MANAGED "$path" absent
+    return 0
+  fi
   _state_capture_original "$path" || return 1
   state_record MANAGED "$path" pending || return 1
   rm -f "$path" || return 1
