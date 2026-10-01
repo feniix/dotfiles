@@ -43,7 +43,19 @@ while IFS= read -r line; do
 done < "$STATE_MANIFEST"
 
 original_for() {
-  awk -F '|' -v path="$1" '$1 == "ORIGINAL" && $3 == path {print $4}' "$STATE_MANIFEST"
+  AWK_PATH="$1" awk -F '|' 'BEGIN { path = ENVIRON["AWK_PATH"] } $1 == "ORIGINAL" && $3 == path {print $4}' "$STATE_MANIFEST"
+}
+
+has_managed() {
+  AWK_PATH="$1" awk -F '|' 'BEGIN { path = ENVIRON["AWK_PATH"] } $1 == "MANAGED" && $3 == path {found=1} END {exit !found}' "$STATE_MANIFEST"
+}
+
+is_xdg_base() {
+  case "$1" in
+    "$HOME/.config"|"$HOME/.cache"|"$HOME/.local"|"$HOME/.local/share"|"$HOME/.local/state"|"$HOME/.local/bin") return 0 ;;
+    "${XDG_CONFIG_HOME:-}"|"${XDG_CACHE_HOME:-}"|"${XDG_DATA_HOME:-}"|"${XDG_STATE_HOME:-}") [[ -n "$1" ]] ;;
+    *) return 1 ;;
+  esac
 }
 
 restore_path() {
@@ -82,8 +94,8 @@ undo_managed() {
 
 undo_legacy_path() {
   local type="$1" path="$2" extra="$3" count
-  count="$(awk -F '|' -v path="$path" \
-    '$3 == path && $1 ~ /^(SYMLINK|SYMLINK_OVER_FILE|FILE_WRITTEN|FILE_CREATED|FILE_DELETED|FILE_COPIED)$/ {n++} END {print n+0}' \
+  count="$(AWK_PATH="$path" awk -F '|' \
+    'BEGIN { path = ENVIRON["AWK_PATH"] } $3 == path && $1 ~ /^(SYMLINK|SYMLINK_OVER_FILE|FILE_WRITTEN|FILE_CREATED|FILE_DELETED|FILE_COPIED)$/ {n++} END {print n+0}' \
     "$STATE_MANIFEST")"
   [[ "$count" == 1 ]] || { log_warning "Ambiguous legacy history: $path"; return 1; }
   case "$type" in
@@ -135,12 +147,31 @@ undo_entry() {
   local type="$1" path="$2" extra="$3"
   case "$type" in
     MANAGED) undo_managed "$path" "$extra" ;;
-    ORIGINAL) return 1 ;; # consumed with its MANAGED entry
+    ORIGINAL)
+      # Normally consumed with its MANAGED entry. Setup killed between
+      # recording the baseline and the change leaves it alone: restore it
+      # while the path holds nothing, or only a link into dotfiles.
+      has_managed "$path" && return 1
+      if [[ ! -e "$path" && ! -L "$path" ]] ||
+        [[ -L "$path" && "$(readlink "$path")" == "$DOTFILES_DIR/"* ]]; then
+        restore_path "$path" "$extra"
+        return
+      fi
+      log_warning "Original of $path was recorded but setup stopped before changing it, and it has changed since; keeping its backup."
+      return 1
+      ;;
     SYMLINK|SYMLINK_OVER_FILE|FILE_WRITTEN|FILE_CREATED|FILE_DELETED|FILE_COPIED)
       undo_legacy_path "$type" "$path" "$extra"
       ;;
     DIR_CREATED)
-      [[ ! -d "$path" ]] || run rmdir "$path"
+      [[ -d "$path" ]] || return 0
+      # Setup creates the XDG base directories on a fresh Mac, but every other
+      # program writes there too: once non-empty they are no longer ours.
+      if is_xdg_base "$path" && [[ -n "$(find "$path" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+        log_info "Keeping $path: other programs store files there."
+        return 0
+      fi
+      run rmdir "$path"
       ;;
     DIR_EXISTED) return 0 ;;
     DEFAULTS_KEY)

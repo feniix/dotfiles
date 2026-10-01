@@ -315,6 +315,58 @@ class RollbackTests(Sandbox):
         [saved] = self.conflicts()
         self.assertEqual(saved.read_text(), "written by a tool")
 
+    def test_backslash_paths_are_tracked_and_restored(self):
+        path = self.home / "odd\\name"
+        path.write_text("baseline")
+        link = 'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/odd\\\\name"'
+        self.state(link)
+        self.state(link)
+        manifest = (self.home / "data/dotfiles-state/manifest").read_text()
+        self.assertEqual(manifest.count("ORIGINAL|"), 1)
+        self.uninstall()
+        self.assertEqual(path.read_text(), "baseline")
+
+    def test_pipe_in_path_is_refused(self):
+        result = self.command([
+            "/bin/bash", "-c",
+            f'log_warning() {{ echo "$1"; }}; source "{REPO}/scripts/lib/state.sh"; '
+            'state_init; state_record MANAGED "$HOME/a|b" x',
+        ], check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("not supported", result.stdout)
+        manifest = (self.home / "data/dotfiles-state/manifest").read_text()
+        self.assertNotIn("a|b", manifest)
+
+    def test_unreadable_file_has_no_hash(self):
+        path = self.home / "secret"
+        path.write_text("x")
+        path.chmod(0)
+        result = self.command([
+            "/bin/bash", "-c",
+            f'source "{REPO}/scripts/lib/state.sh"; _state_file_hash "$HOME/secret"',
+        ], check=False)
+        path.chmod(0o600)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, "")
+
+    def test_orphaned_original_is_restored(self):
+        # Setup killed after recording the baseline, before its MANAGED record.
+        path = self.home / "config-file"
+        path.write_text("baseline")
+        self.state('_state_capture_original "$HOME/config-file"; rm "$HOME/config-file"; '
+                   'ln -s "$DOTFILES_DIR/zshrc" "$HOME/config-file"')
+        self.uninstall()
+        self.assertEqual(path.read_text(), "baseline")
+        self.assertFalse((self.home / "data/dotfiles-state").exists())
+
+    def test_busy_xdg_base_directory_does_not_block_cleanup(self):
+        self.state('state_mkdir "$XDG_CONFIG_HOME/zsh"')
+        (self.home / "config/other-app").mkdir()
+        self.uninstall()
+        self.assertTrue((self.home / "config/other-app").is_dir())
+        self.assertFalse((self.home / "config/zsh").exists())
+        self.assertFalse((self.home / "data/dotfiles-state").exists())
+
     def test_failed_manifest_rewrite_keeps_manifest(self):
         self.state('state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"')
         manifest = self.home / "data/dotfiles-state/manifest"

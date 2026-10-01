@@ -11,7 +11,6 @@ STATE_MANIFEST="$STATE_DIR/manifest"
 STATE_BACKUPS="$STATE_DIR/backups"
 
 _STATE_INITIALIZED=false
-_STATE_ADOPTING=false
 # Outside STATE_DIR so a completed uninstall never deletes the user's copies.
 STATE_CONFLICTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts/setup/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 
@@ -58,8 +57,8 @@ _state_has_entry() {
   local type="$1"
   local path="$2"
   [[ -f "$STATE_MANIFEST" ]] &&
-    awk -F '|' -v type="$type" -v path="$path" \
-      '$1 == type && $3 == path {found=1} END {exit !found}' "$STATE_MANIFEST"
+    AWK_PATH="$path" awk -F '|' -v type="$type" \
+      'BEGIN { path = ENVIRON["AWK_PATH"] } $1 == type && $3 == path {found=1} END {exit !found}' "$STATE_MANIFEST"
 }
 
 # Remove an existing entry for type+path (for updates on re-run)
@@ -71,8 +70,8 @@ _state_remove_entry() {
     # write must not reach the mv or it replaces the manifest with nothing.
     local tmp
     tmp="$(mktemp "$STATE_MANIFEST.XXXXXX")" || return 1
-    if ! awk -F '|' -v type="$type" -v path="$path" \
-      '!($1 == type && $3 == path)' "$STATE_MANIFEST" > "$tmp"; then
+    if ! AWK_PATH="$path" awk -F '|' -v type="$type" \
+      'BEGIN { path = ENVIRON["AWK_PATH"] } !($1 == type && $3 == path)' "$STATE_MANIFEST" > "$tmp"; then
       rm -f "$tmp"
       return 1
     fi
@@ -85,8 +84,8 @@ _state_remove_entry() {
 _state_capture_original() {
   local path="$1" adopt_link="${2:-false}" legacy count type backup
   _state_has_entry ORIGINAL "$path" && return 0
-  legacy="$(awk -F '|' -v path="$path" \
-    '$3 == path && $1 ~ /^(SYMLINK|SYMLINK_OVER_FILE|FILE_WRITTEN|FILE_CREATED|FILE_DELETED|FILE_COPIED)$/ {print}' \
+  legacy="$(AWK_PATH="$path" awk -F '|' \
+    'BEGIN { path = ENVIRON["AWK_PATH"] } $3 == path && $1 ~ /^(SYMLINK|SYMLINK_OVER_FILE|FILE_WRITTEN|FILE_CREATED|FILE_DELETED|FILE_COPIED)$/ {print}' \
     "$STATE_MANIFEST")"
   if [[ -n "$legacy" ]]; then
     count="$(printf '%s\n' "$legacy" | wc -l | tr -d ' ')"
@@ -122,8 +121,8 @@ _state_set_aside_changes() {
   local path="$1" managed
   _state_has_entry ORIGINAL "$path" || return 0
   [[ -e "$path" || -L "$path" ]] || return 0
-  managed="$(awk -F '|' -v path="$path" \
-    '$1 == "MANAGED" && $3 == path {print $4}' "$STATE_MANIFEST")"
+  managed="$(AWK_PATH="$path" awk -F '|' \
+    'BEGIN { path = ENVIRON["AWK_PATH"] } $1 == "MANAGED" && $3 == path {print $4}' "$STATE_MANIFEST")"
   if [[ -L "$path" ]]; then
     [[ "$managed" == "link:$(readlink "$path")" ]] && return 0
   elif [[ -d "$path" ]]; then
@@ -135,8 +134,12 @@ _state_set_aside_changes() {
   log_warning "$path was changed outside setup — moved it to $dest"
 }
 
+# Fails (rather than printing an empty hash) when the file cannot be read, so
+# an unreadable file is never treated as matching an empty fingerprint.
 _state_file_hash() {
-  shasum -a 256 "$1" | awk '{print $1}'
+  local out
+  out="$(shasum -a 256 "$1")" || return 1
+  printf '%s\n' "${out%% *}"
 }
 
 # --- Public API ---
@@ -151,12 +154,12 @@ state_init() {
   mkdir -p "$STATE_BACKUPS"
 
   if [[ ! -f "$STATE_MANIFEST" ]]; then
-    _STATE_ADOPTING=true
     touch "$STATE_MANIFEST"
     echo "# Dotfiles state manifest — do not edit manually" > "$STATE_MANIFEST"
     echo "# Format: TYPE|TIMESTAMP|PATH|EXTRA" >> "$STATE_MANIFEST"
-    log_warning "No previous state found — adopting existing dotfiles install."
-    log_warning "Original pre-dotfiles files cannot be restored."
+    # Existing files are backed up before replacement; only paths that already
+    # link into dotfiles are adopted without a recoverable original.
+    log_warning "Starting state tracking in $STATE_DIR. Paths already linked to dotfiles are adopted as-is; anything else is backed up before it is replaced."
   fi
 
   _STATE_INITIALIZED=true
@@ -167,6 +170,12 @@ state_record() {
   local type="$1"
   local path="$2"
   local extra="${3:-}"
+
+  # The manifest is one line of |-separated fields per record.
+  if [[ "$path" == *"|"* || "$path" == *$'\n'* ]]; then
+    log_warning "Cannot track $path: '|' and newlines are not supported in managed paths."
+    return 1
+  fi
 
   # Deduplicate: update existing entry rather than appending
   _state_remove_entry "$type" "$path" || return 1
