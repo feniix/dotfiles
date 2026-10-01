@@ -149,8 +149,11 @@ for id in "${SRC_IDS[@]}"; do
     && log_info "  ${LOCKED[$id]:0:12} -> $short"
 
   # collect skill dirs matching the globs
-  declare -a picked=()
-  for g in ${SRC_GLOBS[$id]:-}; do
+  # Split the glob list with globbing off, so a pattern can only expand
+  # against the clone below, never against the current directory.
+  declare -a picked=() globs=()
+  set -f; read -r -a globs <<< "${SRC_GLOBS[$id]:-}"; set +f
+  for g in "${globs[@]}"; do
     for p in "$dir"/$g; do
       [[ -f "$p/SKILL.md" ]] || continue
       picked+=("$p")
