@@ -120,7 +120,7 @@ if ! command -v brew >/dev/null; then
 fi
 
 run_step "Setting up oh-my-zsh" bash "$SCRIPTS_DIR/setup/setup_zsh.sh"
-run_step "Setting up Neovim" bash "$SCRIPTS_DIR/setup/setup_nvim.sh"
+run_step "Setting up Neovim" bash "$SCRIPTS_DIR/setup/setup_nvim.sh" --install-plugins
 run_step "Setting up macOS preferences" bash "$SCRIPTS_DIR/setup/setup_macos.sh"
 run_step "Setting up GitHub integration" bash "$SCRIPTS_DIR/setup/setup_github.sh"
 run_step "Fixing SSH key permissions" bash "$SCRIPTS_DIR/ssh/manage_ssh_keys.sh" fix-permissions

@@ -73,6 +73,8 @@ class SetupTests(Sandbox):
         self.mock("curl", "printf '%s\\n' 'mkdir -p \"$HOME/.oh-my-zsh\"'\n")
         self.mock("defaults", 'case "$1" in export) echo "<plist><dict/></plist>";; esac; exit 0\n')
         self.mock("ssh-keygen", "exit 1\n")
+        nvim_log = self.home / "nvim-calls"
+        self.mock("nvim", f'echo "$*" >> "{nvim_log}"\n')
         # Homebrew: install packages (fails); macOS defaults: no; new key: no.
         result = self.command(["/bin/bash", str(repo / "setup.sh")],
                               input="y\nn\nn\n", check=False)
@@ -86,6 +88,8 @@ class SetupTests(Sandbox):
         self.assertTrue((self.home / "config/nvim").is_symlink())
         self.assertTrue((self.home / ".pi/agent/settings.json").is_symlink())
         self.assertIn("commits will fail until it does", out)
+        # A fresh machine restores plugins from the lockfile, blocking.
+        self.assertIn("Lazy! restore", nvim_log.read_text())
 
     def test_missing_signing_key_is_created_only_on_request(self):
         git = self.home / "config/git"
