@@ -92,11 +92,8 @@ class EnvironmentTests(Sandbox):
         self.assertIn("shared-marker", result.stdout)
 
     def setup_prefix(self):
+        # Exercise the real filesystem setup prefix (links), not the steps.
         setup = (REPO / "setup.sh").read_text().split("# --- Setup steps ---", 1)[0]
-        # Exercise the real filesystem setup prefix, excluding chmod of repo scripts.
-        setup = setup.split("# --- Make scripts executable ---", 1)[0] + (
-            setup.split("# --- XDG directories ---", 1)[1]
-        )
         return self.command(["/bin/bash", "-ec", setup])
 
     def test_setup_keeps_hosts_other_tools_add_to_ssh_config(self):
@@ -218,6 +215,16 @@ class EnvironmentTests(Sandbox):
             self.assertEqual(link.resolve(), REPO / "scripts/utils" / name)
         self.uninstall()
         self.assertFalse((self.home / ".local/bin/flushdns").exists())
+
+    def test_setup_leaves_a_clean_checkout_clean(self):
+        repo = self.home / "repo"
+        shutil.copytree(REPO, repo, ignore=shutil.ignore_patterns("__pycache__", ".claude"))
+        before = self.command(["git", "-C", str(repo), "status", "--porcelain"]).stdout
+        self.env["DOTFILES_DIR"] = str(repo)
+        setup = (repo / "setup.sh").read_text().split("# --- Setup steps ---", 1)[0]
+        self.command(["/bin/bash", "-ec", setup])
+        after = self.command(["git", "-C", str(repo), "status", "--porcelain"]).stdout
+        self.assertEqual(after, before)
 
     def test_setup_links_tmux_config(self):
         self.setup_prefix()

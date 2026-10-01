@@ -28,10 +28,6 @@ echo "Setting up dotfiles from $DOTFILES_DIR"
 source "$SCRIPTS_DIR/lib/state.sh"
 state_init
 
-# --- Make scripts executable ---
-find "$SCRIPTS_DIR" -type f \( -name "*.sh" -o -name "osx-defaults" \) -exec chmod +x {} \;
-chmod +x "$DOTFILES_DIR/setup.sh"
-
 # --- XDG directories ---
 log_info "Creating XDG directories..."
 source "$SCRIPTS_DIR/setup/setup_xdg.sh"
