@@ -33,7 +33,15 @@ log_error() {
 # Default locations
 SSH_DIR="$HOME/.ssh"
 BACKUP_DIR="$HOME/.ssh_backup"
-KEYS_LIST="id_rsa id_ed25519 id_ecdsa id_dsa"
+
+# Private keys in a directory: every file that has a matching .pub, so extra
+# keys (per-org GitHub keys, cloud keys) are handled, not just id_* defaults.
+key_names() {
+  local pub
+  for pub in "$1"/*.pub; do
+    [ -f "${pub%.pub}" ] && basename "${pub%.pub}"
+  done
+}
 
 # Make sure permissions are correct on SSH keys
 fix_permissions() {
@@ -44,7 +52,7 @@ fix_permissions() {
   chmod 700 "$SSH_DIR"
   
   # Fix permissions on each key file
-  for key in $KEYS_LIST; do
+  for key in $(key_names "$SSH_DIR"); do
     if [ -f "$SSH_DIR/$key" ]; then
       chmod 600 "$SSH_DIR/$key"
       log_success "Set permissions on $SSH_DIR/$key"
@@ -56,8 +64,9 @@ fix_permissions() {
     fi
   done
   
-  # Set permissions for known_hosts and config
-  for file in known_hosts config authorized_keys; do
+  # ssh refuses a config others can write; keep it private like setup does.
+  [ -f "$SSH_DIR/config" ] && chmod 600 "$SSH_DIR/config"
+  for file in known_hosts authorized_keys; do
     if [ -f "$SSH_DIR/$file" ]; then
       chmod 644 "$SSH_DIR/$file"
       log_success "Set permissions on $SSH_DIR/$file"
@@ -78,7 +87,7 @@ backup_keys() {
   chmod 700 "$dest_dir"
   
   # Copy each key if it exists
-  for key in $KEYS_LIST; do
+  for key in $(key_names "$SSH_DIR"); do
     if [ -f "$SSH_DIR/$key" ]; then
       cp "$SSH_DIR/$key" "$dest_dir/"
       chmod 600 "$dest_dir/$key"
@@ -95,6 +104,7 @@ backup_keys() {
   # Backup config if it exists
   if [ -f "$SSH_DIR/config" ]; then
     cp "$SSH_DIR/config" "$dest_dir/"
+    chmod 600 "$dest_dir/config"
     log_success "Backed up SSH config"
   fi
   
@@ -118,7 +128,7 @@ restore_keys() {
   chmod 700 "$SSH_DIR"
   
   # Restore each key if it exists in the backup
-  for key in $KEYS_LIST; do
+  for key in $(key_names "$source_dir"); do
     if [ -f "$source_dir/$key" ]; then
       cp "$source_dir/$key" "$SSH_DIR/"
       chmod 600 "$SSH_DIR/$key"
@@ -135,7 +145,7 @@ restore_keys() {
   # Restore config if it exists in the backup
   if [ -f "$source_dir/config" ]; then
     cp "$source_dir/config" "$SSH_DIR/"
-    chmod 644 "$SSH_DIR/config"
+    chmod 600 "$SSH_DIR/config"
     log_success "Restored SSH config"
   fi
   
@@ -148,7 +158,7 @@ list_keys() {
   
   local key_count=0
   
-  for key in $KEYS_LIST; do
+  for key in $(key_names "$SSH_DIR"); do
     if [ -f "$SSH_DIR/$key" ]; then
       local mod_time perms
       mod_time=$(stat -f "%Sm" "$SSH_DIR/$key" 2>/dev/null || stat -c "%y" "$SSH_DIR/$key")
@@ -173,7 +183,7 @@ list_keys() {
 check_passphrases() {
   log_info "Checking if SSH keys have passphrases..."
   
-  for key in $KEYS_LIST; do
+  for key in $(key_names "$SSH_DIR"); do
     if [ -f "$SSH_DIR/$key" ]; then
       if ssh-keygen -y -P "" -f "$SSH_DIR/$key" >/dev/null 2>&1; then
         log_warning "$key is NOT protected with a passphrase"
@@ -203,25 +213,22 @@ add_passphrase() {
   
   log_info "Adding passphrase to $key_file..."
   
-  # Create a backup of the key before modifying
-  cp "$SSH_DIR/$key_file" "$SSH_DIR/${key_file}.bak"
-  log_info "Backup created at $SSH_DIR/${key_file}.bak"
-  
-  # Add passphrase
-  ssh-keygen -p -f "$SSH_DIR/$key_file"
-  
-  if [ $? -eq 0 ]; then
+  # The backup is an unencrypted copy of the key: keep it private, and never
+  # leave it behind, whether ssh-keygen fails or is interrupted (set -e).
+  local key="$SSH_DIR/$key_file" backup="$SSH_DIR/${key_file}.bak"
+  (umask 077 && cp -p "$key" "$backup")
+  trap 'mv -f "$backup" "$key"; exit 130' INT TERM
+
+  if ssh-keygen -p -f "$key"; then
+    trap - INT TERM
+    rm -f "$backup"
     log_success "Passphrase added to $key_file"
   else
-    log_error "Failed to add passphrase to $key_file"
-    log_info "Restoring from backup..."
-    mv "$SSH_DIR/${key_file}.bak" "$SSH_DIR/$key_file"
-    log_info "Original key restored"
+    trap - INT TERM
+    log_error "Failed to add passphrase to $key_file; original key kept."
+    mv -f "$backup" "$key"
     return 1
   fi
-  
-  # Remove backup if successful
-  rm "$SSH_DIR/${key_file}.bak"
 }
 
 # Git signs every commit with user.signingkey; without that key every commit

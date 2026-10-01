@@ -105,6 +105,33 @@ class SetupTests(Sandbox):
         again = self.command(script)
         self.assertIn("Git signing key present", again.stdout)
 
+    def ssh_dir(self):
+        ssh = self.home / ".ssh"
+        ssh.mkdir()
+        for name in ("id_ed25519", "id_ed25519_gatx"):
+            (ssh / name).write_text("private")
+            (ssh / name).chmod(0o644)
+            (ssh / f"{name}.pub").write_text("ssh-ed25519 AAAA")
+        (ssh / "config").write_text("Include ~/.config/ssh/config\n")
+        (ssh / "config").chmod(0o644)
+        return ssh
+
+    def test_ssh_key_permissions_cover_every_key_and_the_config(self):
+        ssh = self.ssh_dir()
+        self.command(["/bin/bash", str(REPO / "scripts/ssh/manage_ssh_keys.sh"),
+                      "fix-permissions"])
+        for name in ("id_ed25519", "id_ed25519_gatx", "config"):
+            self.assertEqual(oct((ssh / name).stat().st_mode & 0o777), "0o600", name)
+
+    def test_failed_passphrase_change_leaves_no_unencrypted_copy(self):
+        ssh = self.ssh_dir()
+        self.mock("ssh-keygen", "exit 1\n")
+        result = self.command(["/bin/bash", str(REPO / "scripts/ssh/manage_ssh_keys.sh"),
+                               "add-passphrase", "id_ed25519_gatx"], check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((ssh / "id_ed25519_gatx.bak").exists())
+        self.assertEqual((ssh / "id_ed25519_gatx").read_text(), "private")
+
     def test_zsh_check_only_does_not_initialize_state(self):
         (self.home / ".oh-my-zsh").mkdir()
         self.mock("brew", "exit 0\n")
