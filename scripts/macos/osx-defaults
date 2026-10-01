@@ -17,6 +17,9 @@ set -e
 DRY_RUN=false
 ONLY_SECTIONS=""
 BACKUP_ONLY=false
+SECTIONS=(system sound energy input accessibility hotcorners finder dock
+  screenshot safari terminal browser activity privacy timemachine)
+SECTION_LIST="$(IFS=,; echo "${SECTIONS[*]}")"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -36,11 +39,23 @@ while [[ $# -gt 0 ]]; do
     *)
       echo "Unknown option: $1"
       echo "Usage: $0 [--dry-run] [--only section1,section2] [--backup]"
-      echo "Sections: system,sound,energy,input,accessibility,hotcorners,finder,dock,screenshot,safari,terminal,browser,activity,privacy,timemachine"
+      echo "Sections: $SECTION_LIST"
       exit 1
       ;;
   esac
 done
+
+# A misspelled section would otherwise silently do nothing.
+if [[ -n "$ONLY_SECTIONS" ]]; then
+  IFS=, read -ra requested <<< "$ONLY_SECTIONS"
+  for name in "${requested[@]}"; do
+    if [[ ",$SECTION_LIST," != *",$name,"* ]]; then
+      echo "Unknown section: $name" >&2
+      echo "Valid sections: $SECTION_LIST" >&2
+      exit 1
+    fi
+  done
+fi
 
 # Check if a section should run
 should_run() {

@@ -251,6 +251,14 @@ PY
         self.assertEqual(json.loads(self.preferences.read_text()), self.original)
         self.assertTrue(list((self.home / "data/dotfiles-state/backups/defaults").glob("*.plist")))
 
+    def test_unknown_only_section_is_rejected_before_any_change(self):
+        result = self.apply("--only", "dock,dcok", check=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("Unknown section: dcok", result.stderr)
+        self.assertIn("dock,screenshot", result.stderr)  # lists the valid names
+        self.assertFalse((self.home / "data").exists())
+        self.assertEqual(self.load(), self.original)
+
     def test_dry_run_creates_no_state_or_backup(self):
         self.apply("--dry-run", "--only", "dock")
         self.assertFalse((self.home / "data").exists())
