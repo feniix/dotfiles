@@ -77,6 +77,11 @@ if [[ -L "$HOME/.ssh/config" ]] ||
 fi
 log_success "ssh config"
 
+# tmux (in the Brewfile; until now only the unused Home Manager config linked it)
+state_mkdir "$XDG_CONFIG_HOME/tmux"
+state_symlink "$DOTFILES_DIR/tmux.conf" "$XDG_CONFIG_HOME/tmux/tmux.conf"
+log_success "tmux.conf"
+
 # vim
 if [ -f "$DOTFILES_DIR/.vimrc" ]; then
   state_symlink "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"

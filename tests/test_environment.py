@@ -211,6 +211,12 @@ class EnvironmentTests(Sandbox):
         self.assertIn("+decrypted v2", self.command(git + ["diff"]).stdout)
         self.assertTrue(canary.exists())
 
+    def test_setup_links_tmux_config(self):
+        self.setup_prefix()
+        link = self.home / "config/tmux/tmux.conf"
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(link.resolve(), REPO / "tmux.conf")
+
     def test_setup_prompt_link_matches_shell_source_path(self):
         self.setup_prefix()
         source = (REPO / "zshrc").read_text()
