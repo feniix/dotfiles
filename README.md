@@ -146,3 +146,7 @@ your Neovim plugins.
 Code authored for this repository is available under the
 [MIT License](LICENSE). Vendored third-party material keeps its original
 license; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+> **Note:** `agents/skills/{docx,pdf,pptx,xlsx}` are proprietary Anthropic
+> skills (all rights reserved). They are not covered by the MIT license, and
+> this repository grants no rights to them. See their `LICENSE.txt` files.
