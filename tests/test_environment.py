@@ -121,6 +121,23 @@ class EnvironmentTests(Sandbox):
         self.uninstall()
         self.assertEqual((ssh / "config").read_text(), "Host old\n  HostName 10.0.0.9\n")
 
+    def test_provider_wrappers_see_only_their_own_key(self):
+        self.env.update(KIMI_API_KEY="kimi-secret", OPENAI_API_KEY="o",
+                        OPENAI_ADMIN_KEY="a", LINEAR_API_KEY="l",
+                        ANTHROPIC_API_KEY="real")
+        for wrapper in ("kimi", "zai", "dseek", "ccc", "ccmm"):
+            result = self.command([
+                "/bin/zsh", "-dfc",
+                f'source "{REPO}/claude.source"; claude() {{ env; }}; {wrapper}',
+            ])
+            names = (line.split("=", 1)[0] for line in result.stdout.splitlines())
+            keys = [n for n in names if n.endswith(("_API_KEY", "_ADMIN_KEY"))]
+            self.assertEqual(keys, [], wrapper)
+            self.assertIn("ANTHROPIC_AUTH_TOKEN=", result.stdout)
+        kimi = self.command(["/bin/zsh", "-dfc",
+                             f'source "{REPO}/claude.source"; claude() {{ env; }}; kimi'])
+        self.assertIn("ANTHROPIC_AUTH_TOKEN=kimi-secret", kimi.stdout)
+
     def test_sops_diff_decrypts_only_in_opted_in_repos(self):
         self.setup_prefix()
         canary = self.home / "sops-ran"
