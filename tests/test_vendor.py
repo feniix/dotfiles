@@ -6,6 +6,35 @@ import subprocess
 from test_rollback import REPO, Sandbox
 
 
+# mattpocock/skills v1.2.3 skills/misc/git-guardrails-claude-code/scripts/block-dangerous-git.sh
+UPSTREAM_GUARDRAIL_HOOK = r'''#!/bin/bash
+
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+
+DANGEROUS_PATTERNS=(
+  "git push"
+  "git reset --hard"
+  "git clean -fd"
+  "git clean -f"
+  "git branch -D"
+  "git checkout \."
+  "git restore \."
+  "push --force"
+  "reset --hard"
+)
+
+for pattern in "${DANGEROUS_PATTERNS[@]}"; do
+  if echo "$COMMAND" | grep -qE "$pattern"; then
+    echo "BLOCKED: '$COMMAND' matches dangerous pattern '$pattern'. The user has prevented you from doing this." >&2
+    exit 2
+  fi
+done
+
+exit 0
+'''
+
+
 class VendorTests(Sandbox):
     def setUp(self):
         super().setUp()
@@ -221,6 +250,24 @@ class UpstreamVendorTests(Sandbox):
         lock = self.lock.read_text()
         self.assertIn("vendored one shared", lock)
         self.assertNotIn("vendored two shared", lock)
+
+    def test_git_guardrails_hook_is_patched_on_every_vendor_run(self):
+        hook = "skills/misc/git-guardrails-claude-code/scripts/block-dangerous-git.sh"
+        self.upstream("mattpocock", {
+            "skills/misc/git-guardrails-claude-code": "guardrails",
+            hook: UPSTREAM_GUARDRAIL_HOOK,
+        })
+        self.manifest.write_text(
+            f"source mattpocock {self.upstreams['mattpocock']} main\n"
+            "skill  mattpocock skills/misc/*\n"
+        )
+        result = self.vendor()
+        self.assertIn("patch", result.stdout)
+        self.assertNotIn("upstream block-dangerous-git.sh changed", result.stdout)
+        patched = self.dest / "git-guardrails-claude-code/scripts/block-dangerous-git.sh"
+        repo_copy = REPO / "agents/skills/git-guardrails-claude-code/scripts/block-dangerous-git.sh"
+        self.assertEqual(patched.read_text(), repo_copy.read_text())
+        self.assertTrue(patched.stat().st_mode & 0o111)
 
     def test_frozen_refuses_a_source_without_a_pin(self):
         self.upstream("up", {"skills/a": "a v1"})

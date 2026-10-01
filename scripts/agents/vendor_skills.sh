@@ -157,6 +157,203 @@ rewrite_refs() {
   done
 }
 
+# --- Local patches ----------------------------------------------------------
+# Vendored skills are otherwise copied verbatim; these run on the staged copy,
+# so they survive every re-vendor.
+
+# mattpocock/git-guardrails-claude-code ships a PreToolUse hook that greps the
+# raw command string: `git -C . push`, `git  push`, `git clean -xdf`,
+# `git branch --delete --force` and `git checkout -- .` get through, a commit
+# message mentioning "git push" is blocked, and it fails open without jq.
+# Replace it with a tokenizing version. The hash is the upstream script the
+# replacement was written against (v1.2.3); a mismatch means upstream changed
+# it and the replacement should be reviewed.
+GUARDRAILS_UPSTREAM_SHA256=234922b83c0a1737ee7300806c21ac0f389b07aaeb65c2d71ccedafbc5e1ea4b
+guardrail_hook() {
+  cat <<'GUARDRAIL_HOOK'
+#!/bin/bash
+#
+# Claude Code PreToolUse hook: block destructive git commands.
+#
+# Patched copy of mattpocock/skills' block-dangerous-git.sh, written by the
+# dotfiles' scripts/agents/vendor_skills.sh (edit it there, not here).
+# Unlike the upstream grep, it splits the command like a shell would, so
+#   git -C . push, git  push, git -c k=v push, "git" push    are caught
+#   git commit -m "do not git push"                         is allowed
+# and it fails closed (exit 2) when jq is missing or the input is unreadable.
+# Plain bash 3.2 (macOS /bin/bash). Git aliases are not expanded.
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "BLOCKED: jq is not installed, so the git guardrail hook cannot read the command. Install jq (brew install jq)." >&2
+  exit 2
+fi
+
+INPUT=$(cat)
+if ! COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null); then
+  echo "BLOCKED: the git guardrail hook could not parse its input as JSON." >&2
+  exit 2
+fi
+[ -n "$COMMAND" ] || exit 0
+export LC_ALL=C
+
+block() {
+  echo "BLOCKED: '$COMMAND' $1. The user has prevented you from doing this." >&2
+  exit 2
+}
+
+# check_git <args after git...>
+check_git() {
+  local sub="" a del=0 force=0 staged=0 worktree=0 dashdash=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -C|-c|--git-dir|--work-tree|--namespace|--super-prefix|--config-env|--attr-source)
+        shift; [ $# -gt 0 ] && shift ;;
+      -*) shift ;;
+      *) sub="$1"; shift; break ;;
+    esac
+  done
+  case "$sub" in
+    push) block "runs git push" ;;
+    reset)
+      for a in "$@"; do [ "$a" = --hard ] && block "runs git reset --hard"; done ;;
+    clean)
+      for a in "$@"; do
+        case "$a" in
+          --dry-run) return 0 ;;
+          --*) ;;
+          -*n*) return 0 ;;
+        esac
+      done
+      block "runs git clean without --dry-run" ;;
+    branch)
+      for a in "$@"; do
+        case "$a" in
+          --delete) del=1 ;;
+          --force) force=1 ;;
+          --*) ;;
+          -*)
+            case "$a" in *D*) del=1; force=1 ;; esac
+            case "$a" in *d*) del=1 ;; esac
+            case "$a" in *f*) force=1 ;; esac ;;
+        esac
+      done
+      [ "$del" = 1 ] && [ "$force" = 1 ] && block "force-deletes a branch" ;;
+    checkout)
+      for a in "$@"; do
+        [ "$dashdash" = 1 ] && block "discards working-tree changes"
+        case "$a" in
+          --) dashdash=1 ;;
+          .|./|:/|*/.) block "discards working-tree changes" ;;
+          --force) block "runs git checkout --force" ;;
+          --*) ;;
+          -*f*) block "runs git checkout -f" ;;
+        esac
+      done ;;
+    restore)
+      for a in "$@"; do
+        case "$a" in
+          --staged) staged=1 ;;
+          --worktree) worktree=1 ;;
+          --*) ;;
+          -*)
+            case "$a" in *S*) staged=1 ;; esac
+            case "$a" in *W*) worktree=1 ;; esac ;;
+        esac
+      done
+      if [ "$staged" = 0 ] || [ "$worktree" = 1 ]; then
+        block "discards working-tree changes with git restore"
+      fi ;;
+  esac
+  return 0
+}
+
+# check_segment: inspect one simple command (the words in toks)
+check_segment() {
+  local n=${#toks[@]} i j t
+  i=0
+  while [ "$i" -lt "$n" ]; do
+    t="${toks[$i]}"
+    case "${t##*/}" in
+      git)
+        check_git "${toks[@]:$((i + 1))}" ;;
+      sh|bash|zsh|dash|ksh)
+        j=$((i + 1))
+        while [ "$j" -lt "$n" ]; do
+          case "${toks[$j]}" in
+            --*) ;;
+            -*c*) [ $((j + 1)) -lt "$n" ] && check_command "${toks[$((j + 1))]}" $((depth + 1)); break ;;
+            -*) ;;
+            *) break ;;
+          esac
+          j=$((j + 1))
+        done ;;
+      eval)
+        check_command "${toks[*]:$((i + 1))}" $((depth + 1)) ;;
+    esac
+    i=$((i + 1))
+  done
+}
+
+# check_command <string> [depth]: split into simple commands and words,
+# honouring quotes and backslashes, and check each command.
+check_command() {
+  local s="$1" depth="${2:-0}" n i=0 c q="" word="" inword=0
+  local -a toks=()
+  [ "$depth" -gt 4 ] && return 0
+  n=${#s}
+  while [ "$i" -lt "$n" ]; do
+    c="${s:$i:1}"
+    if [ "$q" = "'" ]; then
+      if [ "$c" = "'" ]; then q=""; else word="$word$c"; fi
+    elif [ "$q" = '"' ]; then
+      case "$c" in
+        '"') q="" ;;
+        '\') i=$((i + 1)); word="$word${s:$i:1}" ;;
+        '`') check_command "${s:$((i + 1))}" $((depth + 1)); word="$word$c" ;;
+        '$')
+          [ "${s:$((i + 1)):1}" = "(" ] && check_command "${s:$((i + 2))}" $((depth + 1))
+          word="$word$c" ;;
+        *) word="$word$c" ;;
+      esac
+    else
+      case "$c" in
+        "'"|'"') q="$c"; inword=1 ;;
+        '\') i=$((i + 1)); word="$word${s:$i:1}"; inword=1 ;;
+        ' '|$'\t'|'<'|'>')
+          [ "$inword" = 1 ] && toks+=("$word"); word=""; inword=0 ;;
+        ';'|'&'|'|'|$'\n'|'('|')'|'`')
+          [ "$inword" = 1 ] && toks+=("$word"); word=""; inword=0
+          [ ${#toks[@]} -gt 0 ] && check_segment
+          toks=() ;;
+        *) word="$word$c"; inword=1 ;;
+      esac
+    fi
+    i=$((i + 1))
+  done
+  [ "$inword" = 1 ] && toks+=("$word")
+  [ ${#toks[@]} -gt 0 ] && check_segment
+  return 0
+}
+
+check_command "$COMMAND"
+exit 0
+GUARDRAIL_HOOK
+}
+# patch_git_guardrails <staged skill dir>
+patch_git_guardrails() {
+  local f="$1/scripts/block-dangerous-git.sh" sum
+  if [[ ! -f "$f" ]]; then
+    log_warning "  $f not found upstream; git guardrail hook left unpatched"
+    return 0
+  fi
+  sum="$(shasum -a 256 "$f" | cut -d' ' -f1)"
+  [[ "$sum" == "$GUARDRAILS_UPSTREAM_SHA256" ]] \
+    || log_warning "  upstream block-dangerous-git.sh changed; review guardrail_hook in $0 against it"
+  guardrail_hook > "$f"
+  chmod 755 "$f"
+  echo "        patch  $(basename "$1")/scripts/block-dangerous-git.sh"
+}
+
 # --- Ownership -------------------------------------------------------------
 # clash_with <id> <name>: print who else holds agents/skills/<name>, if anyone.
 # A source may only write a dir the lock says it owns, or a name nobody holds.
@@ -211,6 +408,7 @@ for id in "${SRC_IDS[@]}"; do
   # report renamed skills as changed on every run.
   stage="$(mktemp -d "${TMPDIR:-/tmp}/vendor-skills.XXXXXX")"
   declare -a vendored_dirs=() staged_targets=()
+  guardrails=""
   for p in "${picked[@]}"; do
     name="$(basename "$p")"
     case " ${SRC_SKIPS[$id]:-} " in *" $name "*) echo "        skip   $name"; continue ;; esac
@@ -220,11 +418,13 @@ for id in "${SRC_IDS[@]}"; do
     done
     rsync -a --exclude .DS_Store --exclude .git "$p/" "$stage/$target/"
     staged_targets+=("$target")
+    [[ "$id" == mattpocock && "$name" == git-guardrails-claude-code ]] && guardrails="$target"
   done
   for r in ${SRC_RENAMES[$id]:-}; do
     old="${r%%:*}"; new="${r##*:}"
     [[ ${#staged_targets[@]} -gt 0 ]] && rewrite_refs "$old" "$new" "${staged_targets[@]/#/$stage/}"
   done
+  [[ -n "$guardrails" ]] && patch_git_guardrails "$stage/$guardrails"
   for target in "${staged_targets[@]}"; do
     other="$(clash_with "$id" "$target")"
     if [[ -n "$other" ]]; then
