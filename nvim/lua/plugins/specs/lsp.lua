@@ -5,7 +5,9 @@ return {
   -- Completion engine
   {
     "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
+    -- CmdlineEnter too, so ':' and '/' completion works before the first
+    -- insert.
+    event = { "InsertEnter", "CmdlineEnter" },
     dependencies = {
       "hrsh7th/cmp-buffer",
       "hrsh7th/cmp-path", 

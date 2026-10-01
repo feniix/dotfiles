@@ -22,11 +22,23 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       require('crates').setup({
-        src = {
-          cmp = {
-            enabled = true,
-          },
-        },
+        -- crates.nvim calls on_attach in each Cargo.toml buffer. Register
+        -- its nvim-cmp source by hand (the old src.cmp key no longer works
+        -- and completion.cmp.enabled is deprecated) and add it to that
+        -- buffer's completion sources.
+        on_attach = function()
+          local ok, cmp = pcall(require, 'cmp')
+          if not ok then
+            return
+          end
+          require('crates.completion.cmp').setup()
+          cmp.setup.buffer({
+            sources = cmp.config.sources(
+              { { name = 'crates' } },
+              { { name = 'buffer' }, { name = 'path' } }
+            ),
+          })
+        end,
       })
     end,
   },

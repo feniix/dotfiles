@@ -120,6 +120,7 @@ function M.setup()
           buffer = "[Buffer]",
           path = "[Path]",
           cmdline = "[CMD]",
+          crates = "[Crates]",
         })[entry.source.name]
         return vim_item
       end,
