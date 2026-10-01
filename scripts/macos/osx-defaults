@@ -64,11 +64,23 @@ run() {
       else
         domain="$3"
       fi
-      defaults_backup_domain "$domain" "$scope" || return 1
+      # Never change a domain uninstall could not restore.
+      if ! defaults_backup_domain "$domain" "$scope"; then
+        echo "  SKIPPED (no backup of $scope:$domain): $*" >&2
+        FAILED+=("$*")
+        return 0
+      fi
     fi
-    [[ "$BACKUP_ONLY" == true ]] || "$@"
+    # One refused write (e.g. a TCC-protected domain without Full Disk
+    # Access) must not abort every later section; report it at the end.
+    if [[ "$BACKUP_ONLY" != true ]] && ! "$@"; then
+      echo "  FAILED: $*" >&2
+      FAILED+=("$*")
+    fi
   fi
+  return 0
 }
+FAILED=()
 
 echo "Configuring macOS $(sw_vers -productVersion) preferences..."
 if [[ "$DRY_RUN" != true ]]; then
@@ -504,4 +516,11 @@ if [[ "$BACKUP_ONLY" == true ]]; then
   echo "Affected domains backed up; no settings applied."
 elif [[ "$DRY_RUN" != true ]]; then
   echo "Only defaults domains are automatically restorable; pmset, nvram and file flags are not."
+fi
+
+if (( ${#FAILED[@]} )); then
+  echo ""
+  echo "${#FAILED[@]} command(s) failed or were skipped:"
+  printf '  %s\n' "${FAILED[@]}"
+  exit 1
 fi

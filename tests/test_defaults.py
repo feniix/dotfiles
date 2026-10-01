@@ -93,7 +93,27 @@ PY
         self.env["FAIL_EXPORT"] = "user:com.apple.dock"
         result = self.apply("--only", "dock", check=False)
         self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(json.loads(self.preferences.read_text()), self.original)
+        self.assertIn("SKIPPED (no backup of user:com.apple.dock)", result.stderr)
+        data = json.loads(self.preferences.read_text())
+        self.assertEqual(data["user:com.apple.dock"], self.original["user:com.apple.dock"])
+        # Other domains in the section are still applied.
+        self.assertIn("user:com.apple.WindowManager", data)
+
+    def test_refused_write_skips_only_that_command(self):
+        # e.g. a TCC-protected domain when the terminal lacks Full Disk Access
+        defaults = self.home / "bin/defaults"
+        defaults.write_text(defaults.read_text().replace(
+            "exec python3",
+            '[[ "$1" == write && "$2" == com.apple.dock && "$3" == autohide ]] && exit 1\n'
+            "exec python3", 1))
+        result = self.apply("--only", "dock,finder", check=False)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("FAILED: defaults write com.apple.dock autohide", result.stderr)
+        data = json.loads(self.preferences.read_text())
+        self.assertEqual(data["user:com.apple.dock"]["autohide"], 0)
+        self.assertEqual(data["user:com.apple.dock"]["show-recents"], 0)
+        self.assertEqual(data["user:com.apple.finder"]["ShowPathbar"], 1)
+        self.assertIn("Verified:", result.stdout)
 
     def test_default_uninstall_keeps_optional_defaults_backups(self):
         self.apply("--only", "dock")

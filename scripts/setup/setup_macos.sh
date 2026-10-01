@@ -85,8 +85,11 @@ if [ -f "$DOTFILES_DIR/scripts/macos/osx-defaults" ]; then
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     log_info "Applying saner defaults to macOS, you may be asked for your password..."
-    bash "$DOTFILES_DIR/scripts/macos/osx-defaults"
-    log_success "macOS defaults applied."
+    if bash "$DOTFILES_DIR/scripts/macos/osx-defaults"; then
+      log_success "macOS defaults applied."
+    else
+      log_warning "Some macOS defaults were not applied; see the list above."
+    fi
   else
     log_info "Skipping macOS defaults."
   fi
