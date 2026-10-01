@@ -117,8 +117,10 @@ function M.setup()
   vim.g.go_highlight_extra_types = 1
   vim.g.go_highlight_generate_tags = 1
   
-  -- Set up autocommand to set keymaps when Go files are opened
+  -- Set up autocommand to set keymaps when Go files are opened. Its own
+  -- group (not core's GoSettings) so re-running setup() replaces it.
   vim.api.nvim_create_autocmd('FileType', {
+    group = vim.api.nvim_create_augroup('GoLangConfig', { clear = true }),
     pattern = 'go',
     callback = function()
       M.setup_keymaps()

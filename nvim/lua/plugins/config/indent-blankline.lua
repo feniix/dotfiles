@@ -113,6 +113,7 @@ function M.setup()
   
   -- Update highlights when colorscheme changes
   vim.api.nvim_create_autocmd('ColorScheme', {
+    group = vim.api.nvim_create_augroup('IndentBlanklineHighlights', { clear = true }),
     pattern = '*',
     callback = setup_highlights,
     desc = 'Update indent-blankline highlights on colorscheme change',

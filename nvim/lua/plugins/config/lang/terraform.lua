@@ -14,8 +14,13 @@ function M.setup()
     vim.g.terraform_format_on_save = false
   end
 
+  -- One group for every autocmd this module creates, cleared on each
+  -- setup() so re-running it does not stack duplicates.
+  local augroup = vim.api.nvim_create_augroup("TerraformConfig", { clear = true })
+
   -- Set up Terraform-specific options
   vim.api.nvim_create_autocmd("FileType", {
+    group = augroup,
     pattern = { "terraform", "hcl" },
     callback = function()
       local buf = vim.api.nvim_get_current_buf()
@@ -34,7 +39,7 @@ function M.setup()
   })
 
   -- Set up autocommands for Terraform files
-  M.setup_autocmds()
+  M.setup_autocmds(augroup)
   
   -- Set up custom commands
   M.setup_commands()
@@ -60,8 +65,8 @@ function M.setup_terraform_keymaps(buf)
   keymap('n', '<leader>th', ':TerraformDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform docs' }))
 end
 
-function M.setup_autocmds()
-  local augroup = vim.api.nvim_create_augroup("TerraformConfig", { clear = true })
+function M.setup_autocmds(augroup)
+  augroup = augroup or vim.api.nvim_create_augroup("TerraformConfig", { clear = true })
   
   -- Auto-format on save (optional, controlled by global setting)
   vim.api.nvim_create_autocmd("BufWritePre", {

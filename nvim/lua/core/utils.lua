@@ -321,6 +321,7 @@ function M.setup()
   
   -- Clear treesitter cache on startup to prevent issues
   vim.api.nvim_create_autocmd("VimEnter", {
+    group = vim.api.nvim_create_augroup("TreesitterCacheCleanup", { clear = true }),
     callback = function()
       vim.defer_fn(function()
         local treesitter_cache = vim.fn.stdpath('cache') .. '/treesitter-vim'

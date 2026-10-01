@@ -4,8 +4,13 @@
 local M = {}
 
 function M.setup()
+  -- One group for every autocmd this module creates, cleared on each
+  -- setup() so re-running it does not stack duplicates.
+  local augroup = vim.api.nvim_create_augroup("RustConfig", { clear = true })
+
   -- Set up Rust-specific options
   vim.api.nvim_create_autocmd("FileType", {
+    group = augroup,
     pattern = "rust",
     callback = function()
       local buf = vim.api.nvim_get_current_buf()
@@ -30,7 +35,7 @@ function M.setup()
   end
 
   -- Set up autocommands for Rust files
-  M.setup_autocmds()
+  M.setup_autocmds(augroup)
   
   -- Set up custom commands
   M.setup_commands()
@@ -62,8 +67,8 @@ function M.setup_rust_keymaps(buf)
   keymap('n', '<leader>rp', ':RustPlay<CR>', vim.tbl_extend('force', opts, { desc = 'Rust playground' }))
 end
 
-function M.setup_autocmds()
-  local augroup = vim.api.nvim_create_augroup("RustConfig", { clear = true })
+function M.setup_autocmds(augroup)
+  augroup = augroup or vim.api.nvim_create_augroup("RustConfig", { clear = true })
   
   -- Auto-format on save (optional)
   vim.api.nvim_create_autocmd("BufWritePre", {
