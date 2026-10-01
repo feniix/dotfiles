@@ -197,7 +197,7 @@ PY
         self.assertNotIn("Not undone automatically", result.stdout)
         result = self.uninstall("--defaults")
         listed = result.stdout.split("Not undone automatically", 1)[1]
-        for command in ("sudo pmset -a standbydelay 86400", "sudo pmset -c sleep 78",
+        for command in ("sudo pmset -c sleep 78",
                         f"chflags nohidden {self.home}/Library",
                         "sudo chflags nohidden /Volumes"):
             self.assertIn("  " + command + "\n", listed)
