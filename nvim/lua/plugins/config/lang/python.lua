@@ -24,6 +24,11 @@ function M.setup()
     desc = "Python buffer configuration",
   })
 
+  -- Format on save is opt-in: set vim.g.python_format_on_save = true
+  if vim.g.python_format_on_save == nil then
+    vim.g.python_format_on_save = false
+  end
+
   -- Set up autocommands for Python files
   M.setup_autocmds()
   
@@ -63,7 +68,9 @@ function M.setup_autocmds()
     group = augroup,
     pattern = "*.py",
     callback = function()
-      if vim.g.python_format_on_save then
+      -- Compare explicitly: Vimscript's 0 is truthy in Lua.
+      local enabled = vim.g.python_format_on_save
+      if enabled == true or enabled == 1 then
         M.format_python()
       end
     end,

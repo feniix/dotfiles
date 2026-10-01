@@ -330,10 +330,10 @@ map('n', '<leader>twn', ':!terraform workspace new ', 'Terraform: New workspace'
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = "*.tf",
   callback = function()
-    -- Auto-format on save (configurable)
-    if vim.g.terraform_fmt_on_save then
-      vim.cmd("silent! !terraform fmt %")
-      vim.cmd("edit")
+    -- Auto-format on save (opt-in: vim.g.terraform_format_on_save = true)
+    local enabled = vim.g.terraform_format_on_save
+    if enabled == true or enabled == 1 then
+      require("plugins.config.lang.terraform").format_terraform()
     end
   end,
 })

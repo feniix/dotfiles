@@ -6,7 +6,13 @@ local M = {}
 function M.setup()
   -- Configure Terraform globals
   vim.g.terraform_align = 0
-  vim.g.terraform_fmt_on_save = 0  -- We'll handle this with autocmds
+  -- Keep vim-terraform's own save hook off: it formats through its
+  -- buffer-local :TerraformFmt, not M.format_terraform. Our hook below reads
+  -- g:terraform_format_on_save instead.
+  vim.g.terraform_fmt_on_save = 0
+  if vim.g.terraform_format_on_save == nil then
+    vim.g.terraform_format_on_save = false
+  end
 
   -- Set up Terraform-specific options
   vim.api.nvim_create_autocmd("FileType", {
@@ -39,7 +45,9 @@ function M.setup_terraform_keymaps(buf)
   local opts = { noremap = true, silent = true, buffer = buf }
   
   -- Terraform formatting and validation
-  keymap('n', '<leader>tf', ':TerraformFmt<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform format' }))
+  -- vim-terraform's ftplugin defines a buffer-local :TerraformFmt that
+  -- shadows ours, so call the formatter directly.
+  keymap('n', '<leader>tf', function() M.format_terraform() end, vim.tbl_extend('force', opts, { desc = 'Terraform format' }))
   keymap('n', '<leader>tv', ':TerraformValidate<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform validate' }))
   keymap('n', '<leader>ti', ':TerraformInit<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform init' }))
   keymap('n', '<leader>tp', ':TerraformPlan<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform plan' }))
@@ -60,8 +68,9 @@ function M.setup_autocmds()
     group = augroup,
     pattern = { "*.tf", "*.tfvars", "*.hcl" },
     callback = function()
-      if vim.g.terraform_fmt_on_save then
-        vim.cmd("TerraformFmt")
+      local enabled = vim.g.terraform_format_on_save
+      if enabled == true or enabled == 1 then
+        M.format_terraform()
       end
     end,
     desc = "Auto-format Terraform files on save",

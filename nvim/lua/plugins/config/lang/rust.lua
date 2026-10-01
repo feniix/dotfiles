@@ -24,6 +24,11 @@ function M.setup()
     desc = "Rust buffer configuration",
   })
 
+  -- Format on save is opt-in: set vim.g.rust_format_on_save = true
+  if vim.g.rust_format_on_save == nil then
+    vim.g.rust_format_on_save = false
+  end
+
   -- Set up autocommands for Rust files
   M.setup_autocmds()
   
@@ -65,7 +70,9 @@ function M.setup_autocmds()
     group = augroup,
     pattern = "*.rs",
     callback = function()
-      if vim.g.rust_format_on_save then
+      -- Compare explicitly: Vimscript's 0 is truthy in Lua.
+      local enabled = vim.g.rust_format_on_save
+      if enabled == true or enabled == 1 then
         M.format_rust()
       end
     end,

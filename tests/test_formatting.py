@@ -23,8 +23,8 @@ vim.fn.writefile({{vim.json.encode(vim.api.nvim_buf_get_lines(0, 0, -1, false))}
                       "--noplugin", "-l", str(script)])
         return json.loads(result.read_text())
 
-    def format_case(self, module, method, command, failure=False, on_save=False,
-                    warning=False, directory=None, before=""):
+    def format_case(self, module, method, command, failure=False, on_save=None,
+                    warning=False, directory=None, before="", unchanged=False):
         if not shutil.which("nvim"):
             self.fail("nvim is required for formatting regression tests")
         body = "echo formatter-error >&2; exit 1\n" if failure else (
@@ -39,8 +39,10 @@ vim.fn.writefile({{vim.json.encode(vim.api.nvim_buf_get_lines(0, 0, -1, false))}
         script = self.home / "test.lua"
         invocation = f"require('{module}').{method}()"
         if on_save:
+            # on_save is (variable, Lua value), e.g. ("rust_format_on_save", "true").
+            variable, value = on_save
             invocation = (
-                f"require('{module}').setup(); vim.g.rust_format_on_save = true; "
+                f"require('{module}').setup(); vim.g.{variable} = {value}; "
                 "vim.cmd('write')"
             )
         script.write_text(f"""
@@ -60,11 +62,11 @@ vim.fn.writefile({{vim.json.encode({{
         self.command(["nvim", "--headless", "-u", "NONE", "-i", "NONE",
                       "--noplugin", "-l", str(script)])
         data = json.loads(result.read_text())
-        self.assertEqual(data["lines"],
-                         ["unsaved content"] if failure else ["UNSAVED CONTENT"])
+        expected = "unsaved content" if failure or unchanged else "UNSAVED CONTENT"
+        self.assertEqual(data["lines"], [expected])
         self.assertEqual(data["cursor"], [1, 3])
         if on_save:
-            self.assertEqual(path.read_text(), "UNSAVED CONTENT\n")
+            self.assertEqual(path.read_text(), expected + "\n")
 
     def test_python_imports_format_current_buffer_not_disk(self):
         self.format_case("plugins.config.lang.python", "sort_imports", "isort")
@@ -100,7 +102,33 @@ vim.fn.writefile({{vim.json.encode({{
 
     def test_rust_format_on_save_formats_unsaved_content(self):
         self.format_case("plugins.config.lang.rust", "format_rust", "rustfmt",
-                         on_save=True)
+                         on_save=("rust_format_on_save", "true"))
+
+    def test_terraform_format_on_save_bypasses_buffer_local_command(self):
+        # vim-terraform's ftplugin defines a buffer-local :TerraformFmt that
+        # shadows the global one; the save hook must not go through it.
+        before = """
+vim.api.nvim_buf_create_user_command(0, 'TerraformFmt', function()
+  error('buffer-local TerraformFmt reached')
+end, {})
+"""
+        self.format_case("plugins.config.lang.terraform", "format_terraform",
+                         "terraform", before=before,
+                         on_save=("terraform_format_on_save", "true"))
+
+    def test_format_on_save_zero_disables_formatting(self):
+        # A Vimscript-style 0 is truthy in Lua; it must still mean "off".
+        for module, method, command, variable in (
+            ("plugins.config.lang.python", "format_python", "black",
+             "python_format_on_save"),
+            ("plugins.config.lang.rust", "format_rust", "rustfmt",
+             "rust_format_on_save"),
+            ("plugins.config.lang.terraform", "format_terraform", "terraform",
+             "terraform_format_on_save"),
+        ):
+            with self.subTest(command=command):
+                self.format_case(module, method, command,
+                                 on_save=(variable, "0"), unchanged=True)
 
     def test_rust_formatter_uses_workspace_edition_and_buffer_directory(self):
         root = self.home / "workspace"
