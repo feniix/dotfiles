@@ -43,7 +43,7 @@ dseek() {
         export ANTHROPIC_AUTH_TOKEN=${DEEPSEEK_API_KEY}
         _claude_scrub_keys
         export ANTHROPIC_MODEL=deepseek-chat
-        export ANTHROPIC_SMALL_FAST_MODEL=deepseek-chat
+        export ANTHROPIC_DEFAULT_HAIKU_MODEL=deepseek-chat
         export API_TIMEOUT_MS=3000000
         claude "$@"
     )
@@ -58,7 +58,6 @@ ccc() {
         export ANTHROPIC_DEFAULT_SONNET_MODEL=gpt-5.6-terra
         export ANTHROPIC_DEFAULT_HAIKU_MODEL=gpt-5.6-luna
         export ANTHROPIC_MODEL=gpt-5.6-sol
-        export ANTHROPIC_SMALL_FAST_MODEL=gpt-5.6-luna
         claude "$@"
     )
 }
@@ -72,7 +71,6 @@ ccmm() {
         export CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1
         # MiniMax-M2.5-HighSpeed
         export ANTHROPIC_MODEL=MiniMax-M2.7-HighSpeed
-        export ANTHROPIC_SMALL_FAST_MODEL=MiniMax-M2.7-HighSpeed
         export ANTHROPIC_DEFAULT_SONNET_MODEL=MiniMax-M2.7-HighSpeed
         export ANTHROPIC_DEFAULT_OPUS_MODEL=MiniMax-M2.7-HighSpeed
         export ANTHROPIC_DEFAULT_HAIKU_MODEL=MiniMax-M2.7-HighSpeed
