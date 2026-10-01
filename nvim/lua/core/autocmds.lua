@@ -27,7 +27,7 @@ function M.setup()
     group = setup_group,
     pattern = "go",
     callback = function()
-      -- Go keymaps are set up in the GoSettings autocmd below
+      -- Go keymaps are buffer-local and set by plugins.config.lang.go
     end,
   })
   
@@ -120,11 +120,7 @@ function M.setup()
         vim.bo.formatprg = "gofmt"
       end
       
-      -- Load Go-specific keymaps
-      local keymaps = utils.safe_require("core.keymaps")
-      if keymaps and keymaps.setup_go_keymaps then
-        keymaps.setup_go_keymaps()
-      end
+      -- Go keymaps are buffer-local and set by plugins.config.lang.go
       
       -- Setup which-key for Go-specific commands
       local which_key_setup = utils.safe_require("plugins.config.which-key")

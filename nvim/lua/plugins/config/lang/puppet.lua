@@ -39,19 +39,20 @@ function M.setup_puppet_keymaps(buf)
   local keymap = vim.keymap.set
   local opts = { noremap = true, silent = true, buffer = buf }
   
+  -- <leader>P (capital) keeps these off the global <leader>p plugin maps.
   -- Puppet linting and validation
-  keymap('n', '<leader>pl', ':PuppetLint<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet lint' }))
-  keymap('n', '<leader>pf', ':PuppetLintFix<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet lint --fix' }))
-  keymap('n', '<leader>pv', ':PuppetValidate<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet validate' }))
-  keymap('n', '<leader>ps', ':PuppetSyntax<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet syntax check' }))
+  keymap('n', '<leader>Pl', ':PuppetLint<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet lint' }))
+  keymap('n', '<leader>Pf', ':PuppetLintFix<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet lint --fix' }))
+  keymap('n', '<leader>Pv', ':PuppetValidate<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet validate' }))
+  keymap('n', '<leader>Ps', ':PuppetSyntax<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet syntax check' }))
   
   -- Puppet documentation and help
-  keymap('n', '<leader>ph', ':PuppetDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet docs' }))
-  keymap('n', '<leader>pm', ':PuppetModulePath<CR>', vim.tbl_extend('force', opts, { desc = 'Show module path' }))
+  keymap('n', '<leader>Ph', ':PuppetDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet docs' }))
+  keymap('n', '<leader>Pm', ':PuppetModulePath<CR>', vim.tbl_extend('force', opts, { desc = 'Show module path' }))
   
   -- Puppet development helpers
-  keymap('n', '<leader>pa', ':PuppetApply<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet apply (dry-run)' }))
-  keymap('n', '<leader>pc', ':PuppetCompile<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet compile' }))
+  keymap('n', '<leader>Pa', ':PuppetApply<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet apply (dry-run)' }))
+  keymap('n', '<leader>Pc', ':PuppetCompile<CR>', vim.tbl_extend('force', opts, { desc = 'Puppet compile' }))
 end
 
 function M.setup_autocmds(augroup)

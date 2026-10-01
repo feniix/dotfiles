@@ -302,8 +302,8 @@ function M.setup_go_mappings()
     { "<leader>Gd", desc = "Go doc", buffer = 0 },
     { "<leader>Gc", desc = "Go coverage toggle", buffer = 0 },
     { "<leader>Gi", desc = "Go info", buffer = 0 },
-    { "<leader>Gv", desc = "Go def vertical split", buffer = 0 },
-    { "<leader>Gs", desc = "Go def horizontal split", buffer = 0 },
+    { "<leader>Gv", desc = "Alternate Go file (vertical split)", buffer = 0 },
+    { "<leader>Gs", desc = "Alternate Go file (horizontal split)", buffer = 0 },
     { "<leader>Gl", desc = "Go metalinter", buffer = 0 },
   })
 end

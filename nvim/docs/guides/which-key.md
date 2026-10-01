@@ -88,8 +88,8 @@ When you press `<leader>` (space), you'll see organized groups:
 - `<leader>Gd` - Go doc
 - `<leader>Gc` - Go coverage toggle
 - `<leader>Gi` - Go info
-- `<leader>Gv` - Go def vertical split
-- `<leader>Gs` - Go def horizontal split
+- `<leader>Gv` - Alternate Go file (vertical split)
+- `<leader>Gs` - Alternate Go file (horizontal split)
 - `<leader>Gl` - Go metalinter
 
 ## Control Key Shortcuts

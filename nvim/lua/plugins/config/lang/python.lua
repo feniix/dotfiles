@@ -45,24 +45,25 @@ function M.setup_python_keymaps(buf)
   local keymap = vim.keymap.set
   local opts = { noremap = true, silent = true, buffer = buf }
   
+  -- <leader>P (capital) keeps these off the global <leader>p plugin maps.
   -- Python formatting and linting
-  keymap('n', '<leader>pf', ':PythonFormat<CR>', vim.tbl_extend('force', opts, { desc = 'Format Python (Black)' }))
-  keymap('n', '<leader>pi', ':PythonImports<CR>', vim.tbl_extend('force', opts, { desc = 'Sort imports (isort)' }))
-  keymap('n', '<leader>pl', ':PythonLint<CR>', vim.tbl_extend('force', opts, { desc = 'Python lint (flake8)' }))
-  keymap('n', '<leader>pt', ':PythonType<CR>', vim.tbl_extend('force', opts, { desc = 'Type check (mypy)' }))
+  keymap('n', '<leader>Pf', ':PythonFormat<CR>', vim.tbl_extend('force', opts, { desc = 'Format Python (Black)' }))
+  keymap('n', '<leader>Pi', ':PythonImports<CR>', vim.tbl_extend('force', opts, { desc = 'Sort imports (isort)' }))
+  keymap('n', '<leader>Pl', ':PythonLint<CR>', vim.tbl_extend('force', opts, { desc = 'Python lint (flake8)' }))
+  keymap('n', '<leader>Pt', ':PythonType<CR>', vim.tbl_extend('force', opts, { desc = 'Type check (mypy)' }))
   
   -- Python testing
-  keymap('n', '<leader>pr', ':PythonRun<CR>', vim.tbl_extend('force', opts, { desc = 'Run Python file' }))
-  keymap('n', '<leader>pT', ':PythonTest<CR>', vim.tbl_extend('force', opts, { desc = 'Run tests (pytest)' }))
-  keymap('n', '<leader>pc', ':PythonCoverage<CR>', vim.tbl_extend('force', opts, { desc = 'Coverage report' }))
+  keymap('n', '<leader>Pr', ':PythonRun<CR>', vim.tbl_extend('force', opts, { desc = 'Run Python file' }))
+  keymap('n', '<leader>PT', ':PythonTest<CR>', vim.tbl_extend('force', opts, { desc = 'Run tests (pytest)' }))
+  keymap('n', '<leader>Pc', ':PythonCoverage<CR>', vim.tbl_extend('force', opts, { desc = 'Coverage report' }))
   
   -- Python REPL and debugging
-  keymap('n', '<leader>pR', ':PythonREPL<CR>', vim.tbl_extend('force', opts, { desc = 'Open Python REPL' }))
-  keymap('n', '<leader>pd', ':PythonDebug<CR>', vim.tbl_extend('force', opts, { desc = 'Debug with pdb' }))
+  keymap('n', '<leader>PR', ':PythonREPL<CR>', vim.tbl_extend('force', opts, { desc = 'Open Python REPL' }))
+  keymap('n', '<leader>Pd', ':PythonDebug<CR>', vim.tbl_extend('force', opts, { desc = 'Debug with pdb' }))
   
   -- Documentation and help
-  keymap('n', '<leader>ph', ':PythonDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Python docs' }))
-  keymap('n', '<leader>pv', ':PythonVersion<CR>', vim.tbl_extend('force', opts, { desc = 'Python version' }))
+  keymap('n', '<leader>Ph', ':PythonDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Python docs' }))
+  keymap('n', '<leader>Pv', ':PythonVersion<CR>', vim.tbl_extend('force', opts, { desc = 'Python version' }))
 end
 
 function M.setup_autocmds(augroup)

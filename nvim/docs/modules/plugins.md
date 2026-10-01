@@ -557,10 +557,10 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "terraform",
   callback = function()
     local map = require('core.utils').map
-    map('n', '<leader>ti', ':!terraform init<CR>', 'Terraform: Init')
-    map('n', '<leader>tp', ':!terraform plan<CR>', 'Terraform: Plan')
-    map('n', '<leader>ta', ':!terraform apply<CR>', 'Terraform: Apply')
-    map('n', '<leader>td', ':!terraform destroy<CR>', 'Terraform: Destroy')
+    map('n', '<leader>Ti', ':!terraform init<CR>', 'Terraform: Init')
+    map('n', '<leader>Tp', ':!terraform plan<CR>', 'Terraform: Plan')
+    map('n', '<leader>Ta', ':!terraform apply<CR>', 'Terraform: Apply')
+    map('n', '<leader>Td', ':!terraform destroy<CR>', 'Terraform: Destroy')
   end,
 })
 ```

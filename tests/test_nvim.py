@@ -90,3 +90,22 @@ return { vim.g.node_host_prog or '', vim.g.loaded_node_provider or -1 }
 
     def test_node_provider_disabled_without_neovim_package(self):
         self.assertEqual(self.node_provider(), ["", 0])
+
+    def test_language_maps_do_not_shadow_global_leader_maps(self):
+        shadowed = self.run_lua("""
+vim.g.mapleader = ','
+require('core.keymaps').setup()
+require('plugins.config.tools').setup_keymaps()
+local out = {}
+for _, lang in ipairs({ 'python', 'puppet', 'terraform', 'go' }) do
+  require('plugins.config.lang.' .. lang).setup()
+  vim.cmd('enew')
+  vim.bo.filetype = lang
+  for _, lhs in ipairs({ ',pi', ',pu', ',pc', ',ps', ',ph', ',pr', ',ti', ',tI', ',tn' }) do
+    local map = vim.fn.maparg(lhs, 'n', false, true)
+    if map.buffer == 1 then table.insert(out, lang .. ' ' .. lhs) end
+  end
+end
+return out
+""")
+        self.assertEqual(shadowed, [])

@@ -134,7 +134,7 @@ end
 #### Testing Framework Integration
 ```lua
 -- Buffer-local keymaps for Python testing
-map('n', '<leader>pt', function()
+map('n', '<leader>Pt', function()
   -- Intelligent test runner selection
   if vim.fn.filereadable('pytest.ini') == 1 or vim.fn.filereadable('pyproject.toml') == 1 then
     vim.cmd('!python -m pytest ' .. vim.fn.expand('%'))
@@ -143,14 +143,14 @@ map('n', '<leader>pt', function()
   end
 end, 'Python: Run tests')
 
-map('n', '<leader>pT', ':!python -m pytest<CR>', 'Python: Run all tests')
-map('n', '<leader>pc', ':!python -m pytest --cov<CR>', 'Python: Run with coverage')
+map('n', '<leader>PT', ':!python -m pytest<CR>', 'Python: Run all tests')
+map('n', '<leader>Pc', ':!python -m pytest --cov<CR>', 'Python: Run with coverage')
 ```
 
 #### Code Formatting
 ```lua
 -- Multiple formatter support
-map('n', '<leader>pf', function()
+map('n', '<leader>Pf', function()
   local formatters = { 'black', 'autopep8', 'yapf' }
   for _, formatter in ipairs(formatters) do
     if vim.fn.executable(formatter) == 1 then
@@ -161,18 +161,18 @@ map('n', '<leader>pf', function()
   end
 end, 'Python: Format file')
 
-map('n', '<leader>pi', ':!isort %<CR>', 'Python: Sort imports')
+map('n', '<leader>Pi', ':!isort %<CR>', 'Python: Sort imports')
 ```
 
 #### REPL Integration
 ```lua
 -- Enhanced Python REPL
-map('n', '<leader>pr', function()
+map('n', '<leader>Pr', function()
   local repl = vim.fn.executable('ipython') == 1 and 'ipython' or 'python'
   vim.cmd('split | terminal ' .. repl)
 end, 'Python: Open REPL')
 
-map('v', '<leader>ps', function()
+map('v', '<leader>Ps', function()
   -- Send selection to REPL
   local selected_text = require('core.utils').get_visual_selection()
   -- Send to terminal...
@@ -302,26 +302,26 @@ return {
 #### Terraform Lifecycle Commands
 ```lua
 -- Complete Terraform workflow
-map('n', '<leader>ti', ':!terraform init<CR>', 'Terraform: Init')
-map('n', '<leader>tp', ':!terraform plan<CR>', 'Terraform: Plan')
-map('n', '<leader>ta', ':!terraform apply<CR>', 'Terraform: Apply')
-map('n', '<leader>td', ':!terraform destroy<CR>', 'Terraform: Destroy')
-map('n', '<leader>tf', ':!terraform fmt<CR>', 'Terraform: Format')
-map('n', '<leader>tv', ':!terraform validate<CR>', 'Terraform: Validate')
+map('n', '<leader>Ti', ':!terraform init<CR>', 'Terraform: Init')
+map('n', '<leader>Tp', ':!terraform plan<CR>', 'Terraform: Plan')
+map('n', '<leader>Ta', ':!terraform apply<CR>', 'Terraform: Apply')
+map('n', '<leader>Td', ':!terraform destroy<CR>', 'Terraform: Destroy')
+map('n', '<leader>Tf', ':!terraform fmt<CR>', 'Terraform: Format')
+map('n', '<leader>Tv', ':!terraform validate<CR>', 'Terraform: Validate')
 ```
 
 #### Advanced Terraform Operations
 ```lua
 -- State management and planning
-map('n', '<leader>tpl', ':!terraform plan -out=tfplan<CR>', 'Terraform: Plan with output')
-map('n', '<leader>tsh', ':!terraform show<CR>', 'Terraform: Show current state')
-map('n', '<leader>tst', ':!terraform state list<CR>', 'Terraform: List state')
-map('n', '<leader>tout', ':!terraform output<CR>', 'Terraform: Show outputs')
+map('n', '<leader>Tpl', ':!terraform plan -out=tfplan<CR>', 'Terraform: Plan with output')
+map('n', '<leader>Tsh', ':!terraform show<CR>', 'Terraform: Show current state')
+map('n', '<leader>Tst', ':!terraform state list<CR>', 'Terraform: List state')
+map('n', '<leader>Tout', ':!terraform output<CR>', 'Terraform: Show outputs')
 
 -- Workspace management
-map('n', '<leader>tws', ':!terraform workspace show<CR>', 'Terraform: Show workspace')
-map('n', '<leader>twl', ':!terraform workspace list<CR>', 'Terraform: List workspaces')
-map('n', '<leader>twn', ':!terraform workspace new ', 'Terraform: New workspace')
+map('n', '<leader>Tws', ':!terraform workspace show<CR>', 'Terraform: Show workspace')
+map('n', '<leader>Twl', ':!terraform workspace list<CR>', 'Terraform: List workspaces')
+map('n', '<leader>Twn', ':!terraform workspace new ', 'Terraform: New workspace')
 ```
 
 #### Validation and Linting
@@ -376,21 +376,21 @@ return {
 #### Puppet-Lint Integration
 ```lua
 -- Comprehensive Puppet linting
-map('n', '<leader>pl', function()
+map('n', '<leader>Pl', function()
   -- Run puppet-lint with quickfix integration
   vim.cmd('compiler puppet-lint')
   vim.cmd('make ' .. vim.fn.expand('%'))
   vim.cmd('copen')
 end, 'Puppet: Lint current file')
 
-map('n', '<leader>pf', ':!puppet-lint --fix %<CR>', 'Puppet: Auto-fix lint issues')
-map('n', '<leader>pla', ':!puppet-lint .<CR>', 'Puppet: Lint all files')
+map('n', '<leader>Pf', ':!puppet-lint --fix %<CR>', 'Puppet: Auto-fix lint issues')
+map('n', '<leader>Pla', ':!puppet-lint .<CR>', 'Puppet: Lint all files')
 ```
 
 #### Syntax Validation
 ```lua
 -- Puppet parser validation
-map('n', '<leader>pv', function()
+map('n', '<leader>Pv', function()
   local file = vim.fn.expand('%')
   local result = vim.fn.system('puppet parser validate ' .. file)
   if vim.v.shell_error == 0 then
@@ -404,12 +404,12 @@ end, 'Puppet: Validate syntax')
 #### Catalog Testing
 ```lua
 -- Puppet catalog compilation and testing
-map('n', '<leader>pc', function()
+map('n', '<leader>Pc', function()
   local manifest = vim.fn.expand('%:p')
   vim.cmd('!puppet apply --noop --verbose ' .. manifest)
 end, 'Puppet: Compile catalog (dry-run)')
 
-map('n', '<leader>pa', function()
+map('n', '<leader>Pa', function()
   local manifest = vim.fn.expand('%:p')
   vim.cmd('!puppet apply ' .. manifest)
 end, 'Puppet: Apply manifest')
@@ -490,7 +490,7 @@ map('n', '<leader>gb', ':GoBench<CR>', 'Run benchmarks')
 #### Python Testing
 ```lua
 -- Multi-framework Python testing
-map('n', '<leader>pt', function()
+map('n', '<leader>Pt', function()
   if vim.fn.filereadable('pytest.ini') == 1 then
     vim.cmd('!python -m pytest ' .. vim.fn.expand('%'))
   elseif vim.fn.filereadable('setup.cfg') == 1 then

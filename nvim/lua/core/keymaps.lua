@@ -112,21 +112,4 @@ function M.setup()
   end
 end
 
--- Setup Go specific keybindings in a separate function so they can be called from an autocommand
-function M.setup_go_keymaps()
-  local keymap = vim.keymap.set
-  local opts = { noremap = true, silent = true, buffer = true }
-
-  -- Go commands using <leader>G prefix to avoid conflicts
-  keymap("n", "<leader>Gb", "<cmd>lua require('plugins.config.lang.go').build_go_files()<CR>", opts)
-  keymap("n", "<leader>Gt", "<Plug>(go-test)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gr", "<Plug>(go-run)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gd", "<Plug>(go-doc)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gc", "<Plug>(go-coverage-toggle)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gi", "<Plug>(go-info)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gl", "<Plug>(go-metalinter)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gv", "<Plug>(go-def-vertical)", { silent = true, buffer = true })
-  keymap("n", "<leader>Gs", "<Plug>(go-def-split)", { silent = true, buffer = true })
-end
-
 return M 

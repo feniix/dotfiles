@@ -49,20 +49,21 @@ function M.setup_terraform_keymaps(buf)
   local keymap = vim.keymap.set
   local opts = { noremap = true, silent = true, buffer = buf }
   
+  -- <leader>T (capital) keeps these off the global <leader>t toggle maps.
   -- Terraform formatting and validation
   -- vim-terraform's ftplugin defines a buffer-local :TerraformFmt that
   -- shadows ours, so call the formatter directly.
-  keymap('n', '<leader>tf', function() M.format_terraform() end, vim.tbl_extend('force', opts, { desc = 'Terraform format' }))
-  keymap('n', '<leader>tv', ':TerraformValidate<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform validate' }))
-  keymap('n', '<leader>ti', ':TerraformInit<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform init' }))
-  keymap('n', '<leader>tp', ':TerraformPlan<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform plan' }))
-  keymap('n', '<leader>ta', ':TerraformApply<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform apply' }))
+  keymap('n', '<leader>Tf', function() M.format_terraform() end, vim.tbl_extend('force', opts, { desc = 'Terraform format' }))
+  keymap('n', '<leader>Tv', ':TerraformValidate<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform validate' }))
+  keymap('n', '<leader>Ti', ':TerraformInit<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform init' }))
+  keymap('n', '<leader>Tp', ':TerraformPlan<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform plan' }))
+  keymap('n', '<leader>Ta', ':TerraformApply<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform apply' }))
   
   -- LSP-specific keymaps (if terraform-ls is available)
-  keymap('n', '<leader>tl', ':TerraformLspToggle<CR>', vim.tbl_extend('force', opts, { desc = 'Toggle Terraform LSP' }))
+  keymap('n', '<leader>Tl', ':TerraformLspToggle<CR>', vim.tbl_extend('force', opts, { desc = 'Toggle Terraform LSP' }))
   
   -- Documentation and help
-  keymap('n', '<leader>th', ':TerraformDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform docs' }))
+  keymap('n', '<leader>Th', ':TerraformDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Terraform docs' }))
 end
 
 function M.setup_autocmds(augroup)

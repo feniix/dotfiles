@@ -76,8 +76,8 @@ function M.setup_keymaps()
   keymap('n', '<leader>Gd', ':GoDoc<CR>', vim.tbl_extend('force', opts, { desc = 'Go doc' }))
   keymap('n', '<leader>Gc', ':GoCoverageToggle<CR>', vim.tbl_extend('force', opts, { desc = 'Go coverage toggle' }))
   keymap('n', '<leader>Gi', ':GoInfo<CR>', vim.tbl_extend('force', opts, { desc = 'Go info' }))
-  keymap('n', '<leader>Gv', M.go_alternate_vertical, vim.tbl_extend('force', opts, { desc = 'Go def vertical split' }))
-  keymap('n', '<leader>Gs', M.go_alternate_split, vim.tbl_extend('force', opts, { desc = 'Go def horizontal split' }))
+  keymap('n', '<leader>Gv', M.go_alternate_vertical, vim.tbl_extend('force', opts, { desc = 'Alternate Go file (vertical split)' }))
+  keymap('n', '<leader>Gs', M.go_alternate_split, vim.tbl_extend('force', opts, { desc = 'Alternate Go file (horizontal split)' }))
   keymap('n', '<leader>Gl', ':GoMetaLinter<CR>', vim.tbl_extend('force', opts, { desc = 'Go metalinter' }))
   
   -- Alternate file mappings
