@@ -2,7 +2,7 @@
 -- Reorganized with better separation of concerns
 
 -- Track startup time for performance monitoring
-local start_time = vim.loop.hrtime()
+local start_time = vim.uv.hrtime()
 
 -- Check if we're running in Neovim
 if vim.fn.has('nvim') == 0 then
@@ -98,7 +98,7 @@ elseif debug_mode then
 end
 
 -- Report startup time and final status
-local end_time = vim.loop.hrtime()
+local end_time = vim.uv.hrtime()
 local startup_time = (end_time - start_time) / 1e6 -- Convert to milliseconds
 
 if debug_mode then

@@ -47,3 +47,24 @@ return out
 """)
         for name, (once, twice) in counts.items():
             self.assertEqual(once, twice, name)
+
+    def test_terraform_lsp_toggle_without_config_only_warns(self):
+        self.mock("terraform-ls", "exit 0\n")
+        messages = self.run_lua("""
+local seen = {}
+vim.notify = function(msg, level) table.insert(seen, { msg, level }) end
+require('plugins.config.lang.terraform').toggle_terraform_lsp()
+return seen
+""")
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("No LSP configuration for terraformls", messages[0][0])
+
+    def test_user_keymaps_accept_list_and_mode_tables(self):
+        maps = self.run_lua("""
+vim.g.mapleader = ','
+local keymaps = require('user.overrides.keymaps')
+keymaps.setup({ { 'n', '<leader>zl', ':echo 1<CR>' } })
+keymaps.setup({ n = { ['<leader>zm'] = ':echo 2<CR>' } })
+return { vim.fn.maparg(',zl', 'n'), vim.fn.maparg(',zm', 'n') }
+""")
+        self.assertEqual(maps, [":echo 1<CR>", ":echo 2<CR>"])

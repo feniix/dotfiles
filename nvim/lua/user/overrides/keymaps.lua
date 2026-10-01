@@ -12,7 +12,7 @@ function M.setup(user_keymaps)
   local total_mappings = 0
   
   -- Handle both array-style and mode-grouped keymaps
-  if vim.tbl_islist(user_keymaps) then
+  if vim.islist(user_keymaps) then
     -- Array format: { { mode, lhs, rhs, opts }, ... }
     for _, mapping in ipairs(user_keymaps) do
       if type(mapping) == 'table' and #mapping >= 3 then

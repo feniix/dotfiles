@@ -93,7 +93,7 @@ function M.setup()
   -- Custom highlight groups for better integration with colorscheme
   local function setup_highlights()
     -- Get the current colorscheme background
-    local bg = vim.api.nvim_get_option('background')
+    local bg = vim.o.background
     
     if bg == 'dark' then
       -- Dark theme highlights

@@ -165,20 +165,32 @@ function M.open_terraform_docs()
 end
 
 -- Toggle Terraform LSP (terraform-ls)
+-- This config defines no LSP servers and does not install nvim-lspconfig, so
+-- starting only works if a `terraformls` config exists (vim.lsp.config or an
+-- lsp/terraformls.lua on the runtimepath). Stopping works for any client.
 function M.toggle_terraform_lsp()
-  local clients = vim.lsp.get_active_clients({ name = "terraformls" })
+  local clients = vim.lsp.get_clients({ name = "terraformls" })
   if #clients > 0 then
-    vim.lsp.stop_client(clients)
-    vim.notify("Terraform LSP stopped", vim.log.levels.INFO)
-  else
-    -- Try to start terraform-ls if available
-    if vim.fn.executable('terraform-ls') == 1 then
-      vim.cmd('LspStart terraformls')
-      vim.notify("Terraform LSP started", vim.log.levels.INFO)
-    else
-      vim.notify("terraform-ls not found. Install it with: go install github.com/hashicorp/terraform-ls@latest", vim.log.levels.WARN)
+    for _, client in ipairs(clients) do
+      client:stop()
     end
+    vim.notify("Terraform LSP stopped", vim.log.levels.INFO)
+    return
   end
+
+  if vim.fn.executable('terraform-ls') == 0 then
+    vim.notify("terraform-ls not found. Install it with: go install github.com/hashicorp/terraform-ls@latest", vim.log.levels.WARN)
+    return
+  end
+
+  local ok, config = pcall(function() return vim.lsp.config.terraformls end)
+  if not ok or type(config) ~= 'table' or not config.cmd then
+    vim.notify("No LSP configuration for terraformls; define one with vim.lsp.config('terraformls', ...)", vim.log.levels.WARN)
+    return
+  end
+
+  vim.lsp.enable('terraformls')
+  vim.notify("Terraform LSP enabled", vim.log.levels.INFO)
 end
 
 return M
