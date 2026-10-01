@@ -95,18 +95,8 @@ debug_path() {
 # === COMPLETION SETUP ===
 # Set up completions once, efficiently
 if type brew &>/dev/null; then
+  # oh-my-zsh runs compinit (with its own cached dump) once this FPATH is set
   FPATH="/opt/homebrew/share/zsh/site-functions:/opt/homebrew/share/zsh-completions:$FPATH"
-  # Skip global compinit in oh-my-zsh, we'll call it once efficiently
-  skip_global_compinit=1
-
-  # Load completions without compiling
-  autoload -Uz compinit
-  # Only rebuild completion cache once a week, without compiling
-  if [ $(date +'%j') != $(/usr/bin/stat -f '%Sm' -t '%j' ${ZDOTDIR:-$HOME}/.zcompdump 2>/dev/null) ]; then
-    compinit -D
-  else
-    compinit -D -C
-  fi
 
   # Completion caching
   zstyle ':completion:*' use-cache on
@@ -186,7 +176,8 @@ prepend_manpath "/opt/homebrew/opt/less/share/man"
 zstyle ':omz:alpha:lib:git' async-prompt yes
 
 # Load Oh-My-Zsh
-source "$ZSH/oh-my-zsh.sh"
+# Guarded so a shell still starts if setup stopped before installing it
+[[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 # === POST OH-MY-ZSH CONFIGURATION ===
 # These need to come AFTER oh-my-zsh to avoid being overridden
@@ -431,7 +422,7 @@ function rm_local_branches() {
 }
 
 # === EXTERNAL TOOLS INTEGRATION ===
-eval "$(command direnv hook zsh)"
+(( $+commands[direnv] )) && eval "$(command direnv hook zsh)"
 
 # === BUN BIN PATH ===
 if [[ -d "$HOME/.cache/.bun/bin" ]]; then
