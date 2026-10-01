@@ -276,6 +276,13 @@ PY
         self.assertFalse((self.home / "data").exists())
         self.assertEqual(self.load(), self.original)
 
+    def test_only_without_sections_is_rejected(self):
+        for args in (["--only"], ["--only", "--dry-run"]):
+            result = self.apply(*args, check=False)
+            self.assertEqual(result.returncode, 1, args)
+            self.assertIn("--only needs", result.stderr)
+        self.assertEqual(json.loads(self.preferences.read_text()), self.original)
+
     def test_dry_run_creates_no_state_or_backup(self):
         self.apply("--dry-run", "--only", "dock")
         self.assertFalse((self.home / "data").exists())
