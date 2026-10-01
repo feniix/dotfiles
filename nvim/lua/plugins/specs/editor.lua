@@ -11,7 +11,9 @@ return {
   -- Fuzzy finder
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.8",
+    -- 0.1.8 calls nvim-treesitter's removed ft_to_lang in previews; master
+    -- uses vim.treesitter.language.get_lang.
+    branch = "master",
     cmd = "Telescope",
     keys = {
       { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find Files" },
