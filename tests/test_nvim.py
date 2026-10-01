@@ -121,3 +121,47 @@ table.sort(names)
 return names
 """)
         self.assertEqual(sorted(invoked), installed)
+
+
+class SetupNvimTests(Sandbox):
+    """setup_nvim.sh with `nvim` mocked; the mock records each call's args."""
+
+    def setUp(self):
+        super().setUp()
+        repo = self.home / "repo"
+        shutil.copytree(REPO / "scripts/lib", repo / "scripts/lib")
+        (repo / "nvim").mkdir(parents=True)
+        (repo / ".vimrc").write_text("fixture")
+        self.env["DOTFILES_DIR"] = str(repo)
+        self.calls = self.home / "nvim-calls"
+        self.mock("nvim", f'printf "%s\\n" "$@" "--" >> {json.dumps(str(self.calls))}\n'
+                  'exit "${NVIM_EXIT:-0}"\n')
+
+    def setup_nvim(self, *args):
+        result = self.command(["/bin/bash", str(REPO / "scripts/setup/setup_nvim.sh"), *args])
+        calls = self.calls.read_text().split("--\n")[:-1] if self.calls.exists() else []
+        return result, [c.splitlines() for c in calls]
+
+    def test_existing_lazy_nvim_is_not_touched(self):
+        (self.home / "data/nvim/lazy/lazy.nvim").mkdir(parents=True)
+        _, calls = self.setup_nvim("--install-plugins")
+        self.assertEqual(calls, [])
+
+    def test_fresh_machine_restores_from_the_lockfile_once(self):
+        _, calls = self.setup_nvim("--install-plugins")
+        self.assertEqual(calls, [["--headless", "+Lazy! restore", "+qa"]])
+
+    def test_without_the_flag_nvim_is_not_run(self):
+        _, calls = self.setup_nvim()
+        self.assertEqual(calls, [])
+
+    def test_failed_restore_warns_without_failing_setup(self):
+        self.env["NVIM_EXIT"] = "1"
+        result, calls = self.setup_nvim("--install-plugins")
+        self.assertEqual(len(calls), 1)
+        self.assertIn("Plugin install failed", result.stdout)
+
+    def test_vimrc_is_left_to_setup_sh(self):
+        self.setup_nvim()
+        self.assertFalse((self.home / ".vimrc").exists())
+        self.assertFalse((self.home / "config/vim/vimrc").exists())

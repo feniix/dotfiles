@@ -50,49 +50,42 @@ state_mkdir "$XDG_DATA_HOME/nvim"        # Plugin data, site packages
 state_mkdir "$XDG_STATE_HOME/nvim/undo"  # Persistent undo files
 state_mkdir "$XDG_CACHE_HOME/nvim"       # Cache files, compiled plugins
 
-# Also create directories for regular Vim
-state_mkdir "$XDG_CONFIG_HOME/vim"
-
 # Link Neovim configuration
 if [ -d "$DOTFILES_DIR/nvim" ]; then
   # Create the symlink to the entire nvim directory (state_symlink handles backup)
   state_symlink "$DOTFILES_DIR/nvim" "$XDG_CONFIG_HOME/nvim"
   log_success "Linked nvim/ → $XDG_CONFIG_HOME/nvim"
   
-  # Install plugins if nvim is available and --install-plugins flag is passed
+  # With --install-plugins, install plugins on a fresh machine (no
+  # lazy.nvim yet). "Lazy! restore" blocks until done and checks out the
+  # commits in lazy-lock.json; "Lazy sync" would update and rewrite the
+  # tracked lockfile. An existing install is left alone.
+  lazy_dir="$XDG_DATA_HOME/nvim/lazy/lazy.nvim"
   if [ "$1" = "--install-plugins" ] && command -v nvim >/dev/null 2>&1; then
-    log_info "Installing Neovim plugins..."
-    # Use Lazy sync for plugin installation
-    nvim --headless -c 'Lazy sync' -c 'sleep 3000m' -c 'quitall'
-    log_success "Neovim plugins installed successfully."
+    if [ -d "$lazy_dir" ]; then
+      log_info "lazy.nvim already installed; skipping plugin restore."
+    else
+      log_info "Installing Neovim plugins from lazy-lock.json..."
+      if nvim --headless "+Lazy! restore" +qa; then
+        log_success "Neovim plugins installed."
+      else
+        log_warning "Plugin install failed; run nvim and :Lazy restore."
+      fi
+    fi
   fi
 else
   log_error "Neovim configuration directory not found at $DOTFILES_DIR/nvim"
   log_warning "Skipping Neovim configuration."
 fi
 
-# Set up .vimrc for Vim compatibility
-if [ -f "$DOTFILES_DIR/.vimrc" ]; then
-  # Link .vimrc to home directory
-  state_symlink "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
-  log_success "Linked .vimrc → $HOME/.vimrc"
-
-  # Link .vimrc to XDG config directory for Vim
-  state_symlink "$DOTFILES_DIR/.vimrc" "$XDG_CONFIG_HOME/vim/vimrc"
-  log_success "Linked .vimrc → $XDG_CONFIG_HOME/vim/vimrc"
-else
-  log_warning "Vim configuration file not found at $DOTFILES_DIR/.vimrc"
-  log_warning "Skipping Vim configuration."
-fi
-
-log_success "Neovim and Vim setup complete!"
+log_success "Neovim setup complete!"
 echo ""
 echo "Neovim configuration is now available at:"
 echo "  Config directory: $XDG_CONFIG_HOME/nvim -> $DOTFILES_DIR/nvim"
 echo "  Main config: $XDG_CONFIG_HOME/nvim/init.lua"
 echo "  Lua modules: $XDG_CONFIG_HOME/nvim/lua/"
 echo ""
-echo "To install plugins, run: nvim and execute :Lazy sync"
+echo "To install plugins, run: nvim and execute :Lazy restore"
 
 echo ""
 echo "Run $DOTFILES_DIR/scripts/nvim/check_nvim.sh to verify the setup."
