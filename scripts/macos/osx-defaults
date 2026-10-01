@@ -58,12 +58,24 @@ if [[ -n "$ONLY_SECTIONS" ]]; then
 fi
 
 # Check if a section should run
+RAN_SECTIONS=()
 should_run() {
   local section="$1"
-  if [[ -z "$ONLY_SECTIONS" ]]; then
-    return 0
+  if [[ -n "$ONLY_SECTIONS" && ",$ONLY_SECTIONS," != *",$section,"* ]]; then
+    return 1
   fi
-  echo ",$ONLY_SECTIONS," | grep -q ",$section,"
+  RAN_SECTIONS+=("$section")
+}
+
+# Apps to restart so a section's settings take effect
+apps_for_section() {
+  case "$1" in
+    activity) echo "Activity Monitor" ;;
+    dock|hotcorners) echo "Dock" ;;
+    finder) echo "Finder" ;;
+    safari) echo "Safari" ;;
+    screenshot) echo "SystemUIServer" ;;
+  esac
 }
 
 # Wrapper that respects dry-run mode
@@ -108,12 +120,14 @@ run() {
       case "$cmd" in
         pmset|nvram|chflags) state_record NON_RESTORABLE "$*" ||
           log_warning "Could not record that uninstall will not undo: $*" ;;
+        defaults) WROTE_DEFAULTS=true ;;
       esac
     fi
   fi
   return 0
 }
 FAILED=()
+WROTE_DEFAULTS=false
 
 echo "Configuring macOS $(sw_vers -productVersion) preferences..."
 if [[ "$DRY_RUN" != true ]]; then
@@ -463,7 +477,16 @@ fi
 if [[ "$DRY_RUN" != true && "$BACKUP_ONLY" != true ]]; then
   echo "Restarting affected applications..."
 
-  for app in "Activity Monitor" "cfprefsd" "Dock" "Finder" "Safari" "SystemUIServer"; do
+  # Only restart apps whose sections ran, so --only finder leaves Safari alone.
+  apps=()
+  [[ "$WROTE_DEFAULTS" != true ]] || apps+=("cfprefsd")
+  for section in ${RAN_SECTIONS[@]+"${RAN_SECTIONS[@]}"}; do
+    app="$(apps_for_section "$section")"
+    if [[ -n "$app" && " ${apps[*]-} " != *" $app "* ]]; then
+      apps+=("$app")
+    fi
+  done
+  for app in ${apps[@]+"${apps[@]}"}; do
     killall "${app}" &> /dev/null || true
   done
 

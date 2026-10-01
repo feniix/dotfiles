@@ -81,7 +81,8 @@ PY
 """)
         self.mock("sw_vers", "echo 15.0\n")
         self.mock("sudo", 'case "$1" in -v|-n) exit 0;; esac; exec "$@"\n')
-        self.mock("killall", "exit 0\n")
+        self.killed = self.home / "killall.log"
+        self.mock("killall", f'echo "$*" >> {str(self.killed)!r}\n')
         self.mock("chflags", "exit 0\n")
         self.mock("pmset", "exit 0\n")
         self.mock("nvram", "exit 0\n")
@@ -250,6 +251,22 @@ PY
         self.apply("--backup", "--only", "dock")
         self.assertEqual(json.loads(self.preferences.read_text()), self.original)
         self.assertTrue(list((self.home / "data/dotfiles-state/backups/defaults").glob("*.plist")))
+
+    def killed_apps(self):
+        return self.killed.read_text().splitlines() if self.killed.exists() else []
+
+    def test_only_restarts_apps_of_the_sections_that_ran(self):
+        self.apply("--only", "dock")
+        self.assertEqual(sorted(self.killed_apps()), ["Dock", "cfprefsd"])
+
+    def test_full_run_restarts_every_affected_app(self):
+        self.apply()
+        self.assertEqual(sorted(self.killed_apps()), [
+            "Activity Monitor", "Dock", "Finder", "Safari", "SystemUIServer", "cfprefsd"])
+
+    def test_no_defaults_written_leaves_cfprefsd_alone(self):
+        self.apply("--only", "energy")
+        self.assertEqual(self.killed_apps(), [])
 
     def test_unknown_only_section_is_rejected_before_any_change(self):
         result = self.apply("--only", "dock,dcok", check=False)
