@@ -4,6 +4,7 @@ No test loads the real init.lua: lazy.nvim would clone or update plugins.
 """
 
 import json
+import re
 import shutil
 
 from test_rollback import REPO, Sandbox
@@ -109,3 +110,14 @@ end
 return out
 """)
         self.assertEqual(shadowed, [])
+
+    def test_python_installer_matches_the_tools_python_lua_runs(self):
+        source = (REPO / "nvim/lua/plugins/config/lang/python.lua").read_text()
+        invoked = set(re.findall(r"executable\('([\w-]+)'\)", source))
+        invoked -= {"python3", "python"}
+        installed = self.run_lua("""
+local names = vim.tbl_keys(require('core.installer').tools.python_tools)
+table.sort(names)
+return names
+""")
+        self.assertEqual(sorted(invoked), installed)

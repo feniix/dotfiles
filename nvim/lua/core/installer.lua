@@ -24,10 +24,14 @@ M.tools = {
     prettier = { cmd = 'npm install -g prettier' },
     eslint = { cmd = 'npm install -g eslint' }
   },
+  -- Exactly the executables plugins/config/lang/python.lua runs.
   python_tools = {
     black = { cmd = 'pip install black' },
-    ruff = { cmd = 'pip install ruff' },
-    pyright = { cmd = 'pip install pyright' }
+    isort = { cmd = 'pip install isort' },
+    flake8 = { cmd = 'pip install flake8' },
+    mypy = { cmd = 'pip install mypy' },
+    pytest = { cmd = 'pip install pytest' },
+    coverage = { cmd = 'pip install coverage' }
   },
   system_tools = {
     ripgrep = { homebrew = 'ripgrep', apt = 'ripgrep', dnf = 'ripgrep', pacman = 'ripgrep' },
