@@ -11,8 +11,10 @@ fi
 # Helper functions for PATH management
 # Add to PATH only if directory exists (and only if not already in PATH)
 prepend_path() {
-  if [[ -d "$1" && ":$PATH:" != *":$1:"* ]]; then
-    export PATH="$1:$PATH"
+  # Move to the front even when already present (nested shells inherit PATH),
+  # dropping other copies so they do not pile up.
+  if [[ -d "$1" ]]; then
+    path=("$1" ${path:#$1})
   fi
 }
 
