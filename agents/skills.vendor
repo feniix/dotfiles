@@ -45,3 +45,7 @@ skill  typesafe skills/typesafe-ai
 # i-have-adhd
 source adhd https://github.com/ayghri/i-have-adhd.git main
 skill  adhd skills/i-have-adhd
+
+# gh stack CLI extension's skill; keep the pin in step with `gh extension list`
+source ghstack https://github.com/github/gh-stack.git v0.2.1
+skill  ghstack skills/gh-stack
