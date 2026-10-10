@@ -168,7 +168,6 @@ plugins=(
 
 # === HOMEBREW CONFIGURATION ===
 # Homebrew environment variables
-export HOMEBREW_BREWFILE="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
 export HOMEBREW_NO_ENV_HINTS=1
 export HOMEBREW_NO_ANALYTICS=1
 export HOMEBREW_AUTOREMOVE=1

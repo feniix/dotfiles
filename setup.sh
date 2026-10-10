@@ -78,6 +78,11 @@ state_mkdir "$XDG_CONFIG_HOME/tmux"
 state_symlink "$DOTFILES_DIR/tmux.conf" "$XDG_CONFIG_HOME/tmux/tmux.conf"
 log_success "tmux.conf"
 
+# Homebrew: `brew bundle --global` reads ~/.config/homebrew/Brewfile
+state_mkdir "$XDG_CONFIG_HOME/homebrew"
+state_symlink "$DOTFILES_DIR/Brewfile" "$XDG_CONFIG_HOME/homebrew/Brewfile"
+log_success "Brewfile"
+
 # utilities: ~/.local/bin is on PATH via zshrc
 state_mkdir "$HOME/.local/bin"
 for util in "$DOTFILES_DIR"/scripts/utils/*; do

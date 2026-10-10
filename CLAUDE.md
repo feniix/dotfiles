@@ -65,8 +65,8 @@ scripts/
 
 ## Package Management
 
-- `brew bundle --file=Brewfile` — install/update Homebrew packages
-- `brew bundle dump --file=Brewfile --force` — update Brewfile from current state
+- The Brewfile is curated: taps, top-level formulae, casks and mas apps chosen on purpose; dependencies are left to Homebrew. Do not regenerate it with `brew bundle dump`
+- setup links it to `~/.config/homebrew/Brewfile`, so `brew bundle --global` works from any directory: `brew bundle install --global`, `brew bundle add --global <name>` / `remove`, `brew bundle check --global` / `cleanup --global` (report only without `--force`)
 - `mise install` — install all tools from `~/.config/mise/config.toml`
 
 ## Agent skills

@@ -232,6 +232,12 @@ class EnvironmentTests(Sandbox):
         self.assertTrue(link.is_symlink())
         self.assertEqual(link.resolve(), REPO / "tmux.conf")
 
+    def test_setup_links_brewfile_for_global_bundle(self):
+        self.setup_prefix()
+        link = self.home / "config/homebrew/Brewfile"
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(link.resolve(), REPO / "Brewfile")
+
     def test_setup_prompt_link_matches_shell_source_path(self):
         self.setup_prefix()
         source = (REPO / "zshrc").read_text()
