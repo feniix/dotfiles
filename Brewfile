@@ -34,6 +34,7 @@ brew "less"
 brew "make"
 brew "rsync"
 brew "ssh-copy-id"
+brew "sshpass"
 brew "wget"
 
 # Git
@@ -77,9 +78,11 @@ brew "postgresql@18", link: true
 brew "ffmpeg"
 brew "pandoc"
 brew "poppler"
+brew "qpdf"
 
 # AI and agent tools
 brew "beads"
+brew "cliproxyapi"
 brew "dmtrkovalenko/fff/fff-mcp"
 brew "gogcli"
 brew "ollama"
