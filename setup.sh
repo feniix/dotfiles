@@ -134,6 +134,11 @@ run_step "Setting up mise" bash "$SCRIPTS_DIR/setup/setup_mise.sh"
 run_step "Linking pi user config" bash "$SCRIPTS_DIR/setup/setup_pi.sh"
 run_step "Linking shared agent skills and prompts" bash "$SCRIPTS_DIR/setup/setup_agent_skills.sh"
 
+# Report only: setup never uninstalls what the Brewfile does not list.
+echo ""
+log_info "Comparing the Brewfile with installed packages..."
+bash "$SCRIPTS_DIR/utils/brew-drift" || true
+
 echo ""
 if (( ${#FAILED_STEPS[@]} )); then
   log_warning "Setup finished with ${#FAILED_STEPS[@]} failed step(s):"

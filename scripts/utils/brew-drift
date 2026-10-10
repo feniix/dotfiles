@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# Report where the Brewfile and the installed packages disagree. Changes
+# nothing. Exit 0 when they match, 1 when they drift, 2 without Homebrew.
+#
+# Installed formulae are only reported when installed on request; anything
+# pulled in as a dependency is Homebrew's business, not the Brewfile's.
+
+set -uo pipefail
+
+brewfile="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
+[[ -e "$brewfile" ]] || brewfile="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
+command -v brew >/dev/null || { echo "brew-drift: Homebrew is not installed" >&2; exit 2; }
+
+missing="$(brew bundle check --file="$brewfile" --verbose --no-upgrade 2>/dev/null |
+  sed -n 's/^→ \(.*\) needs to be installed.*/\1/p')"
+
+# `bundle cleanup` without --force only lists what is not in the Brewfile.
+requested=" $(brew leaves --installed-on-request 2>/dev/null | sed 's#.*/##' | tr '\n' ' ') "
+extra="$(brew bundle cleanup --file="$brewfile" 2>/dev/null | awk -v requested="$requested" '
+  /^Would uninstall formulae:/          { kind = "Formula"; next }
+  /^Would uninstall casks:/             { kind = "Cask"; next }
+  /^Would untap:/                       { kind = "Tap"; next }
+  /^Would uninstall Mac App Store apps:/ { kind = "App"; next }
+  /^(Would|Run|Warning)/                { kind = ""; next }
+  kind == "Formula" && index(requested, " " $0 " ") == 0 { next }
+  kind != ""                            { print kind " " $0 }
+')"
+
+if [[ -z "$missing" && -z "$extra" ]]; then
+  echo "Brewfile matches the installed packages."
+  exit 0
+fi
+if [[ -n "$missing" ]]; then
+  echo "In the Brewfile, not installed (brew bundle install --global):"
+  sed 's/^/  /' <<< "$missing"
+fi
+if [[ -n "$extra" ]]; then
+  echo "Installed, not in the Brewfile (brew bundle add --global, or uninstall):"
+  sed 's/^/  /' <<< "$extra"
+fi
+exit 1

@@ -61,13 +61,14 @@ scripts/
 │   └── check_nvim.sh        # Structure, plugins, and legacy cleanup check
 ├── ssh/
 │   └── manage_ssh_keys.sh   # Key permissions, backup, passphrase, signing-key check
-└── utils/                   # flushdns, view-secrets (linked into ~/.local/bin)
+└── utils/                   # flushdns, view-secrets, brew-drift (linked into ~/.local/bin)
 ```
 
 ## Package Management
 
 - The Brewfile is curated: taps, top-level formulae, casks and mas apps chosen on purpose; dependencies are left to Homebrew. Do not regenerate it with `brew bundle dump`
 - setup links it to `~/.config/homebrew/Brewfile`, so `brew bundle --global` works from any directory: `brew bundle install --global`, `brew bundle add --global <name>` / `remove`, `brew bundle check --global` / `cleanup --global` (report only without `--force`)
+- `brew-drift` reports what is installed but not in the Brewfile (formulae only when installed on request) and what is listed but not installed; setup prints it at the end and never uninstalls anything
 - `mise install` — install all tools from `~/.config/mise/config.toml`
 
 ## Agent skills

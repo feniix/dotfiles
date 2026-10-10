@@ -211,6 +211,37 @@ esac
                                      formulae="hadolint", brewfile=False)
         self.assertEqual(calls, [])
 
+    def brew_drift(self, check="", cleanup="", leaves=""):
+        self.mock("brew", f"""case "$1 $2" in
+  "bundle check") printf '%b' {check!r} ;;
+  "bundle cleanup") printf '%b' {cleanup!r} ;;
+  "leaves --installed-on-request") printf '%b' {leaves!r} ;;
+esac
+""")
+        return self.command(["/bin/bash", str(REPO / "scripts/utils/brew-drift")],
+                            check=False)
+
+    def test_brew_drift_reports_both_directions_without_dependencies(self):
+        result = self.brew_drift(
+            check="→ Formula stern needs to be installed.\n"
+                  "→ App Slack needs to be installed or updated.\n",
+            cleanup="Would uninstall formulae:\nagg\npango\nfff-mcp\n"
+                    "Would uninstall casks:\nsteam\nWould untap:\nacme/tools\n"
+                    "Would `brew cleanup`:\nWould remove: /x\n"
+                    "Run `brew bundle cleanup --force` to make these changes.\n",
+            leaves="agg\ndmtrkovalenko/fff/fff-mcp\n")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("  Formula stern\n  App Slack\n", result.stdout)
+        self.assertIn("  Formula agg\n  Formula fff-mcp\n  Cask steam\n  Tap acme/tools\n",
+                      result.stdout)
+        self.assertNotIn("pango", result.stdout)
+        self.assertNotIn("/x", result.stdout)
+
+    def test_brew_drift_is_quiet_when_everything_matches(self):
+        result = self.brew_drift(cleanup="Would uninstall formulae:\npango\n")
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, "Brewfile matches the installed packages.\n")
+
     def test_rsyncmove_never_splices_onto_a_different_file(self):
         source = (REPO / "zshrc").read_text()
         alias = next(line for line in source.splitlines()
