@@ -1,0 +1,48 @@
+# shellcheck shell=bash
+# Sourced by zshrc.
+
+# Keep the Brewfile in step with installs: `brew install` adds the packages
+# to ~/.config/homebrew/Brewfile (linked to the dotfiles Brewfile) and
+# `brew uninstall` removes them. `command brew install` skips this, for
+# packages you are only trying out.
+function brew() {
+  local brewfile="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
+  local action="$1"
+  command brew "$@"
+  local rc=$?
+  [[ -e "$brewfile" ]] || return $rc
+  case "$action" in
+    install|uninstall|remove|rm) ;;
+    *) return $rc ;;
+  esac
+
+  local arg name entry
+  local -a kind
+  for arg in "${@:2}"; do
+    [[ "$arg" == -* ]] && continue
+    name="${arg##*/}"
+    # The entry as written, tap-qualified or not; bundle remove needs it exact
+    entry="$(awk -F'"' -v n="$name" '/^(brew|cask) "/ {
+      short = $2; sub(/.*\//, "", short)
+      if (short == n) { split($1, k, " "); print k[1] " " $2; exit }
+    }' "$brewfile")"
+    if [[ "$action" == install ]]; then
+      [[ -z "$entry" ]] || continue
+      if command brew list --cask "$name" &>/dev/null; then
+        kind=(--cask)
+      elif command brew list --formula "$name" &>/dev/null; then
+        kind=()
+      else
+        continue
+      fi
+      command brew bundle add --global "${kind[@]}" "$arg" >/dev/null &&
+        echo "Brewfile: added $arg"
+    elif (( rc == 0 )) && [[ -n "$entry" ]]; then
+      kind=(--formula)
+      [[ "$entry" == cask* ]] && kind=(--cask)
+      command brew bundle remove --global "${kind[@]}" "${entry#* }" >/dev/null &&
+        echo "Brewfile: removed ${entry#* }"
+    fi
+  done
+  return $rc
+}

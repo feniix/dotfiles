@@ -18,6 +18,7 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 - `ssh_config` — multiplexing, GitHub multi-key setup, LAN/Tailscale hosts
 - `Brewfile` — Homebrew packages (source of truth for system tools)
 - `claude.source` — Claude Code wrapper functions for alternative providers
+- `brew.source` — `brew` wrapper: `brew install`/`uninstall` add or remove the Brewfile entry (`command brew` skips it)
 - `pi/` — pi user config (settings.json, models.json, AGENTS.md, agents/). Symlinked into `~/.pi/agent/`. See `pi/README.md`.
 - `agents/` — tool-neutral skills and prompts shared by pi, Codex and Claude Code (skills/, prompts/, skills.vendor, skills.lock). Linked item-by-item into each tool by `scripts/setup/setup_agent_skills.sh`.
 

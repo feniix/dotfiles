@@ -154,6 +154,63 @@ class EnvironmentTests(Sandbox):
         self.assertIn("not a git repo", outside.stdout)
         self.assertNotIn("parse error", outside.stderr)
 
+    def brew_wrapper(self, *invocations, rc=0, formulae="", casks="", brewfile=True):
+        """Run the brew.source wrapper against a fake brew; return its bundle calls."""
+        bin_dir, log = self.home / "bin", self.home / "brew.log"
+        bin_dir.mkdir(exist_ok=True)
+        fake = bin_dir / "brew"
+        fake.write_text(f"""#!/bin/bash
+case "$1" in
+  install|uninstall|remove|rm) exit {rc} ;;
+  list) [[ "$2" == --cask && " {casks} " == *" $3 "* ]] && exit 0
+        [[ "$2" == --formula && " {formulae} " == *" $3 "* ]] && exit 0
+        exit 1 ;;
+  bundle) echo "$*" >> "{log}" ;;
+esac
+""")
+        fake.chmod(0o755)
+        if brewfile:
+            path = self.home / "config/homebrew/Brewfile"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('tap "acme/tools"\nbrew "jq"\nbrew "acme/tools/widget"\n'
+                            'brew "bonnie++"\ncask "firefox"\n')
+        self.env["PATH"] = f"{bin_dir}:/usr/bin:/bin"
+        script = f'source "{REPO}/brew.source"; ' + "".join(
+            f"brew {args}; print rc=$?;" for args in invocations)
+        result = self.command(["/bin/zsh", "-dfc", script])
+        calls = log.read_text().splitlines() if log.exists() else []
+        return calls, result.stdout
+
+    def test_brew_install_adds_new_packages_to_the_brewfile(self):
+        calls, out = self.brew_wrapper("install jq hadolint", "install --cask zoom",
+                                       "install acme/tools/widget",
+                                       formulae="jq hadolint widget", casks="zoom")
+        self.assertEqual(calls, ["bundle add --global hadolint",
+                                 "bundle add --global --cask zoom"])
+        self.assertIn("Brewfile: added hadolint", out)
+
+    def test_brew_install_records_only_what_got_installed(self):
+        calls, out = self.brew_wrapper("install nosuchpkg", rc=1)
+        self.assertEqual(calls, [])
+        self.assertIn("rc=1", out)
+
+    def test_brew_uninstall_removes_the_entry_as_written(self):
+        calls, _ = self.brew_wrapper("uninstall widget", "rm --cask firefox",
+                                     "uninstall notlisted", "uninstall bonnie")
+        self.assertEqual(calls, ["bundle remove --global --formula acme/tools/widget",
+                                 "bundle remove --global --cask firefox"])
+        calls, _ = self.brew_wrapper("uninstall bonnie++")
+        self.assertEqual(calls[-1], "bundle remove --global --formula bonnie++")
+
+    def test_brew_uninstall_failure_keeps_the_entry(self):
+        calls, _ = self.brew_wrapper("uninstall jq", rc=1)
+        self.assertEqual(calls, [])
+
+    def test_brew_wrapper_without_linked_brewfile_only_runs_brew(self):
+        calls, _ = self.brew_wrapper("install hadolint", "uninstall jq",
+                                     formulae="hadolint", brewfile=False)
+        self.assertEqual(calls, [])
+
     def test_rsyncmove_never_splices_onto_a_different_file(self):
         source = (REPO / "zshrc").read_text()
         alias = next(line for line in source.splitlines()

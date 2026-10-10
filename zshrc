@@ -459,6 +459,7 @@ if command -v aws_completer &>/dev/null; then
   complete -C aws_completer aws
 fi
 
+[[ -f "${DOTFILES_DIR:-$HOME/dotfiles}/brew.source" ]] && source "${DOTFILES_DIR:-$HOME/dotfiles}/brew.source"
 if [[ -f "${DOTFILES_DIR:-$HOME/dotfiles}/claude.source" ]]; then
   source "${DOTFILES_DIR:-$HOME/dotfiles}/claude.source"
 fi
