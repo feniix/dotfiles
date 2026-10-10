@@ -49,3 +49,7 @@ skill  adhd skills/i-have-adhd
 # gh stack CLI extension's skill; keep the pin in step with `gh extension list`
 source ghstack https://github.com/github/gh-stack.git v0.2.1
 skill  ghstack skills/gh-stack
+
+# Entire's skills (teach, recall, explain, ...), used with the entire CLI
+source entire https://github.com/entireio/skills.git main
+skill  entire skills/*
