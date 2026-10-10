@@ -213,7 +213,7 @@ esac
 
     def brew_drift(self, check="", cleanup="", leaves=""):
         self.mock("brew", f"""case "$1 $2" in
-  "bundle check") printf '%b' {check!r} ;;
+  "bundle check") printf '%b' {check!r} >&2 ;;
   "bundle cleanup") printf '%b' {cleanup!r} ;;
   "leaves --installed-on-request") printf '%b' {leaves!r} ;;
 esac

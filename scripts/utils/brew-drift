@@ -12,7 +12,8 @@ brewfile="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
 [[ -e "$brewfile" ]] || brewfile="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
 command -v brew >/dev/null || { echo "brew-drift: Homebrew is not installed" >&2; exit 2; }
 
-missing="$(brew bundle check --file="$brewfile" --verbose --no-upgrade 2>/dev/null |
+# The unmet entries go to stderr.
+missing="$(brew bundle check --file="$brewfile" --verbose --no-upgrade 2>&1 |
   sed -n 's/^→ \(.*\) needs to be installed.*/\1/p')"
 
 # `bundle cleanup` without --force only lists what is not in the Brewfile.
