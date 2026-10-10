@@ -23,13 +23,13 @@
 # patch in scripts/agents/vendor_skills.sh.
 
 # Matt Pocock's engineering skills (was the mattpocock-skills Claude plugin)
-source mattpocock https://github.com/mattpocock/skills.git v1.2.3
+source mattpocock https://github.com/mattpocock/skills.git v1.3.1
 skill  mattpocock skills/engineering/*
 skill  mattpocock skills/productivity/*
 skill  mattpocock skills/in-progress/*
 skill  mattpocock skills/misc/*
-# `teach` in agents/skills is the Entire skill; keep Matt's out of the way
-skip   mattpocock teach
+# `teach` is the Entire skill; Matt's goes under a prefixed name
+rename mattpocock teach mp-teach
 # `code-review` would shadow Claude Code's built-in /code-review (ultra mode)
 rename mattpocock code-review mp-code-review
 

@@ -1,5 +1,5 @@
 # Resolved commits for agents/skills.vendor — written by scripts/agents/vendor_skills.sh
-mattpocock 6acc160e4e0cd062dbbbd7a1b26ae92855edf07e https://github.com/mattpocock/skills.git
+mattpocock 24fe0ef7737efae15c87225755e9f6f5965e4888 https://github.com/mattpocock/skills.git
 anthropic 2a8ad9f74633d10e3d9bb0660a03bfc6e50584b1 https://github.com/anthropics/claude-plugins-official.git
 typesafe 65a39f393687675ce170e6094757de20370365b9 https://github.com/typesafe-ai/skills.git
 adhd 839872f9d1cd634fed642b4589ce7226199cc15f https://github.com/ayghri/i-have-adhd.git
@@ -12,10 +12,12 @@ vendored mattpocock diagnosing-bugs
 vendored mattpocock domain-modeling
 vendored mattpocock grill-with-docs
 vendored mattpocock implement
+vendored mattpocock implement-spec
 vendored mattpocock improve-codebase-architecture
+vendored mattpocock pr
 vendored mattpocock prototype
 vendored mattpocock research
-vendored mattpocock resolving-merge-conflicts
+vendored mattpocock retro
 vendored mattpocock setup-matt-pocock-skills
 vendored mattpocock tdd
 vendored mattpocock to-spec
@@ -26,6 +28,7 @@ vendored mattpocock wizard
 vendored mattpocock grill-me
 vendored mattpocock grilling
 vendored mattpocock handoff
+vendored mattpocock mp-teach
 vendored mattpocock to-questionnaire
 vendored mattpocock wait-what
 vendored mattpocock writing-for-agents
