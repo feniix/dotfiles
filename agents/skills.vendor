@@ -50,6 +50,8 @@ skill  adhd skills/i-have-adhd
 source ghstack https://github.com/github/gh-stack.git v0.2.1
 skill  ghstack skills/gh-stack
 
-# Entire's skills (teach, recall, explain, ...), used with the entire CLI
-source entire https://github.com/entireio/skills.git main
+# Entire's skills (teach, recall, explain, ...), used with the entire CLI.
+# Held at d6a918f: fe5266f (#46) gave search/SKILL.md invalid YAML frontmatter
+# (unquoted ": " in description), which pi rejects. Back to main once fixed.
+source entire https://github.com/entireio/skills.git d6a918f
 skill  entire skills/*
