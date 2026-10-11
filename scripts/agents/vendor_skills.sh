@@ -123,6 +123,8 @@ checkout_source() {
     log_info "cloning $url"
     git clone --quiet "$url" "$dir" || return 1
   else
+    # Follow a URL changed in the manifest (e.g. switched to a fork).
+    git -C "$dir" remote set-url origin "$url" || return 1
     # --force: let a tag the upstream moved (a re-tagged release) follow it.
     # The pin in the lock, not the local tag, is what guards against drift.
     git -C "$dir" fetch --quiet --force --tags origin \

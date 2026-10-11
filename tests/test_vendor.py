@@ -292,6 +292,21 @@ class UpstreamVendorTests(Sandbox):
         self.assertEqual(self.lock_sha("up"), second)
         self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a v2")
 
+    def test_update_follows_a_url_changed_to_a_fork(self):
+        self.upstream("up", {"skills/a": "a v1"})
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} main\nskill  up skills/*\n"
+        )
+        self.vendor()
+        fork = self.home / "upstream/fork"
+        self.git(self.home, "clone", "-q", str(self.upstreams["up"]), str(fork))
+        self.upstreams["fork"] = fork
+        fixed = self.upstream("fork", {"skills/a": "a fixed"})
+        self.manifest.write_text(f"source up {fork} {fixed}\nskill  up skills/*\n")
+        self.vendor("--update", "up")
+        self.assertEqual(self.lock_sha("up"), fixed)
+        self.assertEqual((self.dest / "a/SKILL.md").read_text(), "a fixed")
+
     def test_rename_treats_the_old_name_literally_and_only_rewrites_docs(self):
         self.upstream("up", {
             "skills/a.b": "---\nname: a.b\n---\nUse /a.b, not /axb or `axb`.\n",
