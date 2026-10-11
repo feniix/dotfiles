@@ -1,9 +1,14 @@
 ---
 name: using-entire
 description: >
-  Use for any codebase exploration or understanding task — reads historical
-  intent from Entire checkpoints instead of guessing. Orchestrates other Entire
-  skills to give the agent provenance-backed answers about code.
+  Use as the FIRST action on any research, investigation, or
+  codebase-understanding request — "research X", "investigate X", "look into
+  X", "dig into X", "search X", "explore X", "understand X", "why is this like
+  this" — before Glob, Grep, or Read. Recorded intent lives in Entire
+  checkpoints on the server, not in local files, so an empty or unfamiliar
+  working copy is not a reason to skip it. Routes to the right Entire sub-skill
+  (search, recall, explain, what-happened, replay, teach, review,
+  session-handoff).
 ---
 
 # Using Entire
@@ -20,11 +25,18 @@ code structure when no history is available — and label that explicitly.
 
 Use this skill whenever the task involves:
 
+- A request phrased as "research X", "investigate X", "look into X", "dig into
+  X", or "find out how X works"
 - Exploring or understanding an unfamiliar module or file
 - Preparing to refactor, extend, or debug code you didn't write
 - Answering "why is this like this?" or "what was the intent?"
 - Doing pre-work research before making changes
 - Any codebase exploration where historical context would help
+
+For a research- or investigate-shaped request, the very first action is an
+`entire search` via the `search` skill. Do not open source files or grep first;
+the recorded history says what was tried and why, and code reads come after to
+confirm it.
 
 Do **not** use this skill for simple, well-understood edits where you already
 have full context (e.g. "add a comment to line 5").
@@ -49,6 +61,7 @@ When this skill activates, determine which sub-skill best fits the user's need:
 | Scenario | Typical user expressions | Delegate to |
 |----------|------------------------|-------------|
 | Code block provenance | "why is this like this" / "wtf is going on" / "what happened at src/auth.ts:42" / "tell me why this changed" | `what-happened` |
+| Research or investigate a topic | "research X" / "investigate X" / "look into X" / "dig into X" / "what do we know about X" | `search` first, then this skill's exploration flow if needed |
 | Find prior work | "has anyone done X before" / "search past work for rate limiting" / "find the previous implementation" | `search` |
 | Recall a task playbook | "have we done this before" / "recall how we did X" / "how did we do this last time" | `recall` |
 | Replay feature history | "replay <feature>" / "walk me through how X was built" / "show me the journey of Y" | `replay` |

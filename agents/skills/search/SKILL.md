@@ -1,17 +1,28 @@
 ---
 name: search
-description: Use when the user wants to find prior work, checkpoints, or agent conversations by topic, repo, branch, author, or recent time window, or to search code content across repositories
+description: >
+  Use when the user asks to research, investigate, look into, dig into, or
+  search for anything — a topic, feature, bug, decision, or "what do we know
+  about X". Invoke this as the FIRST action on such requests, before Glob,
+  Grep, or Read: the answer is in Entire's recorded history (prompts,
+  transcripts, and decisions, across repos), not in the local files, and a
+  working copy that looks empty or unfamiliar is not a reason to skip it.
+  Also use to find code across repositories ("where is X implemented in our
+  other repos"). Not for grepping the current working copy on its own, and
+  not for the current active session.
 ---
 
 # Search Checkpoints and Code
 
 Use `entire search` to find prior checkpoints, commits, and sessions with hybrid (semantic + keyword) search, or `entire search --code` to search code content across repositories. Requires `entire login`. Never run `entire search` without `--json` — it opens an interactive TUI.
 
-## Execution Environment (Required)
+## Search First
 
-On macOS, `entire` reads its credentials from the local secrets store, which is not available inside the Codex sandbox. Run every `entire` command used by this skill outside the sandbox **on the first attempt**. In Codex, invoke the shell tool with `sandbox_permissions: "require_escalated"` and a concise justification that the command needs access to the user's local Entire credentials. This applies to both `entire search` and `entire checkpoint explain`.
+When the user asks to research, investigate, look into, or dig into something, the first action is one `entire search` call, before reading source files or running grep. Recorded prompts, transcripts, and decisions answer "what has been tried and why" in a way code cannot. Grep and file reads come after, to confirm what the history says. Fall back to code-only reasoning only when search returns nothing, and say so.
 
-Do not first try an `entire` command in the sandbox, and do not treat a sandbox-induced credential error as evidence that the user needs to log in. Only report that authentication is required when an outside-the-sandbox invocation reports it.
+## Execution Environment
+
+On macOS, `entire` reads credentials from the local secrets store, which the Codex sandbox cannot reach. In Codex, run every `entire` command with `sandbox_permissions: "require_escalated"` on the first attempt (justification: needs the user's local Entire credentials). A sandboxed credential error is not evidence the user needs to log in; only report that after an unsandboxed attempt says so.
 
 ## Response Format
 
@@ -26,12 +37,13 @@ followed by a blank line, then the content.
 
 ## When to Use
 
-- The user asks things like "have we done this before?", "search past work", "find the previous implementation", or "look for checkpoints about X"
+- The user says "research X", "investigate X", "look into X", "dig into X", "search for X", "find out how X works", or "what do we know about X"
+- The user asks "have we done this before?", "search past work", "find the previous implementation", or "look for checkpoints about X"
 - You need prior context from another branch, repo, author, or recent time period
-- You want likely matches first, then a deeper transcript read only for the best hit
+- You are about to read code to understand a feature, bug, or decision and no one has checked the recorded history yet
 - The user wants to find code across repositories they have access to, e.g. "where is X implemented?", "find usages of Y in our other repos" — use code search (`--code`)
 
-Do not use this for the current active session. Use `session-handoff` for that. For searching files in the current working copy, prefer local tools (grep, ripgrep) over code search.
+Do not use this for the current active session; use `session-handoff` for that. Use grep or ripgrep instead of code search only when the user wants matches in the files of the current working copy and is not asking about history, intent, or other repos.
 
 ## Process
 
