@@ -1,5 +1,8 @@
 {
   "tuiMode": "regular",
+  "defaultTools": [
+    "+codemode"
+  ],
   "compaction": {
     "keepRecentTokens": 24000,
     "reserveTokens": 16384
@@ -18,7 +21,7 @@
     "openai-codex/gpt-6-sol",
     "openai-codex/gpt-6.1-sol"
   ],
-  "lastChangelogVersion": "1.1.0",
+  "lastChangelogVersion": "1.4.0",
   "packages": [
     "npm:pi-ask-user",
     "npm:pi-subagents",
