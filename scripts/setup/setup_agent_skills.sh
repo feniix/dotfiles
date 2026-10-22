@@ -102,16 +102,9 @@ LINKED=0
 PRUNED=0
 
 # --- Targets ---
-# Claude Code profiles: default home plus any extra CLAUDE_CONFIG_DIR homes
-# following the ~/.claude-<name> convention. Only existing homes are linked,
-# and a ~/.claude-* dir counts only if it looks like a profile (Claude Code
-# writes settings.json / .claude.json there), so e.g. ~/.claude-backup-* is
-# never given skills/ and commands/.
-CLAUDE_HOMES=()
-[[ -d "$HOME/.claude" ]] && CLAUDE_HOMES+=("$HOME/.claude")
-for d in "$HOME"/.claude-*; do
-  [[ -d "$d" && ( -f "$d/settings.json" || -f "$d/.claude.json" ) ]] && CLAUDE_HOMES+=("$d")
-done
+# Claude Code profiles: see scripts/lib/claude.sh for which homes count.
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/claude.sh"
+claude_homes
 
 SKILL_TARGETS=("$HOME/.pi/agent/skills" "$HOME/.agents/skills")
 PROMPT_TARGETS=("$HOME/.pi/agent/prompts")
