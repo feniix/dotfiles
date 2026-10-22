@@ -211,10 +211,10 @@ esac
                                      formulae="hadolint", brewfile=False)
         self.assertEqual(calls, [])
 
-    def brew_drift(self, check="", cleanup="", leaves=""):
+    def brew_drift(self, check="", cleanup="", leaves="", cleanup_error=""):
         self.mock("brew", f"""case "$1 $2" in
   "bundle check") printf '%b' {check!r} >&2 ;;
-  "bundle cleanup") printf '%b' {cleanup!r} ;;
+  "bundle cleanup") printf '%b' {cleanup!r}; printf '%b' {cleanup_error!r} >&2; exit 1 ;;
   "leaves --installed-on-request") printf '%b' {leaves!r} ;;
 esac
 """)
@@ -223,7 +223,8 @@ esac
 
     def test_brew_drift_reports_both_directions_without_dependencies(self):
         result = self.brew_drift(
-            check="→ Formula stern needs to be installed.\n"
+            check="→ Tap acme/cli needs to be tapped.\n"
+                  "→ Formula stern needs to be installed.\n"
                   "→ App Slack needs to be installed or updated.\n",
             cleanup="Would uninstall formulae:\nagg\npango\nfff-mcp\n"
                     "Would uninstall casks:\nsteam\nWould untap:\nacme/tools\n"
@@ -231,7 +232,7 @@ esac
                     "Run `brew bundle cleanup --force` to make these changes.\n",
             leaves="agg\ndmtrkovalenko/fff/fff-mcp\n")
         self.assertEqual(result.returncode, 1)
-        self.assertIn("  Formula stern\n  App Slack\n", result.stdout)
+        self.assertIn("  Tap acme/cli\n  Formula stern\n  App Slack\n", result.stdout)
         self.assertIn("  Formula agg\n  Formula fff-mcp\n  Cask steam\n  Tap acme/tools\n",
                       result.stdout)
         self.assertNotIn("pango", result.stdout)
@@ -241,6 +242,19 @@ esac
         result = self.brew_drift(cleanup="Would uninstall formulae:\npango\n")
         self.assertEqual(result.returncode, 0)
         self.assertEqual(result.stdout, "Brewfile matches the installed packages.\n")
+
+    def test_brew_drift_reports_a_failed_cleanup_instead_of_a_match(self):
+        result = self.brew_drift(
+            cleanup_error='Error: No available formula with the name "acme/cli/softnet".\n')
+        self.assertEqual(result.returncode, 3)
+        self.assertNotIn("matches", result.stdout)
+        self.assertIn("brew bundle cleanup failed", result.stderr)
+        self.assertIn("acme/cli/softnet", result.stderr)
+
+    def test_brew_drift_reports_a_failed_check_instead_of_a_match(self):
+        result = self.brew_drift(check="Error: Invalid Brewfile: syntax error\n")
+        self.assertEqual(result.returncode, 3)
+        self.assertIn("brew bundle check failed", result.stderr)
 
     def test_rsyncmove_never_splices_onto_a_different_file(self):
         source = (REPO / "zshrc").read_text()

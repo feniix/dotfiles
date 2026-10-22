@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # Report where the Brewfile and the installed packages disagree. Changes
-# nothing. Exit 0 when they match, 1 when they drift, 2 without Homebrew.
+# nothing. Exit 0 when they match, 1 when they drift, 2 without Homebrew,
+# 3 when brew bundle itself fails (e.g. an installed package's tap is gone).
 #
 # Installed formulae are only reported when installed on request; anything
 # pulled in as a dependency is Homebrew's business, not the Brewfile's.
@@ -12,13 +13,27 @@ brewfile="${XDG_CONFIG_HOME:-$HOME/.config}/homebrew/Brewfile"
 [[ -e "$brewfile" ]] || brewfile="${DOTFILES_DIR:-$HOME/dotfiles}/Brewfile"
 command -v brew >/dev/null || { echo "brew-drift: Homebrew is not installed" >&2; exit 2; }
 
+# Both bundle commands exit 1 for drift as well as for errors, and print
+# nothing to parse when they fail, which would read as "matches". Homebrew's
+# own "Error:" lines are what tell a failure apart.
+failed() {
+  grep -q '^Error:' <<< "$2" || return 1
+  echo "brew-drift: brew bundle $1 failed:" >&2
+  grep -v '^→' <<< "$2" | sed 's/^/  /' >&2
+}
+
 # The unmet entries go to stderr.
-missing="$(brew bundle check --file="$brewfile" --verbose --no-upgrade 2>&1 |
-  sed -n 's/^→ \(.*\) needs to be installed.*/\1/p')"
+check="$(brew bundle check --file="$brewfile" --verbose --no-upgrade 2>&1)"
+failed check "$check" && exit 3
+missing="$(sed -En 's/^→ (.*) needs to be (installed|tapped).*/\1/p' <<< "$check")"
 
 # `bundle cleanup` without --force only lists what is not in the Brewfile.
 requested=" $(brew leaves --installed-on-request 2>/dev/null | sed 's#.*/##' | tr '\n' ' ') "
-extra="$(brew bundle cleanup --file="$brewfile" 2>/dev/null | awk -v requested="$requested" '
+errors="$(mktemp)" || exit 3
+trap 'rm -f "$errors"' EXIT
+cleanup="$(brew bundle cleanup --file="$brewfile" 2>"$errors")"
+failed cleanup "$(cat "$errors")" && exit 3
+extra="$(awk -v requested="$requested" '
   /^Would uninstall formulae:/          { kind = "Formula"; next }
   /^Would uninstall casks:/             { kind = "Cask"; next }
   /^Would untap:/                       { kind = "Tap"; next }
@@ -26,7 +41,7 @@ extra="$(brew bundle cleanup --file="$brewfile" 2>/dev/null | awk -v requested="
   /^(Would|Run|Warning)/                { kind = ""; next }
   kind == "Formula" && index(requested, " " $0 " ") == 0 { next }
   kind != ""                            { print kind " " $0 }
-')"
+' <<< "$cleanup")"
 
 if [[ -z "$missing" && -z "$extra" ]]; then
   echo "Brewfile matches the installed packages."
