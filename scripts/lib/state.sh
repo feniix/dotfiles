@@ -301,3 +301,36 @@ state_copy_file() {
   cp "$src" "$dest" || return 1
   state_finish_file "$dest"
 }
+
+# Set one key in a JSON file another program owns (and rewrites), tracking
+# only that key so uninstall leaves the rest of the file alone:
+#   JSON_KEY|ts|<file>#<jq path array>|<original>:<base64 value set>
+# <original> is NOFILE (no file), ABSENT (no key) or the base64 JSON value.
+# A rerun keeps the first baseline.
+state_json_key() {
+  local file="$1" key="$2" value="$3" record entry original tmp
+  record="$file#$key"
+  value="$(jq -c . <<< "$value")" || return 1
+  entry="$(AWK_PATH="$record" awk -F '|' \
+    'BEGIN { path = ENVIRON["AWK_PATH"] } $1 == "JSON_KEY" && $3 == path {print $4}' "$STATE_MANIFEST")"
+  if [[ -n "$entry" ]]; then
+    original="${entry%%:*}"
+  elif [[ ! -e "$file" ]]; then
+    original=NOFILE
+  elif jq -e --argjson p "$key" 'try (getpath($p[:-1]) | has($p[-1])) catch false' "$file" >/dev/null; then
+    original="$(jq -c --argjson p "$key" 'getpath($p)' "$file" | base64)" || return 1
+  else
+    jq empty "$file" || { log_warning "$file is not valid JSON; not changing it."; return 1; }
+    original=ABSENT
+  fi
+  state_record JSON_KEY "$record" "$original:$(printf '%s' "$value" | base64)" || return 1
+  tmp="$(mktemp "$STATE_DIR/json.XXXXXX")" || return 1
+  if [[ -e "$file" ]]; then
+    jq --argjson p "$key" --argjson v "$value" 'setpath($p; $v)' "$file" > "$tmp"
+  else
+    jq -n --argjson p "$key" --argjson v "$value" 'setpath($p; $v)' > "$tmp"
+  fi || { rm -f "$tmp"; return 1; }
+  # Write in place: keeps the file's mode, and a symlinked file stays a link.
+  cat "$tmp" > "$file" || { rm -f "$tmp"; return 1; }
+  rm -f "$tmp"
+}

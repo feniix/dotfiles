@@ -143,6 +143,42 @@ undo_defaults_domain() {
   for j in "${keys[@]}"; do resolved[$j]=true; done
 }
 
+# Undo one state_json_key: restore the key's baseline only while it still holds
+# the value setup wrote; a value changed since is the user's and is kept.
+undo_json_key() {
+  local record="$1" extra="$2" file key original value current tmp
+  file="${record%%#*}" key="${record#*#}"
+  original="${extra%%:*}" value="$(printf '%s' "${extra#*:}" | base64 --decode)" || return 1
+  [[ -f "$file" ]] || return 0
+  current="$(jq -c --argjson p "$key" 'getpath($p)' "$file")" || return 1
+  if [[ "$current" != "$(jq -c . <<< "$value")" ]]; then
+    log_info "Keeping $key in $file: changed since setup."
+    return 0
+  fi
+  tmp="$(mktemp)" || return 1
+  case "$original" in
+    ABSENT|NOFILE)
+      # Also drop the parent objects the key leaves empty.
+      jq --argjson p "$key" 'delpaths([$p])
+        | reduce range($p | length - 1; 0; -1) as $i
+            (.; if getpath($p[:$i]) == {} then delpaths([$p[:$i]]) else . end)' "$file" > "$tmp"
+      ;;
+    *)
+      jq --argjson p "$key" --argjson v "$(printf '%s' "$original" | base64 --decode)" \
+        'setpath($p; $v)' "$file" > "$tmp"
+      ;;
+  esac || { rm -f "$tmp"; return 1; }
+  log_info "Restoring $key in $file"
+  if [[ "$original" == NOFILE && "$(jq -c . "$tmp")" == "{}" ]]; then
+    run rm "$file"
+  elif [[ "$DRY_RUN" == true ]]; then
+    printf '  [dry-run] restore %s in %s\n' "$key" "$file"
+  else
+    cat "$tmp" > "$file"
+  fi
+  rm -f "$tmp"
+}
+
 undo_entry() {
   local type="$1" path="$2" extra="$3"
   case "$type" in
@@ -174,6 +210,7 @@ undo_entry() {
       run rmdir "$path"
       ;;
     DIR_EXISTED) return 0 ;;
+    JSON_KEY) undo_json_key "$path" "$extra" ;;
     DEFAULTS_KEY)
       # Status 2 keeps it quietly: its domain entry reports the retention.
       [[ "$RESTORE_DEFAULTS" == true ]] || return 2
