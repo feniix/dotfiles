@@ -37,3 +37,7 @@ pnpm = "12.4.0"
 "npm:agent-browser" = "0.38.2"
 "npm:mcporter" = "0.14.2"
 "npm:@openai/codex" = "0.159.3"
+# tart reads the app bundle mise unpacks; softnet gets its SUID bit from
+# tart on first --net-softnet use (one sudo prompt per softnet version).
+"github:cirruslabs/tart" = "2.41.1"
+"github:cirruslabs/softnet" = "0.24.1"
