@@ -136,3 +136,5 @@ mas "WhatsApp", id: 310633997
 brew "ghidra"
 # View disk space usage and delete unwanted data, fast
 brew "dua-cli"
+# Terminal emulator that uses platform-native UI and GPU acceleration
+cask "ghostty"
