@@ -1,3 +1,8 @@
+# There is deliberately no claude() function: the default profile comes from
+# `export CLAUDE_CONFIG_DIR="$HOME/.claude"` in zshenv, which reaches scripts,
+# hooks and editors too, not just this interactive shell. The wrappers below
+# override it (or the provider) for one invocation.
+#
 # Each wrapper hands its own key to Claude as ANTHROPIC_AUTH_TOKEN, then drops
 # every other *_API_KEY / *_ADMIN_KEY from the session so one provider (and
 # the tools and MCP servers Claude starts) cannot read another provider's key.
@@ -76,4 +81,9 @@ ccmm() {
         export ANTHROPIC_DEFAULT_HAIKU_MODEL=MiniMax-M2.7-HighSpeed
         claude "$@"
     )
+}
+
+# Personal account: a separate Claude Code profile (settings, skills, login).
+claude-p() {
+    CLAUDE_CONFIG_DIR="$HOME/.claude-personal" claude "$@"
 }

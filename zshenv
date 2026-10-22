@@ -66,7 +66,7 @@ fi
 
 # Claude Code: keep the default profile entirely inside ~/.claude.
 # Without this, the default profile's account state lives at ~/.claude.json;
-# with it, every profile (default and ~/.claude-* via aliases) has the same
+# with it, every profile (default and ~/.claude-* via claude.source) has the same
 # layout: <dir>/.claude.json next to <dir>/settings.json. Exported here rather
 # than aliased so hooks, scripts and IDE-spawned processes inherit it too.
 # Dock/Spotlight-launched apps do not read zshenv and will not see it.

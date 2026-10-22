@@ -468,7 +468,5 @@ fi
 [[ ! -f "$XDG_CONFIG_HOME/zsh/.p10k.zsh" ]] || source "$XDG_CONFIG_HOME/zsh/.p10k.zsh"
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
-alias claude-p="CLAUDE_CONFIG_DIR=/Users/feniix/.claude-personal claude"
-
 # bun completions
 [ -s "/Users/feniix/.bun/_bun" ] && source "/Users/feniix/.bun/_bun"
