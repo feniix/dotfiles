@@ -4,7 +4,7 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 
 ## Setup
 
-- `./setup.sh` — links configs (XDG dirs, zsh, git, ssh, tmux, ghostty, utilities), then runs each step as its own process (Homebrew, oh-my-zsh, nvim, macOS, GitHub, SSH, signing key, mise, pi, agent skills); a failed step doesn't stop the rest, and failures are listed at the end with exit 1
+- `./setup.sh` — links configs (XDG dirs, zsh, git, ssh, tmux, ghostty, utilities), then runs each step as its own process (Homebrew, oh-my-zsh, nvim, macOS, GitHub, SSH, signing key, mise, pi, agent skills, Claude Code settings); a failed step doesn't stop the rest, and failures are listed at the end with exit 1
 - `./uninstall.sh` — reverse setup using state manifest (supports `--software`, `--defaults`, `--dry-run`)
 - All side effects tracked in `~/.local/share/dotfiles-state/` with file backups
 - Safe to re-run: idempotent install, first run on existing install does an "adopt"; anything at a managed path changed by hand is moved to `~/.local/share/dotfiles-conflicts/setup/<run>/` before relinking
@@ -40,6 +40,7 @@ scripts/
 ├── lib/
 │   ├── state.sh             # State tracking library (manifest + backups)
 │   ├── software.sh          # Brew/mise before-after inventories (owned software)
+│   ├── claude.sh            # Which ~/.claude* dirs are Claude Code profiles
 │   └── defaults.sh          # Per-key macOS defaults records + domain snapshots
 ├── agents/
 │   └── vendor_skills.sh     # Vendor third-party skill bundles (pinned to skills.lock)
@@ -54,6 +55,7 @@ scripts/
 │   ├── setup_github.sh      # GitHub CLI install + auth
 │   ├── setup_pi.sh          # pi user config symlinks (settings, models, agents)
 │   ├── setup_agent_skills.sh # agents/skills + agents/prompts linked per item into pi, Codex, all Claude profiles
+│   ├── setup_claude.sh      # Per-key settings.json values in every Claude profile (tracked per key)
 │   └── setup_macos.sh       # macOS key bindings, iTerm2, optional defaults
 ├── macos/
 │   └── osx-defaults         # macOS system defaults (supports --dry-run, --only, --backup)

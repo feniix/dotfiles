@@ -138,6 +138,7 @@ run_step "Checking the git signing key" bash "$SCRIPTS_DIR/ssh/manage_ssh_keys.s
 run_step "Setting up mise" bash "$SCRIPTS_DIR/setup/setup_mise.sh"
 run_step "Linking pi user config" bash "$SCRIPTS_DIR/setup/setup_pi.sh"
 run_step "Linking shared agent skills and prompts" bash "$SCRIPTS_DIR/setup/setup_agent_skills.sh"
+run_step "Configuring Claude Code profiles" bash "$SCRIPTS_DIR/setup/setup_claude.sh"
 
 # Report only: setup never uninstalls what the Brewfile does not list.
 echo ""

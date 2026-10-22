@@ -172,6 +172,7 @@ your Neovim plugins.
 ./scripts/setup/setup_nvim.sh       # Neovim symlink + plugin install
 ./scripts/setup/setup_pi.sh         # pi user config symlinks (settings, models, agents)
 ./scripts/setup/setup_agent_skills.sh  # agents/skills + agents/prompts linked per item into pi, Codex, Claude Code (--dry-run; --absorb to move tool-installed items into the repo)
+./scripts/setup/setup_claude.sh     # Claude Code settings keys (AGENTS.md + CLAUDE.md loading) in every profile
 ./scripts/agents/vendor_skills.sh     # third-party skill bundles (agents/skills.vendor) into agents/skills; pinned to skills.lock, --update [<id>] to move pins; --dry-run, --frozen
 ./scripts/setup/setup_homebrew.sh   # Homebrew + Brewfile
 ./scripts/setup/setup_mise.sh       # mise tools from config.toml

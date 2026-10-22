@@ -1,5 +1,6 @@
 """Filesystem lifecycle tests; all writes are confined to temporary homes."""
 
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -207,6 +208,55 @@ class RollbackTests(Sandbox):
         self.assertEqual(original.read_text(), '{"skills":[]}\n')
         self.uninstall()
         self.assertTrue(settings.is_symlink())
+
+    def claude_setting(self, home):
+        settings = json.loads((home / "settings.json").read_text())
+        return settings["pluginConfigs"]["cc-plugin-agents-md@builtin"]["options"]["instructionFiles"]
+
+    def setup_claude(self):
+        self.command(["/bin/bash", str(REPO / "scripts/setup/setup_claude.sh")])
+
+    def test_claude_setting_is_set_in_every_profile_and_undone_by_key(self):
+        default = self.home / ".claude"
+        default.mkdir()
+        (default / "settings.json").write_text('{"theme": "dark"}\n')
+        personal = self.home / ".claude-personal"
+        personal.mkdir()
+        (personal / "settings.json").write_text(
+            '{"pluginConfigs": {"cc-plugin-agents-md@builtin": '
+            '{"options": {"instructionFiles": "claude-md"}}}}\n')
+        (self.home / ".claude-backup-old").mkdir()
+        self.setup_claude()
+        self.setup_claude()
+        for home in (default, personal):
+            self.assertEqual(self.claude_setting(home), "claude-md-and-agents-md")
+        self.assertFalse((self.home / ".claude-backup-old/settings.json").exists())
+        # Claude Code rewrites the file; uninstall must keep its other changes.
+        settings = json.loads((default / "settings.json").read_text())
+        settings["model"] = "opus"
+        (default / "settings.json").write_text(json.dumps(settings))
+        self.uninstall()
+        self.assertEqual(json.loads((default / "settings.json").read_text()),
+                         {"theme": "dark", "model": "opus"})
+        self.assertEqual(self.claude_setting(personal), "claude-md")
+
+    def test_claude_setting_changed_after_setup_is_kept(self):
+        default = self.home / ".claude"
+        default.mkdir()
+        self.setup_claude()
+        (default / "settings.json").write_text(
+            '{"pluginConfigs": {"cc-plugin-agents-md@builtin": '
+            '{"options": {"instructionFiles": "claude-md"}}}}\n')
+        self.uninstall()
+        self.assertEqual(self.claude_setting(default), "claude-md")
+
+    def test_claude_settings_file_created_by_setup_is_removed(self):
+        default = self.home / ".claude"
+        default.mkdir()
+        self.setup_claude()
+        self.assertEqual(self.claude_setting(default), "claude-md-and-agents-md")
+        self.uninstall()
+        self.assertFalse((default / "settings.json").exists())
 
     def skill_repo(self):
         repo = self.home / "repo"
