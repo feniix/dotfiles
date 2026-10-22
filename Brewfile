@@ -83,7 +83,6 @@ brew "qpdf"
 # AI and agent tools
 brew "beads"
 brew "cliproxyapi"
-brew "dmtrkovalenko/fff/fff-mcp"
 brew "gogcli"
 brew "ollama"
 
@@ -96,11 +95,9 @@ cask "entireio/tap/entire"
 cask "gcloud-cli"
 
 # Development apps
-cask "antigravity"
 cask "claude"
 cask "codex"
 cask "codex-app"
-cask "codexbar"
 cask "iterm2"
 cask "mitmproxy"
 cask "orbstack"
@@ -124,7 +121,6 @@ cask "superhuman"
 cask "zoom"
 
 # Media
-cask "spotify"
 cask "transmission"
 cask "vlc"
 
