@@ -1,7 +1,6 @@
 # Packages chosen on purpose. Dependencies are left to Homebrew.
 # Language toolchains and versioned CLIs live in mise/config.toml.
 
-tap "dmtrkovalenko/fff"
 tap "entireio/tap"
 tap "nklmilojevic/sofka"
 
