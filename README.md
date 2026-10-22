@@ -124,7 +124,7 @@ additionally require Bash 4+ (Homebrew). The AWS credential-selection
 test additionally runs when the AWS CLI is available.
 
 ```bash
-uvx pytest -q tests
+uvx --with pytest-xdist pytest -q -n auto tests
 git ls-files setup.sh uninstall.sh 'scripts/**' | xargs shellcheck -S warning
 ```
 

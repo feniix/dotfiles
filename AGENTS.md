@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 
@@ -8,7 +8,7 @@ Personal dotfiles for macOS (Apple Silicon). Not designed to be generalizable.
 - `./uninstall.sh` — reverse setup using state manifest (supports `--software`, `--defaults`, `--dry-run`)
 - All side effects tracked in `~/.local/share/dotfiles-state/` with file backups
 - Safe to re-run: idempotent install, first run on existing install does an "adopt"; anything at a managed path changed by hand is moved to `~/.local/share/dotfiles-conflicts/setup/<run>/` before relinking
-- Tests: `uvx pytest -q tests` (temporary homes, every external CLI mocked); run them and `shellcheck -S warning` locally. There is no CI, by choice.
+- Tests: `uvx --with pytest-xdist pytest -q -n auto tests` (temporary homes, every external CLI mocked; parallel, ~15s vs ~90s serial); run them and `shellcheck -S warning` locally. There is no CI, by choice.
 
 ## Key Files
 
