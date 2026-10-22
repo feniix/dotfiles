@@ -7,6 +7,7 @@ tap "nklmilojevic/sofka"
 
 # Shell and terminal
 brew "direnv"
+brew "dua-cli"
 brew "eza"
 brew "fd"
 brew "fzf"
@@ -74,6 +75,9 @@ brew "caddy"
 brew "mkcert"
 brew "postgresql@18", link: true
 
+# Reverse engineering
+brew "ghidra"
+
 # Documents and media
 brew "ffmpeg"
 brew "pandoc"
@@ -98,6 +102,7 @@ cask "gcloud-cli"
 cask "claude"
 cask "codex"
 cask "codex-app"
+cask "ghostty"
 cask "iterm2"
 cask "mitmproxy"
 cask "orbstack"
@@ -132,9 +137,3 @@ mas "Slack", id: 803453959
 mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "WhatsApp", id: 310633997
-# Multi-platform software reverse engineering framework
-brew "ghidra"
-# View disk space usage and delete unwanted data, fast
-brew "dua-cli"
-# Terminal emulator that uses platform-native UI and GPU acceleration
-cask "ghostty"
