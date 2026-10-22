@@ -55,6 +55,7 @@ scrollback-limit = 1000000000
 bell-features = no-system,no-audio,attention,title,border
 
 # --- Mouse / selection ---------------------------------------------------------
+# In pi, use Cmd+Shift-click to open links while mouse reporting is enabled.
 # iTerm2 had mouse reporting off; uncomment to match (breaks mouse in vim/tmux)
 # mouse-reporting = false
 copy-on-select = clipboard
