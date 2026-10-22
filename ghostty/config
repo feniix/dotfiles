@@ -1,0 +1,70 @@
+# Ghostty config, ported from the iTerm2 "Default" profile
+# (iterm2/com.googlecode.iterm2.plist).
+
+# --- Font --------------------------------------------------------------------
+# iTerm2: MesloLGSNFM-Regular 11, ligatures off
+font-family = MesloLGS Nerd Font Mono
+font-size = 11
+font-feature = -calt
+font-feature = -liga
+
+# --- Colors: iTerm2's Solarized Dark variant ---------------------------------
+background = #002b36
+foreground = #93a1a1
+cursor-color = #93a1a1
+cursor-text = #002b36
+selection-background = #586e75
+selection-foreground = #93a1a1
+# "Use Bright Bold" on, bold color = foreground
+bold-color = bright
+
+palette = 0=#002b36
+palette = 1=#dc322f
+palette = 2=#859900
+palette = 3=#b58900
+palette = 4=#268bd2
+palette = 5=#6c71c4
+palette = 6=#2aa198
+palette = 7=#93a1a1
+palette = 8=#657b83
+palette = 9=#dc322f
+palette = 10=#859900
+palette = 11=#b58900
+palette = 12=#268bd2
+palette = 13=#6c71c4
+palette = 14=#2aa198
+palette = 15=#fdf6e3
+
+# --- Cursor ------------------------------------------------------------------
+cursor-style = block
+cursor-style-blink = true
+
+# --- Window ------------------------------------------------------------------
+window-width = 157
+window-height = 30
+# iTerm2 "Dim inactive split panes" at 40%
+unfocused-split-opacity = 0.6
+focus-follows-mouse = true
+confirm-close-surface = true
+quit-after-last-window-closed = true
+
+# --- Scrollback (iTerm2: unlimited; Ghostty's limit is bytes) -----------------
+scrollback-limit = 1000000000
+
+# --- Bell: silent, visual only --------------------------------------------------
+bell-features = no-system,no-audio,attention,title,border
+
+# --- Mouse / selection ---------------------------------------------------------
+# iTerm2 had mouse reporting off; uncomment to match (breaks mouse in vim/tmux)
+# mouse-reporting = false
+copy-on-select = clipboard
+
+# --- Keys ----------------------------------------------------------------------
+# Option is a normal macOS Option (iTerm2 "Option key sends: Normal");
+# these mirror the iTerm2 profile key mappings.
+keybind = performable:super+c=copy_to_clipboard
+keybind = super+backspace=text:\x15
+keybind = alt+backspace=text:\x1b\x7f
+keybind = alt+arrow_left=esc:b
+keybind = alt+arrow_right=esc:f
+keybind = delete=text:\x04

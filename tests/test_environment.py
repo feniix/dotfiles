@@ -320,6 +320,12 @@ esac
         self.assertTrue(link.is_symlink())
         self.assertEqual(link.resolve(), REPO / "tmux.conf")
 
+    def test_setup_links_ghostty_config(self):
+        self.setup_prefix()
+        link = self.home / "config/ghostty/config"
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(link.resolve(), REPO / "ghostty/config")
+
     def test_setup_links_brewfile_for_global_bundle(self):
         self.setup_prefix()
         link = self.home / "config/homebrew/Brewfile"

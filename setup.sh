@@ -78,6 +78,11 @@ state_mkdir "$XDG_CONFIG_HOME/tmux"
 state_symlink "$DOTFILES_DIR/tmux.conf" "$XDG_CONFIG_HOME/tmux/tmux.conf"
 log_success "tmux.conf"
 
+# Ghostty (cask in the Brewfile)
+state_mkdir "$XDG_CONFIG_HOME/ghostty"
+state_symlink "$DOTFILES_DIR/ghostty/config" "$XDG_CONFIG_HOME/ghostty/config"
+log_success "ghostty config"
+
 # Homebrew: `brew bundle --global` reads ~/.config/homebrew/Brewfile
 state_mkdir "$XDG_CONFIG_HOME/homebrew"
 state_symlink "$DOTFILES_DIR/Brewfile" "$XDG_CONFIG_HOME/homebrew/Brewfile"

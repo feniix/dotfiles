@@ -91,6 +91,7 @@ Agent skill conflicts are retained separately under
 | Neovim | `~/.config/nvim` -> `~/dotfiles/nvim` |
 | mise | `~/.config/mise/config.toml` -> `~/dotfiles/mise/config.toml` |
 | tmux | `~/.config/tmux/tmux.conf` -> `~/dotfiles/tmux.conf` |
+| Ghostty | `~/.config/ghostty/config` -> `~/dotfiles/ghostty/config` |
 | Utilities | `~/.local/bin/{flushdns,view-secrets}` -> `~/dotfiles/scripts/utils/` |
 
 The `sopsdiffer` git diff driver decrypts only in repos that opt in with
@@ -148,6 +149,7 @@ your Neovim plugins.
 ├── agents/              # Shared agent skills + prompts (pi, Codex, Claude Code)
 ├── nvim/                # Neovim config (Lua, lazy.nvim)
 ├── iterm2/              # iTerm2 preferences
+├── ghostty/             # Ghostty config
 ├── pi/                  # pi user config
 ├── mise/                # mise tool versions
 ├── home-manager/        # Home Manager flake (not used by setup.sh)
