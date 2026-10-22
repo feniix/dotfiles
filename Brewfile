@@ -132,3 +132,7 @@ mas "Slack", id: 803453959
 mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "WhatsApp", id: 310633997
+# Multi-platform software reverse engineering framework
+brew "ghidra"
+# View disk space usage and delete unwanted data, fast
+brew "dua-cli"
