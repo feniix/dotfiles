@@ -78,6 +78,14 @@ Anthropic section above.
 - Full text: [`LICENSES/MIT-ayghri-i-have-adhd.txt`](LICENSES/MIT-ayghri-i-have-adhd.txt)
 - Skills: `i-have-adhd`
 
+### HumanLayer skills (MIT)
+
+- Upstream: [`humanlayer/skills`](https://github.com/humanlayer/skills),
+  pinned at commit `653b6411c1f70c275a18e37673b042ff99f67ceb`
+- License: MIT, `Copyright (c) 2026 HumanLayer`
+- Full text: [`LICENSES/MIT-humanlayer-skills.txt`](LICENSES/MIT-humanlayer-skills.txt)
+- Skills: `show-me`, `visual-pr`
+
 ## Copied (not vendored) sources
 
 These were copied into `agents/skills/` by hand, so no commit is pinned. Each

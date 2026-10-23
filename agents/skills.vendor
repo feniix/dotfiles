@@ -56,3 +56,8 @@ skill  ghstack skills/gh-stack
 # Back to https://github.com/entireio/skills.git main once #48 is merged.
 source entire https://github.com/chrisdoc/entireio-skills.git 7201348bfdab51ef66510003a328d42c55ab0f6b
 skill  entire skills/*
+
+# HumanLayer's show-me and visual-pr (https://www.humanlayer.com/blog/show-me-skill)
+source humanlayer https://github.com/humanlayer/skills.git main
+skill  humanlayer plugins/show-me/skills/show-me
+skill  humanlayer plugins/visual-pr/skills/visual-pr

@@ -5,6 +5,7 @@ typesafe 65a39f393687675ce170e6094757de20370365b9 https://github.com/typesafe-ai
 adhd 839872f9d1cd634fed642b4589ce7226199cc15f https://github.com/ayghri/i-have-adhd.git
 ghstack 29a36d314be664583705f18e41cebdf2b61ad514 https://github.com/github/gh-stack.git
 entire 7201348bfdab51ef66510003a328d42c55ab0f6b https://github.com/chrisdoc/entireio-skills.git
+humanlayer 653b6411c1f70c275a18e37673b042ff99f67ceb https://github.com/humanlayer/skills.git
 # skill dirs in agents/skills and the source that owns them
 vendored mattpocock ask-matt
 vendored mattpocock mp-code-review
@@ -60,3 +61,5 @@ vendored entire session-to-skill
 vendored entire teach
 vendored entire using-entire
 vendored entire what-happened
+vendored humanlayer show-me
+vendored humanlayer visual-pr
