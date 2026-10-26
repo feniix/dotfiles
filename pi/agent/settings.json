@@ -11,15 +11,19 @@
   "defaultProvider": "openai-codex",
   "defaultThinkingLevel": "medium",
   "enabledModels": [
-    "openai-codex/gpt-5.3-codex-spark",
-    "openai-codex/gpt-5.5",
     "openai-codex/gpt-5.6-sol",
     "openai-codex/gpt-5.6-luna",
     "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-6-astra",
     "openai-codex/gpt-6-luna",
     "openai-codex/gpt-6-sol",
-    "openai-codex/gpt-6.1-sol"
+    "openai-codex/gpt-6.1-sol",
+    "google/gemini-4-argon",
+    "google/gemini-flash-lite-latest",
+    "google/gemini-pro-latest",
+    "google/gemma-4-31b-it",
+    "minimax/MiniMax-M3",
+    "minimax/MiniMax-M3.1-Flash"
   ],
   "lastChangelogVersion": "1.4.0",
   "packages": [
