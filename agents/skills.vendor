@@ -28,8 +28,6 @@ skill  mattpocock skills/engineering/*
 skill  mattpocock skills/productivity/*
 skill  mattpocock skills/in-progress/*
 skill  mattpocock skills/misc/*
-# `teach` is the Entire skill; Matt's goes under a prefixed name
-rename mattpocock teach mp-teach
 # `code-review` would shadow Claude Code's built-in /code-review (ultra mode)
 rename mattpocock code-review mp-code-review
 
@@ -49,13 +47,6 @@ skill  adhd skills/i-have-adhd
 # gh stack CLI extension's skill; keep the pin in step with `gh extension list`
 source ghstack https://github.com/github/gh-stack.git v0.2.1
 skill  ghstack skills/gh-stack
-
-# Entire's skills (teach, recall, explain, ...), used with the entire CLI.
-# Vendored from PR #48's commit (chrisdoc's fork): upstream main fe5266f plus a
-# fix for search/SKILL.md's invalid YAML frontmatter (#47), which pi rejects.
-# Back to https://github.com/entireio/skills.git main once #48 is merged.
-source entire https://github.com/chrisdoc/entireio-skills.git 7201348bfdab51ef66510003a328d42c55ab0f6b
-skill  entire skills/*
 
 # HumanLayer's show-me and visual-pr (https://www.humanlayer.com/blog/show-me-skill)
 source humanlayer https://github.com/humanlayer/skills.git main
