@@ -44,9 +44,12 @@
     "maxLines": 2000
   },
   "pi-exa": {
-    "advancedEnabled": false,
-    "enabledTools": [],
-    "researchEnabled": false
+    "advancedEnabled": true,
+    "researchEnabled": true,
+    "cyclesEnabled": true,
+    "researchTimeoutMs": 180000,
+    "submitTimeoutMs": 30000,
+    "monitorIntervalMs": 5000
   },
   "pi-ref-tools": {
     "maxBytes": 51200,
