@@ -55,6 +55,9 @@ scrollback-limit = 1000000000
 bell-features = no-system,no-audio,attention,title,border
 
 # --- Mouse / selection ---------------------------------------------------------
+# Match iTerm2's word characters (/-+\~_.) by delimiting other ASCII punctuation.
+# Ghostty uses boundaries, not word characters; Unicode selection may differ.
+selection-word-chars = " \t!\"#$%&'()*,:;<=>?@[]^`{|}│"
 # In pi, use Cmd+Shift-click to open links while mouse reporting is enabled.
 # iTerm2 had mouse reporting off; uncomment to match (breaks mouse in vim/tmux)
 # mouse-reporting = false
