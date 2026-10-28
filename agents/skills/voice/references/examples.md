@@ -1,6 +1,6 @@
 # Calibration examples
 
-These are invented situations, not quotes or paraphrases of private Slack conversations. They illustrate choices, not fixed templates. Preserve the facts of the user's actual request.
+These are invented situations, not quotes or paraphrases of private Slack conversations or emails. They illustrate choices, not fixed templates. Preserve the facts of the user's actual request.
 
 ## Human request, not agent command
 
@@ -74,11 +74,11 @@ Here imperatives and explicit action boundaries fit. The skill must preserve the
 
 ## Email to a less familiar recipient
 
-Input: Ask a new collaborator to send the integration requirements before a scheduled call.
+Input: Ask a new collaborator, Alex, to send the integration requirements before a scheduled call. Sign as Seb.
 
 > Hi Alex,
 >
-> Can you send the integration requirements before our call? I would like to go through them first so we can use the time for the open questions.
+> Can you send the integration requirements before our call?
 >
 > Best,
 > Seb
@@ -95,7 +95,7 @@ A greeting, recap, and closing are unnecessary here. Do not change the question 
 
 ## External email with scheduling options
 
-Input: Offer either Tuesday at 10 AM UTC or Wednesday at 2 PM UTC for a review. Ask which works; neither is booked yet.
+Input: Offer Morgan either Tuesday at 10 AM UTC or Wednesday at 2 PM UTC for a review. Ask which works; neither is booked yet. Sign as Seb.
 
 > Hi Morgan,
 >
