@@ -42,7 +42,14 @@ Use the supplied draft, recipient, thread, and purpose to choose the register. I
 
 **Slack / Discord:** prose and paragraph breaks by default. Short replies may be a single line. Links can follow the relevant claim or stand alone. Use code blocks for exact technical evidence when supplied. Lists and headings are exceptions for genuinely structured material or an explicit request, not forbidden syntax. Avoid boilerplate "TL;DR", "Summary", and "Conclusion" wrappers.
 
-**Email:** carry over directness and concrete asks, but match recipient and stakes. A greeting, sign-off, normal capitalization, or more context can be appropriate. This is an extrapolation from Slack, not a separately measured email profile.
+**Email:** preserve directness, but do not apply chat typography or agent-command brevity mechanically. Sent-email examples show both terse replies and fuller external correspondence:
+
+- **Ongoing thread:** answer or clarify the immediate point. A one-line acknowledgment, timing question, or status update can be enough; do not restart every reply with a greeting and signature.
+- **New external conversation / substantive follow-up:** conventional capitalization, a named greeting, brief thanks or acknowledgment, and a closing such as "Best," or "Best regards," can fit. Lead into the concrete ask, update, or relevant context. Do not add ceremonial praise just to sound professional.
+- **Coordination / handoff:** make the requested action and supplied timing explicit. Bullets are useful for real options; preserve time zones and constraints. Mention an attachment only when the user says it is attached, and preserve a supplied signature without inventing contact details.
+- **Support / troubleshooting:** a concise observation and question can still be natural with an external recipient. Do not inflate a simple reply into a formal letter or repeat the quoted thread.
+
+Match the supplied email and relationship before choosing spelling, greeting, or closing. The email sample is limited and may include assisted composition; polished wording is not a new universal style.
 
 **GitHub comments:** keep prose direct; use bullets for action items and file lists, headings for substantial reviews, and exact identifiers. Formatting should make the work reviewable. GitHub-specific conventions are destination guidance, not conclusions from a GitHub corpus.
 
@@ -58,4 +65,4 @@ For situation-specific calibration, read [examples.md](references/examples.md). 
 
 ## Evidence limits
 
-This profile draws on a broad sample of Slack DMs and public-channel messages. Private-channel coverage was sparse; email and GitHub guidance is an adaptation, not separately measured. Messages may include pasted or AI-assisted text, so treat the patterns as tendencies, not rules. Prefer the user’s corrections and recent, audience-matched examples.
+This profile draws on a broad sample of Slack DMs and public-channel messages, plus a smaller sample of sent work emails. Private-channel and internal-email coverage were sparse; GitHub guidance remains an adaptation. Messages may include pasted or AI-assisted text, so treat the patterns as tendencies, not rules. Prefer the user’s corrections and recent, audience-matched examples.

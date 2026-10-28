@@ -78,6 +78,43 @@ Input: Ask a new collaborator to send the integration requirements before a sche
 
 > Hi Alex,
 >
-> can you send the integration requirements before our call? I would like to go through them first so we can use the time for the open questions.
+> Can you send the integration requirements before our call? I would like to go through them first so we can use the time for the open questions.
+>
+> Best,
+> Seb
 
-This is destination-aware guidance, not a claim that Slack proves a particular email salutation. Keep a requested signature; do not remove one mechanically.
+This is a synthetic example of the fuller external-email mode seen in sent mail, not a required template. Keep a requested signature; do not remove one mechanically.
+
+## Email reply within an established thread
+
+Input: A collaborator proposes moving the call to Thursday. Ask whether the time will stay the same; do not confirm availability yet.
+
+> Same time on Thursday?
+
+A greeting, recap, and closing are unnecessary here. Do not change the question into "Thursday works for me"; availability was not given.
+
+## External email with scheduling options
+
+Input: Offer either Tuesday at 10 AM UTC or Wednesday at 2 PM UTC for a review. Ask which works; neither is booked yet.
+
+> Hi Morgan,
+>
+> I can do either of these for the review:
+>
+> - Tuesday at 10 AM UTC
+> - Wednesday at 2 PM UTC
+>
+> Please let me know which works for you.
+>
+> Best,
+> Seb
+
+Lists are useful here. Preserve both options and the time zone; do not invent a preference or imply that a meeting is already scheduled.
+
+## Concise support email
+
+Input: The upload now completes, but the preview is still blank. Ask whether the recipient can reproduce it.
+
+> The upload works now, but the preview is still blank. Can you reproduce that on your end?
+
+External correspondence does not always need a formal opening or a long explanation. Preserve what changed and what remains broken.
