@@ -54,4 +54,8 @@ Use the supplied draft, recipient, thread, and purpose to choose the register. I
 - Does it sound conversational without forced mistakes, missing punctuation, or a pile of signature phrases?
 - Did useful warmth or a real question survive the rewrite?
 
-For situation-specific calibration, read [examples.md](references/examples.md). For the corpus, exclusions, supporting counts, and limits behind this profile, read [evidence.md](references/evidence.md). Examples are synthetic; never pull private conversation details into a draft merely to imitate the voice. This skill drafts text; it does not authorize sending it.
+For situation-specific calibration, read [examples.md](references/examples.md). Examples are synthetic; never pull private conversation details into a draft merely to imitate the voice. This skill drafts text; it does not authorize sending it.
+
+## Evidence limits
+
+This profile draws on a broad sample of Slack DMs and public-channel messages. Private-channel coverage was sparse; email and GitHub guidance is an adaptation, not separately measured. Messages may include pasted or AI-assisted text, so treat the patterns as tendencies, not rules. Prefer the user’s corrections and recent, audience-matched examples.
