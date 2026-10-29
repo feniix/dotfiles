@@ -6,7 +6,7 @@ These are invented situations, not quotes or paraphrases of private Slack conver
 
 Input: Ask a colleague to check a proposed cache change before tomorrow's rollout.
 
-> hey, can you look at the cache change before we roll it out tomorrow?
+> can you look at the cache change before we roll it out tomorrow?
 
 Avoid: "review cache, approve, deploy". That changes the relationship and invents approval and deployment instructions.
 
@@ -44,9 +44,27 @@ Keep the numbers, limitation, and next step. Do not pad it to a target word coun
 
 Input: A colleague is unwell; offer to postpone the review until next week.
 
-> hey, do you want to move the review to next week? no rush, hope you feel better
+> do you want to move the review to next week? no rush, hope you feel better
 
 Avoid an abrupt "move review to next week". The offer is not a decision already made.
+
+## Rewrite, not touch-up
+
+Input: Rewrite this in my voice: "Hello team, I wanted to let you know that I will be unable to attend tomorrow's planning meeting due to a scheduling conflict. Could someone please take notes? Thank you."
+
+> I cant make planning tomorrow, I have a conflict
+>
+> can someone take notes?
+
+Every fact and the request survive; the greeting, the "I wanted to let you know" wind-up, and the sign-off do not. Avoid returning the original with "Hello team" swapped for "hey team".
+
+## Uncertainty without invented reasoning
+
+Input: Ask the on-call engineer whether the 5-minute alert threshold is right. Unsure about it.
+
+> not sure the 5 minute threshold on that alert is right, what do you think?
+
+Avoid: "5 minutes feels too noisy given the traffic pattern". He did not say why he was unsure; do not supply a reason for him.
 
 ## Familiar correction
 
@@ -99,17 +117,20 @@ Input: Offer Morgan either Tuesday at 10 AM UTC or Wednesday at 2 PM UTC for a r
 
 > Hi Morgan,
 >
-> I can do either of these for the review:
->
-> - Tuesday at 10 AM UTC
-> - Wednesday at 2 PM UTC
->
-> Please let me know which works for you.
+> I can do Tuesday at 10 AM UTC or Wednesday at 2 PM UTC for the review. Which works better for you?
 >
 > Best,
 > Seb
 
-Lists are useful here. Preserve both options and the time zone; do not invent a preference or imply that a meeting is already scheduled.
+Two options fit in a sentence; a bullet list for them reads templated. Bullets earn their place with three or more options or options that each carry detail. Preserve both options and the time zone; do not invent a preference or imply that a meeting is already scheduled.
+
+## Contractions and emphasis
+
+Input: Tell a teammate the flaky test is not caused by the new cache, the cache is disabled in CI, and ask them to keep looking elsewhere.
+
+> it's not the cache, the cache is not even enabled in CI. can you keep looking?
+
+Contractions carry the ordinary flow ("it's"); the full form ("is not even enabled") is where the claim lands hardest. He mixes both with anyone. Avoid spelling out every contraction ("it is not the cache"), and avoid adding a suggestion such as "I'd check the fixtures next" that he did not give.
 
 ## Concise support email
 
