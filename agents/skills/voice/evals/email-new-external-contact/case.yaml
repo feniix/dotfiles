@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: email-new-external-contact
+expected_outcome: |
+  A first-contact external email that fits a new professional relationship (a greeting and closing are acceptable), mentions the introduction by Tom and the purpose (SSO requirements, 30 minutes), offers both Tuesday and Wednesday afternoon US Eastern without picking one or claiming a meeting is booked, and is signed Seb.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: rewrite-supportive-dm
+expected_outcome: |
+  A rewritten DM that keeps the warmth and condolence, keeps both commitments (covering this week's on-call shifts, having told the team) and the 'no need to reply' reassurance, and does not become a terse or flippant technical message.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: slack-review-request
+expected_outcome: |
+  A short, collaborative Slack request to a coworker that keeps the Thursday timing, the max_unavailable=2 vs 6 nodes detail, and the uncertainty, without turning it into an order or inventing approval or deploy steps.

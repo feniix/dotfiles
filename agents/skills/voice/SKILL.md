@@ -1,79 +1,76 @@
 ---
 name: voice
-description: Write or rewrite text in Sebastian Otaegui's voice. Auto-triggers when the user asks to "write in my voice", "rewrite this in my style", "draft a slack message", "draft an email", "compose a message", "say this like I would", or otherwise asks for content to sound like Sebastian wrote it. Use this skill for Slack messages, emails, GitHub comments, internal team posts, and other casual prose. Do NOT use for formal documents (contracts, formal reports) or code/comments.
+description: Write or rewrite messages in Sebastian Otaegui's voice, including Slack, email, GitHub comments, and internal posts. Use for "write in my voice", "rewrite this in my style", or drafting personal messages for Sebastian. Not for answering him as the assistant, sending messages, formal reports/contracts, or code/comments.
 ---
 
-# Sebastian's Writing Voice
+# Sebastian's writing voice
 
-When asked to write or rewrite content in Sebastian's voice, follow this profile.
+Write like a technically fluent colleague: direct, conversational, concrete, and comfortable assuming shared context. Concise does not mean cold. Instructions to an agent are only one register, not the template for everything Sebastian says to people.
 
-## Voice profile
+## First choose the situation
 
-Sebastian writes like a senior engineer who treats the assistant (and his team) as competent collaborators, not ceremony. Messages are short, lowercase-leaning, action-first, and assume context. He drops articles and apostrophes, types lowercase consistently for product/service names (`evie`, `openclaw`, `anthropic`, `superhuman`, `google`) but capitalizes acronyms (CASA, OAuth, MCP, IAM, ZDR, DPA). There's almost no hedging, no greetings, no thank-yous — just the next instruction or finding. When something is wrong he says so plainly. He uses "lets" (no apostrophe) constantly, asks single-word questions ("yes", "ok", "push", "commit"), pastes raw error logs without preamble, and reverses himself mid-thread without ceremony. Spanish-influenced syntax shows occasionally (run-on commas chaining clauses, missing apostrophes, "isnt it?" trailing tags).
+Use the supplied draft, recipient, thread, and purpose to choose the register. If those are clear, draft directly. Ask only when the missing context would materially change the message. Return the draft without a preamble or style explanation unless requested.
 
-## Representative quotes (verbatim)
+The content is his; only the wording is yours. Say what he asked to say and nothing more. The common failure is not a wrong fact but a helpful extra: prep questions for the recipient, an "anyone have context?" call for input, his reasoning or opinion spelled out when he only said he was unsure, a flexibility offer such as "or another time if that is easier", or a promise like "I will send the invite". Each of these speaks for him. If an addition seems genuinely useful, suggest it to the user after the draft instead of putting it in.
 
-- 'commit all'
-- 'lets work on devtools, they fell out of sync, packages/pi-devtools/ does not support linear like plugins/devtools/ and other features please check'
-- 'do the work, do not commit'
-- 'actually keep it'
-- 'nono, do not commit to cc-skills'
-- 'be more exahustive, use code reasoning'
-- 'is the format of the json log jsonl?'
-- 'create branch, commit, pr'
-- 'tee will also send to the terminal isnt it?'
-- 'do not switch the model, the model is not the issue because yesterday we used it without any problem'
+When the request is already worded like the message ("tell Priya no, the deploy is not blocked..."), it is his draft: change as little as possible. Drop the instruction wrapper ("tell X", "reply to Y:") and the third-person references it implies ("she can go ahead" becomes "go ahead"), but keep his words, his contractions or full forms, and his grammar. Do not add words he did not write: "tell Ji-woo the PR looks good" becomes "looks good", not "the PR looks good".
 
-## Do
+- **Rewriting a supplied draft:** move it into his voice, do not just touch it up. Keep every fact, commitment, and the emotional weight, but rework the casing, phrasing, and rhythm so it reads the way he would have typed it. Changing only the greeting is not a rewrite. Keep his own words for people and sensitive subjects ("father" stays "father"); rework the wrapping around them, not the substance.
+- **Quick reply / ongoing DM:** fragments and short acknowledgments are natural. Answer the actual question; do not recap the whole thread. A greeting usually adds nothing mid-conversation.
+- **Human request / coordination:** direct questions such as "can you", "can we", "do you want to", or "got a minute?" are normal. Brief context, the ask, and any real timing constraint. Do not turn a collaborative request into an order.
+- **Technical discussion / debugging:** observation first, relevant evidence or constraint, then the hypothesis or question. Distinguish what he tried from what he suspects. Include his reasoning when he supplied it; do not construct reasoning for him.
+- **Status / findings / handoff:** lead with what changed or where things stand; include the remaining gap and next action or specific question. A few short paragraphs often suffice. Longer findings are fine when the facts need them; there is no 200–400-word target.
+- **Social / personal / supportive:** warmth, enthusiasm, jokes, greetings, thanks, and apologies are part of the voice. Match the relationship and moment. Do not flatten these into technical imperatives or invent personal details.
+- **Agent instructions:** terse verbs and explicit boundaries fit here: "check the diff, do not commit yet". Keep this register separate from messages to coworkers.
 
-- Open with the verb or the topic — no "could you" or "please" up front (trailing "please" is fine occasionally).
-- Use lowercase by default. Capitalize "I" mostly. Capitalize technical acronyms (CASA, OAuth, MCP). Product/service names stay lowercase (evie, gmail, anthropic, superhuman, google, openclaw).
-- Keep sentences short and chained with commas. One thought per line. Often a follow-up question on its own line.
-- Paste raw logs, paths, URLs, or error output verbatim, then ask a single bare question after.
-- Use direct imperatives for actions: "push", "commit", "pull", "create branch, commit, pr", "fix it".
-- Use paragraph breaks (double newlines) instead of markdown headers/bullets when writing chat-style messages (Slack, Discord, etc.).
-- Drop apostrophes in contractions: `cant`, `doesnt`, `dont`, `isnt`, `lets`, `whats`, `theres`, `youd`, `wed`, `googles`, `superhumans` (possessives too).
+## Stable tendencies
 
-## Don't
+### Rhythm and phrasing
 
-- Don't use greetings, sign-offs, or thank-yous.
-- Don't use markdown headers or bullet lists in chat-style messages — prose with line breaks only. (Bullets are fine in long-form docs or when explicitly requested.)
-- Don't hedge with "I think we might want to consider..." — just state it. "I think" is fine as a tail-tag ("update the pr body I think?").
-- Don't over-correct typos or grammar — though don't fabricate typos either; just don't autocorrect his style.
-- Don't pad with rationale unless asked. When he wants depth he says "Thorough" or "be more exahustive".
-- Don't add "TL;DR" / "Summary" / "Conclusion" headers.
-- Don't use parallel-structured bullets ("First, ... Second, ... Third, ...") which are AI tells.
-- Don't use hedging adverbs ("notably", "explicitly", "specifically", "importantly") at sentence starts.
+- Lowercase-leaning openings, short clauses, conversational connectors: "so", "also", "but", "I mean", "actually", "btw", "for context". Use them when they carry the thought, not as a checklist.
+- He often develops a thought through short follow-ups. In one draft, use short paragraphs to keep that rhythm; do not pretend to send a burst of separate messages. Start a new line where a separate thought starts (a hypothesis, the remaining gap), not for a short closing clause such as "go ahead".
+- Casual commas and fragments fit. Periods and complete sentences also fit. Never manufacture run-ons, dropped articles, typos, or an accent, and do not correct the ones in his own wording either.
+- He mixes contractions and full forms freely, with any recipient: "I'm", "Im", and "I am"; "don't", "dont", and "do not". The one consistent pattern is emphasis: he drops the contraction when he wants a claim to land harder ("I do not want this merged yet", "that is not the issue"). So use contractions for ordinary flow and full forms where the point is emphatic. Spelling out every contraction makes a draft sound stiff; contracting everything loses his emphasis. This applies to wording you write; when he already chose "don't" or "do not", keep his choice.
+- Both apostrophized and bare spellings ("don't", "dont", "lets") occur. Keep whichever the supplied draft uses; do not mechanically add or strip apostrophes.
+- Skip stock politeness that pads without saying anything: "I have not had a chance to", "just wanted to", "I hope this finds you well", "please do not hesitate to". Say the thing: "I have not checked yet".
+- Always capitalize people's names, in every channel, even when the user typed them in lowercase. Product names often stay lowercase in casual Slack prose; in email, capitalize them. Acronym casing varies in actual chat; prefer readable conventional casing (API, MCP, EKS) without altering identifiers, commands, paths, URLs, or quoted text.
 
-## Stylistic tics worth preserving
+### Stance and relationships
 
-- "actually" as a course-correction opener.
-- "nono," doubling for emphatic disagreement.
-- One-word replies ("yes", "ok", "done", "perfect", "lgtm", "proceed").
-- Trailing "?" on declarative-feeling sentences ("isnt it?", "I think?").
-- Spanish-flavored phrasings: missing apostrophes, run-on commas, occasional dropped articles.
-- "follow-up on the X thread" or just "follow up on X" as an opener for continuing a discussion.
-- "so" or "ok" as a casual opener for technical status.
+- Be direct about an observed failure, but keep genuine uncertainty: "I think", "maybe", "probably", "it looks like", "I am not sure", "I have not tried it". These are meaningful, including at the start of a sentence, not filler to delete.
+- Ask concrete questions instead of adding generic calls for feedback. A constraint followed by "what if..." or "would that work?" is a natural way to propose something.
+- Correct course without ceremony: "actually", "I meant", or a brief "no" plus the correction. "nono" fits an emphatic casual correction but is not a mandatory signature.
+- Allow brief enthusiasm and acknowledgment: "cool", "sounds good", "awesome", "lol", "haha". Occasional emoji or emphasis can fit social exchanges; do not decorate every draft or inject jokes into serious messages.
+- In Slack, start without a greeting by default: under 2% of his messages open with "hey", "hi", or "good morning", even when asking for something. Open with the ask, the news, or the person's name. Save "hey" for a first message after a long gap or a light social opener, and avoid it before bad news or condolences, where it reads breezy. "thanks" and "sorry" are available when meant. Skip canned pleasantries and formal sign-offs in chat, not human warmth. Email is different; see below.
+- Blunt criticism and profanity can occur with familiar people. Do not introduce profanity, hostility, or extra certainty merely to make a draft sound less polished.
 
-## Format guidance by destination
+## Format and destination
 
-**Slack messages**: paragraph breaks, no headers, no bullet lists, technical acronyms capitalized, links bare at the end (one URL per line). Aim for 200–400 words for findings posts, much shorter for quick updates.
+**Slack / Discord:** prose and paragraph breaks by default. Short replies may be a single line. Links can follow the relevant claim or stand alone. Use code blocks for exact technical evidence when supplied. Lists and headings are exceptions for genuinely structured material or an explicit request, not forbidden syntax. Avoid boilerplate "TL;DR", "Summary", and "Conclusion" wrappers.
 
-**Email**: same as Slack but slightly more formal (still no greetings/sign-offs unless explicitly asked).
+**Email:** preserve directness, but do not apply chat typography or agent-command brevity mechanically. Sent-email examples show both terse replies and fuller external correspondence:
 
-**GitHub PR comments / issue comments**: structured markdown is OK here, but keep prose in voice. Bullets allowed for action items / file lists. Headers for sections in long comments.
+- **Ongoing thread:** answer or clarify the immediate point. A one-line acknowledgment, timing question, or status update can be enough; do not restart every reply with a greeting and signature.
+- **New external conversation / substantive follow-up:** conventional capitalization, a named greeting, brief thanks or acknowledgment, and a closing such as "Best," or "Best regards," can fit. Lead into the concrete ask, update, or relevant context. Do not add ceremonial praise just to sound professional.
+- **Coordination / handoff:** make the requested action and supplied timing explicit. Two simple options read naturally in one sentence ("Tuesday or Wednesday afternoon, US Eastern"); save bullets for three or more options or options that each carry detail. Preserve time zones and constraints. Mention an attachment only when the user says it is attached, and preserve a supplied signature without inventing contact details.
+- **Support / troubleshooting:** a concise observation and question can still be natural with an external recipient. Do not inflate a simple reply into a formal letter or repeat the quoted thread.
 
-**Slash command messages / chat to Claude**: terse imperatives, single-purpose. "push", "commit all", "make discrete commits", "be more exahustive".
+In email, capitalize names of people, companies, and products ("Dana", "Northwind", "Evie") even when the user typed them in lowercase. Match the supplied email and relationship before choosing spelling, greeting, or closing. The email sample is limited and may include assisted composition; polished wording is not a new universal style.
 
-## Calibration check before submitting
+**GitHub comments:** keep prose direct; use bullets for action items and file lists, headings for substantial reviews, and exact identifiers. Formatting should make the work reviewable. GitHub-specific conventions are destination guidance, not conclusions from a GitHub corpus.
 
-Before returning the rewritten content, verify:
-- Lowercase by default? (proper nouns can stay lowercase per the profile)
-- No "TL;DR" / "Summary" / section-header markdown in chat-style outputs?
-- Apostrophes dropped where his pattern drops them?
-- No greetings, no sign-offs, no thank-yous?
-- Acronyms still uppercase (CASA, OAuth, MCP, etc.)?
-- Comma-chained run-ons present, not separated into individual sentences?
-- No AI-tell adverbs at sentence starts?
+## Before returning
 
-If any of those fail, rewrite before returning.
+- Does this fit the audience and purpose, rather than treating every recipient as an agent?
+- Are the facts, uncertainty, ownership, timing, and commitments unchanged? Read each sentence and ask whether he supplied it. Remove invented asks, offers, promises, rationale, opinions, and calls for input, however helpful they seem.
+- If this was a rewrite, would he recognize it as his own phrasing rather than the original lightly edited?
+- In Slack, does it open with a greeting he would not have used?
+- Is it as short as the content allows without making the recipient reconstruct missing context?
+- Does it sound conversational without forced mistakes, missing punctuation, or a pile of signature phrases?
+- Did useful warmth or a real question survive the rewrite?
+
+For situation-specific calibration, read [examples.md](references/examples.md). Examples are synthetic; never pull private conversation details into a draft merely to imitate the voice. This skill drafts text; it does not authorize sending it.
+
+## Evidence limits
+
+This profile draws on a broad sample of Slack DMs and public-channel messages, plus a smaller sample of sent work emails. Private-channel and internal-email coverage were sparse; GitHub guidance remains an adaptation. Messages may include pasted or AI-assisted text, so treat the patterns as tendencies, not rules. Prefer the user’s corrections and recent, audience-matched examples.

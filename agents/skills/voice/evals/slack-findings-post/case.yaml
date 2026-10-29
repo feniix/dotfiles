@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: slack-findings-post
+expected_outcome: |
+  A Slack findings post that keeps every number (m5.xlarge to c6i.xlarge, 14m to 9m, 5 days of billing), the two named slower jobs, the cost uncertainty, and the next steps, in conversational prose without boilerplate headers or invented conclusions.

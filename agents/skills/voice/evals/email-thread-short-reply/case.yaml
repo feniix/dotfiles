@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: email-thread-short-reply
+expected_outcome: |
+  A brief in-thread email reply that says Seb has not checked yet and will check tomorrow morning, without claiming the duplicates are gone, without recapping the thread, and without heavy ceremony.
