@@ -32,7 +32,7 @@ herdr pane
 herdr workspace
 herdr worktree
 herdr tab
-herdr wait
+herdr agent
 herdr terminal
 herdr notification
 herdr integration
@@ -129,7 +129,7 @@ Inspect the pane after launch. If `agent_status` is not yet `idle`, wait for the
 
 ```bash
 herdr pane get <returned-pane-id>
-herdr wait agent-status <returned-pane-id> --status idle --timeout 30000
+herdr agent wait <returned-pane-id> --until idle --timeout 30000
 herdr pane run <returned-pane-id> "Review the current diff and report only actionable findings."
 ```
 
@@ -140,8 +140,8 @@ Status waits match the current status immediately or wait for a future matching 
 For normal background work, wait for the agent to start working. If the pane remains in a background tab or workspace, wait for `done` before reading its transcript:
 
 ```bash
-herdr wait agent-status <returned-pane-id> --status working --timeout 30000
-herdr wait agent-status <returned-pane-id> --status done --timeout 120000
+herdr agent wait <returned-pane-id> --until working --timeout 30000
+herdr agent wait <returned-pane-id> --until done --timeout 120000
 herdr pane read <returned-pane-id> --source recent-unwrapped --lines 120
 ```
 
@@ -167,7 +167,7 @@ Read the new `pane_id` from the JSON response, then run and inspect the command:
 
 ```bash
 herdr pane run <returned-pane-id> "just test"
-herdr wait output <returned-pane-id> --match "test result" --timeout 120000
+herdr pane wait-output <returned-pane-id> --match "test result" --timeout 120000
 herdr pane read <returned-pane-id> --source recent-unwrapped --lines 120
 ```
 
