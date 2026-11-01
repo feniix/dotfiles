@@ -470,3 +470,4 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 # bun completions
 [ -s "/Users/feniix/.bun/_bun" ] && source "/Users/feniix/.bun/_bun"
+alias ssh='ghostty +ssh --'
