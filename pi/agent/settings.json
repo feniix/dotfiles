@@ -25,7 +25,7 @@
     "minimax/MiniMax-M3",
     "minimax/MiniMax-M3.1-Flash"
   ],
-  "lastChangelogVersion": "1.4.0",
+  "lastChangelogVersion": "1.5.0",
   "packages": [
     "npm:pi-ask-user",
     "npm:pi-subagents",
@@ -70,5 +70,15 @@
   "skills": [
     "!**/.agents/skills/**",
     "!**/synced/**"
-  ]
+  ],
+  "extensionChangelogVersions": {
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.87.0",
+    "{\"source\":\"npm:@feniix/pi-devtools\",\"scope\":\"user\"}": "3.1.5",
+    "{\"source\":\"npm:@feniix/pi-ref-tools\",\"scope\":\"user\"}": "3.0.6",
+    "{\"source\":\"npm:@feniix/pi-statusline\",\"scope\":\"user\"}": "1.0.1",
+    "{\"source\":\"npm:pi-codex-tools\",\"scope\":\"user\"}": "0.4.1",
+    "{\"source\":\"npm:pi-chrome\",\"scope\":\"user\"}": "0.15.57",
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:@feniix/pi-exa\",\"scope\":\"user\"}": "7.1.1"
+  }
 }
