@@ -22,7 +22,8 @@
         ControlPath = "~/.ssh/controlmasters/%C";
         ConnectTimeout = 5;
         ConnectionAttempts = 2;
-        ForwardAgent = true;
+        # Forward the agent (GitHub and signing keys) only to the named hosts.
+        ForwardAgent = false;
         AddKeysToAgent = true;
       };
 
@@ -50,6 +51,7 @@
       "feniixhq-lan" = {
         HostName = "192.168.4.67";
         User = "feniix";
+        ForwardAgent = true;
         ServerAliveInterval = 5;
         ServerAliveCountMax = 2;
         TCPKeepAlive = true;
@@ -59,6 +61,7 @@
       "feniixhq" = {
         HostName = "100.113.48.101";
         User = "feniix";
+        ForwardAgent = true;
         ServerAliveInterval = 10;
         ServerAliveCountMax = 3;
         TCPKeepAlive = true;

@@ -1,4 +1,4 @@
-{ ... }:
+{ dotfilesDir, ... }:
 
 {
   programs.git = {
@@ -98,7 +98,9 @@
 
       "http \"https://gopkg.in\"".followRedirects = true;
 
-      "diff \"sopsdiffer\"".textconv = "sops -d";
+      # Gated: decrypts only in repos with `git config sops.diff true`, so a
+      # cloned repo's .gitattributes cannot make git diff run sops -d.
+      "diff \"sopsdiffer\"".textconv = "${dotfilesDir}/scripts/git/sops-textconv";
 
       url = {
         "git@github-gatx:GATX-Corp/".insteadOf = [

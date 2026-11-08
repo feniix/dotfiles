@@ -6,6 +6,8 @@
 # Each wrapper hands its own key to Claude as ANTHROPIC_AUTH_TOKEN, then drops
 # every other *_API_KEY / *_ADMIN_KEY from the session so one provider (and
 # the tools and MCP servers Claude starts) cannot read another provider's key.
+# A missing key stops the wrapper: with an empty token Claude could fall back
+# to the profile's stored login and send it to the third-party base URL.
 _claude_scrub_keys() {
     local v
     for v in ${(k)parameters[(I)*_API_KEY]} ${(k)parameters[(I)*_ADMIN_KEY]}; do
@@ -15,6 +17,7 @@ _claude_scrub_keys() {
 
 kimi() {
     (
+        : "${KIMI_API_KEY:?kimi: KIMI_API_KEY is not set}"
         export ANTHROPIC_BASE_URL=https://api.kimi.com/coding/
         export ANTHROPIC_AUTH_TOKEN=$KIMI_API_KEY
         _claude_scrub_keys
@@ -30,6 +33,7 @@ kimi() {
 
 zai() {
     (
+        : "${ZAI_API_KEY:?zai: ZAI_API_KEY is not set}"
         export ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
         export ANTHROPIC_AUTH_TOKEN=$ZAI_API_KEY
         _claude_scrub_keys
@@ -44,6 +48,7 @@ zai() {
 
 dseek() {
     (
+        : "${DEEPSEEK_API_KEY:?dseek: DEEPSEEK_API_KEY is not set}"
         export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropic
         export ANTHROPIC_AUTH_TOKEN=${DEEPSEEK_API_KEY}
         _claude_scrub_keys
@@ -69,6 +74,7 @@ ccc() {
 
 ccmm() {
     (
+        : "${MINIMAX_API_KEY:?ccmm: MINIMAX_API_KEY is not set}"
         export ANTHROPIC_BASE_URL=https://api.minimax.io/anthropic
         export ANTHROPIC_AUTH_TOKEN=$MINIMAX_API_KEY
         _claude_scrub_keys

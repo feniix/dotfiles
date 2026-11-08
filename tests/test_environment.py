@@ -309,22 +309,38 @@ esac
         self.assertEqual(dst.read_text(), "XXXXXXXXXXGOODTAIL")
         self.assertFalse(src.exists())
 
+    PROVIDER_KEYS = {"kimi": "KIMI_API_KEY", "zai": "ZAI_API_KEY",
+                     "dseek": "DEEPSEEK_API_KEY", "ccmm": "MINIMAX_API_KEY"}
+
+    def wrapper(self, name):
+        return self.command([
+            "/bin/zsh", "-dfc",
+            f'source "{REPO}/claude.source"; claude() {{ env; }}; {name}',
+        ], check=False)
+
     def test_provider_wrappers_see_only_their_own_key(self):
-        self.env.update(KIMI_API_KEY="kimi-secret", OPENAI_API_KEY="o",
-                        OPENAI_ADMIN_KEY="a", LINEAR_API_KEY="l",
+        self.env.update({key: f"{name}-secret" for name, key in self.PROVIDER_KEYS.items()})
+        self.env.update(OPENAI_API_KEY="o", OPENAI_ADMIN_KEY="a", LINEAR_API_KEY="l",
                         ANTHROPIC_API_KEY="real")
-        for wrapper in ("kimi", "zai", "dseek", "ccc", "ccmm"):
-            result = self.command([
-                "/bin/zsh", "-dfc",
-                f'source "{REPO}/claude.source"; claude() {{ env; }}; {wrapper}',
-            ])
+        for name in (*self.PROVIDER_KEYS, "ccc"):
+            result = self.wrapper(name)
+            self.assertEqual(result.returncode, 0, name)
             names = (line.split("=", 1)[0] for line in result.stdout.splitlines())
             keys = [n for n in names if n.endswith(("_API_KEY", "_ADMIN_KEY"))]
-            self.assertEqual(keys, [], wrapper)
-            self.assertIn("ANTHROPIC_AUTH_TOKEN=", result.stdout)
-        kimi = self.command(["/bin/zsh", "-dfc",
-                             f'source "{REPO}/claude.source"; claude() {{ env; }}; kimi'])
-        self.assertIn("ANTHROPIC_AUTH_TOKEN=kimi-secret", kimi.stdout)
+            self.assertEqual(keys, [], name)
+            token = "sk-dummy" if name == "ccc" else f"{name}-secret"
+            self.assertIn(f"ANTHROPIC_AUTH_TOKEN={token}\n", result.stdout, name)
+
+    def test_provider_wrappers_stop_without_their_key(self):
+        # An empty token could let Claude fall back to the stored login and
+        # send it to the third-party base URL.
+        for name, key in self.PROVIDER_KEYS.items():
+            self.env.pop(key, None)
+            self.env["ANTHROPIC_API_KEY"] = "real"
+            result = self.wrapper(name)
+            self.assertNotEqual(result.returncode, 0, name)
+            self.assertNotIn("ANTHROPIC_BASE_URL", result.stdout, name)
+            self.assertIn(key, result.stderr, name)
 
     def test_sops_diff_decrypts_only_in_opted_in_repos(self):
         self.setup_prefix()
