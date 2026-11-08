@@ -25,6 +25,7 @@
   const PROJECTS = {
     "evie-platform": { id: 11348463, label: "Spantree / Evie Platform", defaultTask: "Tooling & Internal Platform" },
     "211la": { id: 11848944, label: "211 LA (2LA presales)", defaultTask: "Presales Engineering" },
+    "vermeulens": { id: 11829782, label: "Vermeulens Phase 1", defaultTask: "Billable Project Work" },
   };
 
   window.FLOAT_CFG = {

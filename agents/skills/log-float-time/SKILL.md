@@ -34,6 +34,7 @@ This mutates a live timesheet. Confirm before writing; verify after.
 |---|---|---|---|
 | `evie-platform` (default) | `11348463` | Spantree / Evie Platform | `Tooling & Internal Platform` |
 | `211la` | `11848944` | 211 LA (2LA presales; the API returns no project name — identified from the user's 2LA entries, Sep 2026) | `Presales Engineering` |
+| `vermeulens` | `11829782` | Vermeulens Phase 1 (active; Phase 0 is `11462341`) | `Billable Project Work` |
 
 Stable coordinates: `people_id` `17853024` · `phase_id` `0` · the project ids above.
 These do not change. The helper refuses any project not in this table — add a row here
