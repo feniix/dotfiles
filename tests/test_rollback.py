@@ -340,6 +340,27 @@ class RollbackTests(Sandbox):
         self.uninstall()
         self.assertFalse(path.exists())
 
+    def test_backup_and_conflict_dirs_are_owner_only(self):
+        # A 0644 file whose privacy comes from its 0700 parent must not be
+        # copied somewhere other users can read it.
+        ssh = self.home / ".ssh"
+        ssh.mkdir(mode=0o700)
+        (ssh / "config").write_text("Host dummy\n")
+        (ssh / "config").chmod(0o644)
+        state_dir = self.home / "data/dotfiles-state"
+        (state_dir / "backups").mkdir(parents=True)
+        state_dir.chmod(0o755)  # left wide by an older setup
+        link = 'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/.ssh/config"'
+        self.state(link)
+        for d in (state_dir, state_dir / "backups"):
+            self.assertEqual(d.stat().st_mode & 0o777, 0o700, d)
+        (ssh / "config").unlink()
+        (ssh / "config").write_text("changed by hand")
+        self.state(link)
+        self.assertEqual((self.home / "data/dotfiles-conflicts").stat().st_mode & 0o777, 0o700)
+        [saved] = self.conflicts()
+        self.assertEqual(saved.read_text(), "changed by hand")
+
     def test_rerun_over_own_link_sets_nothing_aside(self):
         link = 'state_symlink "$DOTFILES_DIR/zshrc" "$HOME/config-file"'
         self.state(link)

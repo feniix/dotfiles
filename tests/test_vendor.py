@@ -231,6 +231,28 @@ class UpstreamVendorTests(Sandbox):
         self.assertIn("vendored up b", self.lock.read_text())
         self.assertNotIn("vendored up a", self.lock.read_text())
 
+    def test_skill_name_with_whitespace_cannot_claim_a_first_party_skill(self):
+        mine = self.dest / "victim"
+        mine.mkdir()
+        (mine / "SKILL.md").write_text("first-party")
+        self.upstream("up", {"skills/ok": "upstream ok", "skills/x victim": "spaced"})
+        self.manifest.write_text(
+            f"source up {self.upstreams['up']} main\nskill  up skills/*\n"
+        )
+        result = self.vendor(check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("unsafe skill name", result.stdout)
+        self.assertFalse(self.lock.exists() and "vendored up" in self.lock.read_text())
+        self.assertFalse((self.dest / "x victim").exists())
+        # Upstream later ships the targeted name directly: still a CLASH.
+        self.upstream("up", {"skills/victim": "upstream-controlled"})
+        (self.upstreams["up"] / "skills/x victim/SKILL.md").unlink()
+        self.git(self.upstreams["up"], "add", "-A")
+        self.git(self.upstreams["up"], "commit", "-q", "-m", "drop spaced")
+        result = self.vendor("--update", check=False)
+        self.assertIn("first-party", result.stderr)
+        self.assertEqual((mine / "SKILL.md").read_text(), "first-party")
+
     def test_vendored_skill_never_overwrites_another_sources_skill(self):
         self.upstream("one", {"skills/shared": "from one"})
         self.manifest.write_text(

@@ -99,10 +99,21 @@ done < "$MANIFEST"
 #             vendored <name>            legacy (no owner); never deleted
 declare -A LOCKED=() PREV_OWNED=() OWNER=()
 declare -a PREV_LEGACY=() LOCK_IDS=()
+
+# Skill names come from upstream directory names and end up in space-joined
+# ownership lists. A name with whitespace or glob characters would split into
+# several owned names (an upstream "x mine" would claim a first-party "mine"),
+# so only plain names are accepted, at intake and when reading the lock.
+valid_name() { [[ "$1" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; }
+
 if [[ -f "$LOCK" ]]; then
   while read -r a b c _; do
     [[ -z "${a:-}" || "$a" == \#* ]] && continue
     if [[ "$a" == "vendored" ]]; then
+      if ! valid_name "${c:-$b}"; then
+        log_warning "ignoring lock entry with an unsafe skill name: $a $b ${c:-}"
+        continue
+      fi
       if [[ -n "${c:-}" ]]; then PREV_OWNED[$b]="${PREV_OWNED[$b]:-} $c"; OWNER[$c]="$b"; else PREV_LEGACY+=("$b"); fi
     else
       LOCKED[$a]="$b"; LOCK_IDS+=("$a")
@@ -428,18 +439,26 @@ for id in "${SRC_IDS[@]}"; do
   # report renamed skills as changed on every run.
   stage="$(mktemp -d "${TMPDIR:-/tmp}/vendor-skills.XXXXXX")"
   declare -a vendored_dirs=() staged_targets=()
-  guardrails=""
+  guardrails="" unsafe=""
   for p in "${picked[@]}"; do
     name="$(basename "$p")"
+    if ! valid_name "$name"; then unsafe="$name"; break; fi
     case " ${SRC_SKIPS[$id]:-} " in *" $name "*) echo "        skip   $name"; continue ;; esac
     target="$name"
     for r in ${SRC_RENAMES[$id]:-}; do
       [[ "${r%%:*}" == "$name" ]] && target="${r##*:}"
     done
+    if ! valid_name "$target"; then unsafe="$target"; break; fi
     rsync -a --exclude .DS_Store --exclude .git "$p/" "$stage/$target/"
     staged_targets+=("$target")
     [[ "$id" == mattpocock && "$name" == git-guardrails-claude-code ]] && guardrails="$target"
   done
+  if [[ -n "$unsafe" ]]; then
+    log_warning "  $id: unsafe skill name '$unsafe'; refusing to change its skills or lock entries"
+    unset "RESOLVED[$id]"; FAILED+=("$id")
+    rm -rf "$stage"; stage=""
+    continue
+  fi
   for r in ${SRC_RENAMES[$id]:-}; do
     old="${r%%:*}"; new="${r##*:}"
     [[ ${#staged_targets[@]} -gt 0 ]] && rewrite_refs "$old" "$new" "${staged_targets[@]/#/$stage/}"

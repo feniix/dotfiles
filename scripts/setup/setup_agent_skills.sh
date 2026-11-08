@@ -94,7 +94,7 @@ run() {
 
 SKILLS_SRC="$DOTFILES_DIR/agents/skills"
 PROMPTS_SRC="$DOTFILES_DIR/agents/prompts"
-CONFLICTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts/agent-skills/$(date -u +%Y%m%dT%H%M%SZ)-$$"
+CONFLICTS_DIR="$STATE_CONFLICTS_ROOT/agent-skills/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 CONFLICTS=0
 MOVED=0
 FOUND=0
@@ -179,7 +179,7 @@ absorb() {
       run rm -rf "$entry"
     else
       echo "        DIFF   $name  -> $CONFLICTS_DIR/$escaped/$name  (canonical wins)"
-      run mkdir -p "$CONFLICTS_DIR/$escaped"
+      run _state_private_dir "$STATE_CONFLICTS_ROOT" "$CONFLICTS_DIR/$escaped"
       run cp -a "$entry" "$CONFLICTS_DIR/$escaped/$name"
       run rm -rf "$entry"
       CONFLICTS=$((CONFLICTS + 1))

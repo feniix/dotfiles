@@ -1,5 +1,6 @@
 """Shell environment behavior with home-directory writes sandboxed."""
 
+import json
 import shutil
 
 from test_rollback import REPO, Sandbox
@@ -153,6 +154,43 @@ class EnvironmentTests(Sandbox):
                                 + "rm_local_branches"], check=False)
         self.assertIn("not a git repo", outside.stdout)
         self.assertNotIn("parse error", outside.stderr)
+
+    def pi_no_agents(self, repo):
+        source = (REPO / "zshrc").read_text()
+        start = source.index("pi-no-agents() {")
+        body = source[start:source.index("\n}\n", start) + 3]
+        return self.command(["/bin/zsh", "-dfc", f'cd "{repo}"; {body} pi-no-agents'], check=False)
+
+    def test_pi_no_agents_never_writes_outside_the_repo(self):
+        if not shutil.which("jq"):
+            self.skipTest("jq not installed")
+        outside = self.home / "outside"
+        outside.mkdir()
+        (outside / "rc").write_text("original")
+        git = ["git", "-c", "init.defaultBranch=main"]
+        planted = {
+            "dir-link": lambda pi: pi.symlink_to(outside),
+            "file-link": lambda pi: (pi.mkdir(), (pi / "settings.json").symlink_to(outside / "new.json")),
+            "tmp-link": lambda pi: (pi.mkdir(), (pi / "settings.json").write_text('{"x": "$(touch pwned)"}'),
+                                    (pi / "settings.json.tmp").symlink_to(outside / "rc")),
+        }
+        for name, plant in planted.items():
+            repo = self.home / name
+            repo.mkdir()
+            self.command(git + ["init", "-q", str(repo)])
+            plant(repo / ".pi")
+            self.pi_no_agents(repo)
+            self.assertEqual(sorted(p.name for p in outside.iterdir()), ["rc"], name)
+            self.assertEqual((outside / "rc").read_text(), "original", name)
+        tmp_case = self.home / "tmp-link/.pi/settings.json"
+        self.assertFalse(tmp_case.is_symlink())
+        self.assertIn("!**/.agents/skills/**", tmp_case.read_text())
+        clean = self.home / "clean"
+        clean.mkdir()
+        self.command(git + ["init", "-q", str(clean)])
+        self.assertEqual(self.pi_no_agents(clean).returncode, 0)
+        self.assertEqual(json.loads((clean / ".pi/settings.json").read_text()),
+                         {"skills": ["!**/.agents/skills/**"]})
 
     def brew_wrapper(self, *invocations, rc=0, formulae="", casks="", brewfile=True):
         """Run the brew.source wrapper against a fake brew; return its bundle calls."""

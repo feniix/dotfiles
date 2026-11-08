@@ -12,9 +12,20 @@ STATE_BACKUPS="$STATE_DIR/backups"
 
 _STATE_INITIALIZED=false
 # Outside STATE_DIR so a completed uninstall never deletes the user's copies.
-STATE_CONFLICTS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts/setup/$(date -u +%Y%m%dT%H%M%SZ)-$$"
+STATE_CONFLICTS_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/dotfiles-conflicts"
+STATE_CONFLICTS_DIR="$STATE_CONFLICTS_ROOT/setup/$(date -u +%Y%m%dT%H%M%SZ)-$$"
 
 # --- Internal helpers ---
+
+# Backups and set-aside copies keep only their own file mode, so a 0644
+# ~/.ssh/config loses the protection of its 0700 parent. Keep the directories
+# that hold them owner-only, and tighten ones an older setup left at 0755.
+_state_private_dir() {
+  local d
+  for d in "$@"; do
+    (umask 077 && mkdir -p "$d") && chmod 700 "$d" || return 1
+  done
+}
 
 _state_timestamp() {
   date -u +%Y-%m-%dT%H:%M:%SZ
@@ -129,7 +140,8 @@ _state_set_aside_changes() {
     [[ "$managed" == directory ]] && return 0
   fi
   local dest="$STATE_CONFLICTS_DIR/${path#/}"
-  mkdir -p "$(dirname "$dest")" || return 1
+  _state_private_dir "$STATE_CONFLICTS_ROOT" || return 1
+  (umask 077 && mkdir -p "$(dirname "$dest")") || return 1
   mv "$path" "$dest" || return 1
   log_warning "$path was changed outside setup — moved it to $dest"
 }
@@ -150,8 +162,7 @@ state_init() {
     return 0
   fi
 
-  mkdir -p "$STATE_DIR"
-  mkdir -p "$STATE_BACKUPS"
+  _state_private_dir "$STATE_DIR" "$STATE_BACKUPS" || return 1
 
   if [[ ! -f "$STATE_MANIFEST" ]]; then
     touch "$STATE_MANIFEST"
