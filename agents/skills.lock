@@ -5,6 +5,7 @@ typesafe 65a39f393687675ce170e6094757de20370365b9 https://github.com/typesafe-ai
 adhd 839872f9d1cd634fed642b4589ce7226199cc15f https://github.com/ayghri/i-have-adhd.git
 ghstack 29a36d314be664583705f18e41cebdf2b61ad514 https://github.com/github/gh-stack.git
 humanlayer 653b6411c1f70c275a18e37673b042ff99f67ceb https://github.com/humanlayer/skills.git
+cloudflare c1c8a8c1471069fb0e188eeaff69b8e8db6564a8 https://github.com/cloudflare/security-audit-skill.git
 # skill dirs in agents/skills and the source that owns them
 vendored mattpocock ask-matt
 vendored mattpocock mp-code-review
@@ -51,3 +52,4 @@ vendored adhd i-have-adhd
 vendored ghstack gh-stack
 vendored humanlayer show-me
 vendored humanlayer visual-pr
+vendored cloudflare security-audit

@@ -52,3 +52,7 @@ skill  ghstack skills/gh-stack
 source humanlayer https://github.com/humanlayer/skills.git main
 skill  humanlayer plugins/show-me/skills/show-me
 skill  humanlayer plugins/visual-pr/skills/visual-pr
+
+# Cloudflare's security audit skill (no release tags; pinned by skills.lock)
+source cloudflare https://github.com/cloudflare/security-audit-skill.git main
+skill  cloudflare skills/security-audit
