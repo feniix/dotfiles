@@ -342,6 +342,30 @@ esac
             self.assertNotIn("ANTHROPIC_BASE_URL", result.stdout, name)
             self.assertIn(key, result.stderr, name)
 
+    def personal(self, security):
+        return self.command([
+            "/bin/zsh", "-dfc",
+            f'source "{REPO}/claude.source"; claude() {{ env; }}; '
+            f'security() {{ {security}; }}; claude-p',
+        ], check=False)
+
+    def test_personal_wrapper_switches_only_the_login(self):
+        self.env.update(ANTHROPIC_API_KEY="work", ANTHROPIC_AUTH_TOKEN="work",
+                        ANTHROPIC_BASE_URL="https://example.invalid")
+        self.env.pop("CLAUDE_CONFIG_DIR", None)
+        result = self.personal("print personal-token")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("CLAUDE_CODE_OAUTH_TOKEN=personal-token\n", result.stdout)
+        self.assertNotIn("CLAUDE_CONFIG_DIR", result.stdout)
+        for name in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL"):
+            self.assertNotIn(f"{name}=", result.stdout)
+
+    def test_personal_wrapper_stops_without_a_token(self):
+        result = self.personal("return 44")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertNotIn("CLAUDE_CODE_OAUTH_TOKEN", result.stdout)
+        self.assertIn("claude-code-personal", result.stderr)
+
     def test_sops_diff_decrypts_only_in_opted_in_repos(self):
         self.setup_prefix()
         canary = self.home / "sops-ran"

@@ -99,6 +99,9 @@ The `sopsdiffer` git diff driver decrypts only in repos that opt in with
 can't make `git diff` contact a KMS or Vault with your credentials.
 The `kimi`/`zai`/`dseek`/`ccc`/`ccmm` wrappers in `claude.source` pass only their
 own key and unset every other `*_API_KEY`/`*_ADMIN_KEY` in that session.
+`claude-p` runs the personal Claude account in the default profile (shared
+settings and session history) with a `claude setup-token` token read from the
+keychain item `claude-code-personal`.
 
 The shell setup and Home Manager read the same `mise/config.toml` tool declarations.
 Web-identity AWS authentication must be configured in its project/profile, not
