@@ -11,21 +11,23 @@
   "defaultProvider": "openai-codex",
   "defaultThinkingLevel": "medium",
   "enabledModels": [
-    "openai-codex/gpt-5.6-sol",
-    "openai-codex/gpt-5.6-luna",
-    "openai-codex/gpt-5.6-terra",
     "openai-codex/gpt-6-astra",
     "openai-codex/gpt-6-luna",
-    "openai-codex/gpt-6-sol",
     "openai-codex/gpt-6.1-sol",
     "google/gemini-4-argon",
     "google/gemini-flash-lite-latest",
     "google/gemini-pro-latest",
     "google/gemma-4-31b-it",
     "minimax/MiniMax-M3",
-    "minimax/MiniMax-M3.1-Flash"
+    "minimax/MiniMax-M3.1-Flash",
+    "openai-codex/gpt-6.2-sol",
+    "google/gemma-4-26b-a4b-it",
+    "zai/glm-5.3-highspeed",
+    "zai/glm-5.3-flash",
+    "openai-codex/gpt-6.2-astra",
+    "openai-codex/gpt-6.1-terra"
   ],
-  "lastChangelogVersion": "1.5.0",
+  "lastChangelogVersion": "1.5.2",
   "packages": [
     "npm:pi-ask-user",
     "npm:pi-subagents",
@@ -72,13 +74,13 @@
     "!**/synced/**"
   ],
   "extensionChangelogVersions": {
-    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.87.0",
+    "{\"source\":\"npm:pi-subagents\",\"scope\":\"user\"}": "0.89.1",
     "{\"source\":\"npm:@feniix/pi-devtools\",\"scope\":\"user\"}": "3.1.5",
     "{\"source\":\"npm:@feniix/pi-ref-tools\",\"scope\":\"user\"}": "3.0.6",
     "{\"source\":\"npm:@feniix/pi-statusline\",\"scope\":\"user\"}": "1.0.1",
-    "{\"source\":\"npm:pi-codex-tools\",\"scope\":\"user\"}": "0.4.1",
+    "{\"source\":\"npm:pi-codex-tools\",\"scope\":\"user\"}": "0.4.2",
     "{\"source\":\"npm:pi-chrome\",\"scope\":\"user\"}": "0.15.57",
-    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.47.0",
+    "{\"source\":\"npm:pi-web-access\",\"scope\":\"user\"}": "0.48.0",
     "{\"source\":\"npm:@feniix/pi-exa\",\"scope\":\"user\"}": "7.1.1"
   }
 }
