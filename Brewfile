@@ -137,3 +137,5 @@ mas "Slack", id: 803453959
 mas "Tailscale", id: 1475387142
 mas "Telegram", id: 747648890
 mas "WhatsApp", id: 310633997
+# Easiest, most secure way to use WireGuard and 2FA
+brew "tailscale"
